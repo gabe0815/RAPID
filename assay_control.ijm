@@ -169,7 +169,8 @@ function rebootCameras(){
 }
 
 function recordAssay(x,y,z,camera,timestamp){
-	cmd="/home/user/fanucrobot/psmag01_arg.sh";
+    //psmag01_arg.sh does everything from recording to downloading and adding sampleID and timestamp
+	cmd="/home/user/fanucrobot/psmag01_arg.sh"; //add args for targetdir, sampleID, x, y, z
 	cam = camBus[j];
 	print(cmd+" " + cam);
 	lock = "/tmp/busy_"+camBus[j]+".lck";
@@ -177,7 +178,6 @@ function recordAssay(x,y,z,camera,timestamp){
 		wait(5000);
 	}
 	doCommand("execute cmd");
-	wait(2000); //record simulatenously to check if vibration on one affects the other plate
 	
 }
 
@@ -194,7 +194,7 @@ function processStack(t,x,y){
 		robotSetRegister(x_plate,x);
 		robotSetRegister(y_plate,y);
 		//process the stack
-		for (z=0;z<numLayers; z++){
+		for (z=num_layers;z>0; z--){ //plates are picked from the top
 			robotSetRegister(z_plate,z);
 			robotSetRegister(todo,p_to_a);
 			waitForRobotWhileRunning(); 
