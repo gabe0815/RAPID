@@ -1,4 +1,3 @@
-
 //robot variables
 var KARELchangeRegVal="/home/user/fanucrobot/KARELchangeRegVal.sh";
 
@@ -8,6 +7,7 @@ var p_from_a=2;
 
 var x_plate=2;
 var y_plate=3;
+var z_plate= ;
 
 var vib_5s=5;
 
@@ -44,44 +44,25 @@ macro "reboot [r]"{
 	
 }
 macro "start recording [s] "{
-	/*make sure, busy file is removed. It is set in imaging shell script to prevent rebooting while still busy. This could probably be omitted, as it is deleted from the shell script after it has finished.
-	*/
-	//File.delete("/tmp/busy.lck");	
-	
 	initCameras();
+	checkCameras(); //resets and re-initializes cameras in case of failure
 	
-	
-	//start of main loop
-	for (i=1; i < 10000; i++){
-		//make sure all cameras are still running
-		
-		
-		print("round number: " + i);
-		//start imaging
-		for (j=0; j<camBus.length; j++){
-			//cmd="/home/user/mac/Users/jhench/Documents/sync/lab_journal/2015/data201502/ptpcam_multicam/psmag01_arg.sh";
-			cmd="/home/user/fanucrobot/psmag01_arg.sh";
-			cam = camBus[j];
-			print(cmd+" " + cam);
-			lock = "/tmp/busy_"+camBus[j]+".lck";
-			while (File.exists(lock)){
-				wait(5000);
+	while(true){
+	t = parseInt(exec("/home/user/fanucrobot/unixTime.sh"));
+		for (y=1;y<=maxY;y++){
+			for (x=1;x<=maxX;x++){
+				while (File.exists("/home/user/pause.txt")==true){
+					print("pause active");
+					wait(1000);
+				}
+				processStack(t,x,y);
 			}
-			doCommand("execute cmd");
-			wait(2000); //record simulatenously to check if vibration on one affects the other plate
 		}
-		
-		if (i % 10 == 0){
-			//wait(70000);
-			rebootCameras();
-			wait(10000);
-			initCameras();
-		}
-		wait(600000); //start recording every 10 min
-		
 		
 	}
 }
+
+	
 
 macro "execute cmd" {
 	r = exec("sh", cmd, cam);
@@ -119,10 +100,9 @@ function initCameras() {
 	for (i=0; i<camBus.length; i++){
 		print("cam_"+i+" = " + camBus[i]);
 		if (camBus[i] == 0){
-			print("initialization failed ...");
-			exit("camera "+i+" could not connect...");
+			print("camera "+i+" could not connect...");
 			break;
-			//return 1;	
+
 		} else {
 			//print("sucess!");
 
@@ -155,9 +135,11 @@ function checkCameras(){
 		for (i=0; i<files.length; i++){
 			if (indexOf("/tmp/"+files[i], "busy_") != -1){
 				File.delete("/tmp/"+files[i]);
-				print("/tmp/"+files[i]);
+				//print("/tmp/"+files[i]);
 			}
 		}
+		//re-initialize cameras after resetting
+		initCameras();
 	}
 	
 }
@@ -186,9 +168,58 @@ function rebootCameras(){
 	}
 }
 
+function recordAssay(x,y,z,camera,timestamp){
+	cmd="/home/user/fanucrobot/psmag01_arg.sh";
+	cam = camBus[j];
+	print(cmd+" " + cam);
+	lock = "/tmp/busy_"+camBus[j]+".lck";
+	while (File.exists(lock)){
+		wait(5000);
+	}
+	doCommand("execute cmd");
+	wait(2000); //record simulatenously to check if vibration on one affects the other plate
+	
+}
+
 //********************************** robot functions *****************************************
 function robotSetRegister(registerNumber,registerValue){
 	a=exec(KARELchangeRegVal,registerNumber,registerValue);
 	print(a);
 }
 
+function processStack(t,x,y){
+	parseCsvTable(tableFileName,x,y);
+	print("current plate: "+x+","+y+" = "+currentSampleID+" started at "+currentSampleZeroTime);
+	if (currentSampleID!="undefined"){
+		robotSetRegister(x_plate,x);
+		robotSetRegister(y_plate,y);
+		//process the stack
+		for (z=0;z<numLayers; z++){
+			robotSetRegister(z_plate,z);
+			robotSetRegister(todo,p_to_a);
+			waitForRobotWhileRunning(); 
+			//start assay for plate z
+			
+			
+		
+		
+		}
+
+		robotSetRegister(todo,p_to_a);
+		waitForRobotWhileRunning();
+		cameraRecordVideoFixedTime(); //record for 70s, will stop by iself
+		wait(70000+3000); //8s for camera setup until start, add 3s after modification on 2014-06-11
+		robotSetRegister(todo,p_from_a);
+		wait(10000);
+		cameraDownloadAndDelete(""+downloadDestination+toString(t)+"_"+toString(x)+"_"+toString(y)+"");
+		sampleIdFile=""+downloadDestination+toString(t)+"_"+toString(x)+"_"+toString(y)+"/sampleID.txt";
+		File.saveString(currentSampleID+"\n"+currentSampleZeroTime,sampleIdFile);
+		waitForRobotWhileRunning();
+	}else{
+		print("waiting "+onePlateDuration+"s.");
+		wait(onePlateDuration*1000);
+		 	
+	}
+	print("done with "+currentSampleID);
+	print("------------------");
+}
