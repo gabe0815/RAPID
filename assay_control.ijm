@@ -1,3 +1,10 @@
+//*************************************************************
+//assay_control
+//robot assisted plate imaging device - RAPID
+//By Jürgen Hench & Gabriel Schweighauser
+//2015
+//*************************************************************
+
 //robot variables
 var KARELchangeRegVal="/home/user/fanucrobot/KARELchangeRegVal.sh";
 
