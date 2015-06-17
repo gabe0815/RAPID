@@ -1,30 +1,51 @@
+//*************************************************************
+//assay_control
+//robot assisted plate imaging device - RAPID
+//By Jürgen Hench & Gabriel Schweighauser
+//2015
+//*************************************************************
 
 //robot variables
-var KARELchangeRegVal="/home/user/fanucrobot/KARELchangeRegVal.sh";
+var KARELchangeRegVal="/home/user/applications/RAPID/robot/KARELchangeRegVal.sh";
 
 //register values
-var p_to_a=1;
-var p_from_a=2;
+var P_TO_A=1;
+var P_FROM_A=2;
 
-var x_plate=2;
-var y_plate=3;
+var X_PLATE=2;
+var Y_PLATE=3;
+var Z_PLATE=5; 
 
-var vib_5s=5;
+var VIB_5S=5; //make sure to add this in mainmenu of robots
 
-var todo=11;
+var TODO=11;
 
 
 //camera variables
-var camSerials=newArray('B0A8859584994AFFB9EFAF7AB6382F77','B53A9EACCA6A4DAEAFE6E7CD227FC887','1955DD886CB34783993370E6B572FDBA','860869D768724772A766819D1BAD8411');
-var camBus=newArray(camSerials.length);
-var ptpcam="/home/user/applications/ptpcam/ptpcam";
-var cmd; //used to execute non blocking shell scripts
-var cam;
+var CAMSERIALS=newArray('B0A8859584994AFFB9EFAF7AB6382F77','B53A9EACCA6A4DAEAFE6E7CD227FC887','1955DD886CB34783993370E6B572FDBA','860869D768724772A766819D1BAD8411');
+var CAMBUS=newArray(CAMSERIALS.length);
+var PTPCAM="/home/user/applications/RAPID/ptpcam/ptpcam";
+var CMD; //used to execute non blocking shell scripts
+var CAM;
+var DOWNDIR = "/mnt/1TBraid01/imagesets01/20150617_vibassay_continous/dl";
+var TARGETDIR;
+var SAMPLEID;
+var TIMESTAMP;
+
+//assay variables
+var TABLEFILENAME="/home/user/applications/RAPID/sampleTable_newFormat.tsv";
+var CURRENTSAMPLEID;
+var CURRENTSAMPLEZEROTIME;
+var MAXY=7;
+var MAXX=10;
+var MAXZ=4; 
+var STACKREVERSED = false;
+var STACKDURATION = 180;
 
 macro "upload psmag01.lua [u] "{
 	initCameras();
-	for (i = 0; i < camBus.length; i++){ 
-		r = exec("/home/user/fanucrobot/upload_psmag01_arg.sh", camBus[i]);
+	for (i = 0; i < CAMBUS.length; i++){ 
+		r = exec("/home/user/applications/RAPID/ptpcam/upload_psmag01_arg.sh", CAMBUS[i]);
 		print(r);
 	}
 
@@ -44,47 +65,34 @@ macro "reboot [r]"{
 	
 }
 macro "start recording [s] "{
-	/*make sure, busy file is removed. It is set in imaging shell script to prevent rebooting while still busy. This could probably be omitted, as it is deleted from the shell script after it has finished.
-	*/
-	//File.delete("/tmp/busy.lck");	
-	
 	initCameras();
+	checkCameras(); //resets and re-initializes cameras in case of failure
 	
-	
-	//start of main loop
-	for (i=1; i < 10000; i++){
-		//make sure all cameras are still running
-		
-		
-		print("round number: " + i);
-		//start imaging
-		for (j=0; j<camBus.length; j++){
-			//cmd="/home/user/mac/Users/jhench/Documents/sync/lab_journal/2015/data201502/ptpcam_multicam/psmag01_arg.sh";
-			cmd="/home/user/fanucrobot/psmag01_arg.sh";
-			cam = camBus[j];
-			print(cmd+" " + cam);
-			lock = "/tmp/busy_"+camBus[j]+".lck";
-			while (File.exists(lock)){
-				wait(5000);
+	while(true){
+		for (y=1;y<=MAXY;y++){
+            		if ((y % 2) != 1){
+               			 STACKREVERSED = true; //assay starts with correctly ordered stack            
+            		} else {
+                		STACKREVERSED = false;
+            		}
+			
+			for (x=1;x<=MAXX;x++){
+				while (File.exists("/home/user/pause.txt")==true){
+					print("pause active");
+					wait(1000);
+				}
+		        	checkCameras(); 
+		        	processStack(x,y);
 			}
-			doCommand("execute cmd");
-			wait(2000); //record simulatenously to check if vibration on one affects the other plate
 		}
-		
-		if (i % 10 == 0){
-			//wait(70000);
-			rebootCameras();
-			wait(10000);
-			initCameras();
-		}
-		wait(600000); //start recording every 10 min
-		
 		
 	}
 }
 
-macro "execute cmd" {
-	r = exec("sh", cmd, cam);
+	
+
+macro "execute CMD" {
+	r = exec("sh", CMD, CAM, TARGETDIR, SAMPLEID, TIMESTAMP);
 	//print(r);
 }
 
@@ -92,10 +100,10 @@ macro "execute cmd" {
 
 function initCameras() {
 	//get bus of each camera to adress them separately
-	camBus=newArray(camSerials.length); //to reset the array, otherwise the error handling does not work as an invalid adress will still be present
+	CAMBUS=newArray(CAMSERIALS.length); //to reset the array, otherwise the error handling does not work as an invalid adress will still be present
 	vendor="0x314F";
 	
-	r = exec(ptpcam, "-l");
+	r = exec(PTPCAM, "-l");
 	lines=split(r, "\n");
 	
 	for (i=0; i < lines.length; i++){
@@ -103,10 +111,10 @@ function initCameras() {
 			field = indexOf(lines[i], "/");
 			bus = substring(lines[i], field+1, field +4) ;
 			device = "--dev=" + bus;
-			camID = exec(ptpcam, device, "-i");
-			for (j=0; j < camSerials.length; j++){
-				if (indexOf(camID, camSerials[j]) != -1){
-					camBus[j] = bus;
+			camID = exec(PTPCAM, device, "-i");
+			for (j=0; j < CAMSERIALS.length; j++){
+				if (indexOf(camID, CAMSERIALS[j]) != -1){
+					CAMBUS[j] = bus;
 	
 				}
 				
@@ -116,15 +124,11 @@ function initCameras() {
 		}
 	}
 	
-	for (i=0; i<camBus.length; i++){
-		print("cam_"+i+" = " + camBus[i]);
-		if (camBus[i] == 0){
-			print("initialization failed ...");
-			exit("camera "+i+" could not connect...");
+	for (i=0; i<CAMBUS.length; i++){
+		print("CAM_"+i+" = " + CAMBUS[i]);
+		if (CAMBUS[i] == 0){
+			print("camera "+i+" could not connect...");
 			break;
-			//return 1;	
-		} else {
-			//print("sucess!");
 
 		}
 	}	
@@ -137,7 +141,7 @@ function checkCameras(){
 	//check if all cameras are still present
 	print("checking if all cameras present");
 	vendor="0x314F";
-	r = exec(ptpcam, "-l");
+	r = exec(PTPCAM, "-l");
 	lines=split(r, "\n");
 	numCameras = 0;
 	for (i=0; i<lines.length; i++){
@@ -146,18 +150,23 @@ function checkCameras(){
 		}
 		
 	}
-	if (numCameras != camBus.length){
+	
+	if (numCameras != CAMBUS.length){
 		//reset cameras
-		robotSetRegister(todo,vib_5s);
+		robotSetRegister(TODO,VIB_5S);
 		
 		//remove old lock files
 		files = getFileList("/tmp/");
 		for (i=0; i<files.length; i++){
 			if (indexOf("/tmp/"+files[i], "busy_") != -1){
 				File.delete("/tmp/"+files[i]);
-				print("/tmp/"+files[i]);
+				//print("/tmp/"+files[i]);
 			}
 		}
+		//re-initialize cameras after resetting
+		initCameras();
+	} else {
+		print("all cameras ready!");
 	}
 	
 }
@@ -168,8 +177,8 @@ function rebootCameras(){
 	
 	do {
 	        lock = false;        
-	        for (k=0; k<camBus.length; k++){
-	            if (File.exists("/tmp/busy_"+camBus[k] + ".lck")){
+	        for (k=0; k<CAMBUS.length; k++){
+	            if (File.exists("/tmp/busy_"+CAMBUS[k] + ".lck")){
 	                lock = true;            
 	            }        
 	        }
@@ -177,13 +186,21 @@ function rebootCameras(){
 	} while (lock);
 	
 	print("rebooting cameras ...");
-	for (i = 0; i < camBus.length; i++){ 
-		//chdkCMD=" --dev="+camBus[j]+" --chdk=\"lua sleep(2000) reboot()\"";
-		//r = exec("/home/user/mac/Users/jhench/Documents/sync/lab_journal/2015/data201502/ptpcam_multicam/rebootCam_arg01.sh", camBus[i]);
-		r = exec("/home/user/fanucrobot/rebootCam_arg01.sh", camBus[i]);
-		//r = exec(ptpcam, chdkCMD);
+	for (i = 0; i < CAMBUS.length; i++){ 
+		r = exec("/home/user/applications/RAPID/ptpcam/rebootCam_arg01.sh", CAMBUS[i]);
 		print(r);
 	}
+}
+
+function recordAssay(x,y,z){
+    //psmag01_arg.sh does everything from recording to downloading and adding sampleID and timestamp
+	CMD="/home/user/applications/RAPID/ptpcam/psmag01_arg.sh"; //usage: ./psmag01_arg.sh [cameraBus] [targetDir] [sampleID] [timestamp]
+	CAM = CAMBUS[z];
+    	TARGETDIR = DOWNDIR+toString(TIMESTAMP)+"_"+toString(x)+"_"+toString(y);
+	SAMPLEID=CURRENTSAMPLEID+"\n"+CURRENTSAMPLEZEROTIME;
+
+	doCommand("execute CMD"); // ./psmag01_arg.sh CAM TARGETDIR SAMPLEID TIMESTAMP
+
 }
 
 //********************************** robot functions *****************************************
@@ -192,3 +209,91 @@ function robotSetRegister(registerNumber,registerValue){
 	print(a);
 }
 
+function processStack(x,y){
+	currentStack = parseCsvTable(TABLEFILENAME,x,y); //returns array with plates of stack x,y in the order specified in the table
+
+
+    
+	print("current stack: "+x+","+y);
+	if (currentStack[0]!=0){ //0 indicates an empty stack
+		robotSetRegister(X_PLATE,x);
+		robotSetRegister(Y_PLATE,y);
+		//process the stack
+		for (z=MAXZ-1; z>=0; z--){ //plates are picked from the top
+			robotSetRegister(Z_PLATE,z+1); //robot z stack starts with 1
+			robotSetRegister(TODO,P_TO_A);
+			waitForRobotWhileRunning();
+		        //start recording
+		        TIMESTAMP = parseInt(exec("/home/user/applications/RAPID/robot/unixTime.sh"));	
+		        //get current plate ID, check if order is reversed
+		        if (STACKREVERSED){
+		                z_plate = MAXZ - z; //invert z index if stack is reversed
+		              	z_plate -= 1;
+		        } else {
+		                z_plate = z;                
+		        }
+		           
+		            
+		        sampleField=split(currentStack[z_plate],"/"); //delimiter between ID and UNIX time
+			if (lengthOf(sampleField)==2){
+				CURRENTSAMPLEID=sampleField[0];
+				CURRENTSAMPLEZEROTIME=sampleField[1];
+			}
+		            	
+		       	while (File.exists("/tmp/busy_"+CAMBUS[z])){
+			        wait(5000);
+			}            
+		        recordAssay(x,y,z);
+				
+		
+		}
+
+        	for (z=MAXZ-1; z>=0; z--){
+            	//make sure camera has finished before removing the plate
+           		 while (File.exists("/tmp/busy_"+CAMBUS[z])){
+                		wait(5000);
+            		}
+
+        		robotSetRegister(Z_PLATE,z);
+			robotSetRegister(TODO,P_FROM_A);
+			waitForRobotWhileRunning();
+        }
+
+		
+	} else {
+		print("waiting "+STACKDURATION+"s.");
+		wait(STACKDURATION*1000);
+		 	
+	}
+	print("done with "+CURRENTSAMPLEID);
+	print("------------------");
+}
+
+function waitForRobotWhileRunning(){
+	//as a test, replace actual robot movements with wait
+	//a=exec("/home/user/applications/RAPID/robot/wait_while_running.sh");
+	//print(a);
+	wait(15000);
+}
+//****************************MISC************************************************************
+
+function parseCsvTable(tableFileName,x,y){
+
+    linesTable=split(File.openAsString(tableFileName),"\n");
+
+    //slice through xy to get arrays of z
+    currentStack = newArray(MAXZ);
+    for (i=1; i< linesTable.length; i++){ //first line contains header
+	    colRaw=split(linesTable[i],"\t");
+	    index = ((y-1)*MAXX) + x; 
+	    currentStack[i-1] = colRaw[index];	
+    }
+
+    for (i=0; i<currentStack.length; i++){
+	    print(currentStack[i]);
+	
+    }
+	
+    return currentStack; 
+    		
+}
