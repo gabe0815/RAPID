@@ -2,7 +2,7 @@
 
 #usage: ./psmag01_arg.sh [cameraBus] [targetDir] [sampleID] [timestamp]
 
-PTPCAM=/home/user/apps/ptpcam/ptpcam_32bit
+PTPCAM=/home/user/applications/RAPID/ptpcam/ptpcam
 
 touch /tmp/busy_$1.lck
 

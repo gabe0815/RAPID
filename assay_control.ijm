@@ -6,7 +6,7 @@
 //*************************************************************
 
 //robot variables
-var KARELchangeRegVal="/home/user/fanucrobot/KARELchangeRegVal.sh";
+var KARELchangeRegVal="/home/user/applications/RAPID/robot/KARELchangeRegVal.sh";
 
 //register values
 var P_TO_A=1;
@@ -24,7 +24,7 @@ var TODO=11;
 //camera variables
 var CAMSERIALS=newArray('B0A8859584994AFFB9EFAF7AB6382F77','B53A9EACCA6A4DAEAFE6E7CD227FC887','1955DD886CB34783993370E6B572FDBA','860869D768724772A766819D1BAD8411');
 var CAMBUS=newArray(CAMSERIALS.length);
-var PTPCAM="/home/user/applications/ptpcam/ptpcam";
+var PTPCAM="/home/user/applications/RAPID/ptpcam/ptpcam";
 var CMD; //used to execute non blocking shell scripts
 var CAM;
 var DOWNDIR = "/mnt/1TBraid01/imagesets01/20150508_vibassay_continous/dl";
@@ -45,7 +45,7 @@ var STACKDURATION = 180;
 macro "upload psmag01.lua [u] "{
 	initCameras();
 	for (i = 0; i < CAMBUS.length; i++){ 
-		r = exec("/home/user/fanucrobot/upload_psmag01_arg.sh", CAMBUS[i]);
+		r = exec("/home/user/applications/RAPID/upload_psmag01_arg.sh", CAMBUS[i]);
 		print(r);
 	}
 
@@ -183,14 +183,14 @@ function rebootCameras(){
 	
 	print("rebooting cameras ...");
 	for (i = 0; i < CAMBUS.length; i++){ 
-				r = exec("/home/user/fanucrobot/rebootCam_arg01.sh", CAMBUS[i]);
+				r = exec("/home/user/applications/RAPID/ptpcam/rebootCam_arg01.sh", CAMBUS[i]);
 		        print(r);
 	}
 }
 
 function recordAssay(x,y,z){
     //psmag01_arg.sh does everything from recording to downloading and adding sampleID and timestamp
-	CMD="/home/user/fanucrobot/psmag01_arg.sh"; //usage: ./psmag01_arg.sh [cameraBus] [targetDir] [sampleID] [timestamp]
+	CMD="/home/user/applications/RAPID/psmag01_arg.sh"; //usage: ./psmag01_arg.sh [cameraBus] [targetDir] [sampleID] [timestamp]
 	CAM = CAMBUS[z];
     TARGETDIR = DOWNDIR+toString(TIMESTAMP)+"_"+toString(x)+"_"+toString(y);
 	SAMPLEID=CURRENTSAMPLEID+"\n"+CURRENTSAMPLEZEROTIME;
@@ -220,7 +220,7 @@ function processStack(x,y){
 			robotSetRegister(TODO,P_TO_A);
 			waitForRobotWhileRunning(); 
 		            //start recording
-		            TIMESTAMP = parseInt(exec("/home/user/fanucrobot/unixTime.sh"));	
+		            TIMESTAMP = parseInt(exec("/home/user/applications/RAPID/robot/unixTime.sh"));	
 		            //get current plate ID, check if order is reversed
 		             if (STACKREVERSED){
 		                z_plate = MAXZ - z_plate; //invert z index if stack is reversed
