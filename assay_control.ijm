@@ -45,7 +45,7 @@ var STACKDURATION = 180;
 macro "upload psmag01.lua [u] "{
 	initCameras();
 	for (i = 0; i < CAMBUS.length; i++){ 
-		r = exec("/home/user/applications/RAPID/upload_psmag01_arg.sh", CAMBUS[i]);
+		r = exec("/home/user/applications/RAPID/ptpcam/upload_psmag01_arg.sh", CAMBUS[i]);
 		print(r);
 	}
 
@@ -163,6 +163,8 @@ function checkCameras(){
 		}
 		//re-initialize cameras after resetting
 		initCameras();
+	} else {
+		print("all cameras ready!");
 	}
 	
 }
@@ -266,6 +268,11 @@ function processStack(x,y){
 	print("------------------");
 }
 
+function waitForRobotWhileRunning(){
+	a=exec("/home/user/applications/RAPID/robot/wait_while_running.sh");
+	print(a);
+}
+//****************************MISC************************************************************
 
 function parseCsvTable(tableFileName,x,y){
 
