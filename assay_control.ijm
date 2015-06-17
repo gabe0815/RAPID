@@ -27,7 +27,19 @@ var CAMBUS=newArray(CAMSERIALS.length);
 var PTPCAM="/home/user/applications/ptpcam/ptpcam";
 var CMD; //used to execute non blocking shell scripts
 var CAM;
-var DOWNDIR = "/mnt/1TBraid01/imagesets01/20150508_vibassay_continous/dl"
+var DOWNDIR = "/mnt/1TBraid01/imagesets01/20150508_vibassay_continous/dl";
+var TARGETDIR;
+var SAMPLEID;
+var TIMESTAMP;
+
+//assay variables
+var TABLEFILENAME="/mnt/1TBraid01/imagesets01/sampleTable.csv";
+var CURRENTSAMPLEID;
+var CURRENTSAMPLEZEROTIME;
+var MAXY=7;
+var MAXX=10;
+var NUMLAYERS=4; 
+
 
 macro "upload psmag01.lua [u] "{
 	initCameras();
@@ -56,14 +68,13 @@ macro "start recording [s] "{
 	checkCameras(); //resets and re-initializes cameras in case of failure
 	
 	while(true){
-	t = parseInt(exec("/home/user/fanucrobot/unixTime.sh"));
 		for (y=1;y<=maxY;y++){
 			for (x=1;x<=maxX;x++){
 				while (File.exists("/home/user/pause.txt")==true){
 					print("pause active");
 					wait(1000);
 				}
-				processStack(t,x,y);
+		        processStack(x,y);
 			}
 		}
 		
@@ -73,7 +84,7 @@ macro "start recording [s] "{
 	
 
 macro "execute CMD" {
-	r = exec("sh", CMD, CAM);
+	r = exec("sh", CMD, CAM, TARGETDIR, SAMPLEID, TIMESTAMP);
 	//print(r);
 }
 
@@ -110,9 +121,6 @@ function initCameras() {
 		if (CAMBUS[i] == 0){
 			print("camera "+i+" could not connect...");
 			break;
-
-		} else {
-			//print("sucess!");
 
 		}
 	}	
@@ -173,18 +181,14 @@ function rebootCameras(){
 	}
 }
 
-function recordAssay(x,y,z,camera,timestamp){
+function recordAssay(x,y,z){
     //psmag01_arg.sh does everything from recording to downloading and adding sampleID and timestamp
-	CMD="/home/user/fanucrobot/psmag01_arg.sh"; //add args for targetdir, sampleID, x, y, z
-	CAM = CAMBUS[j];
-    targetDir = DOWNDIR+toString(t)+"_"+toString(x)+"_"+toString(y);
-	sampleID=currentSampleID+"\n"+currentSampleZeroTime;	
+	CMD="/home/user/fanucrobot/psmag01_arg.sh"; //usage: ./psmag01_arg.sh [cameraBus] [targetDir] [sampleID] [timestamp]
+	CAM = CAMBUS[z];
+    TARGETDIR = DOWNDIR+toString(TIMESTAMP)+"_"+toString(x)+"_"+toString(y);
+	SAMPLEID=CURRENTSAMPLEID+"\n"+CURRENTSAMPLEZEROTIME;
 
-    lock = "/tmp/busy_"+CAMBUS[j]+".lck";
-	while (File.exists(lock)){
-		wait(5000);
-	}
-	doCommand("execute CMD");
+	doCommand("execute CMD"); // ./psmag01_arg.sh CAM TARGETDIR SAMPLEID TIMESTAMP
 
 }
 
@@ -194,22 +198,38 @@ function robotSetRegister(registerNumber,registerValue){
 	print(a);
 }
 
-function processStack(t,x,y){
-	parseCsvTable(tableFileName,x,y);
-	print("current plate: "+x+","+y+" = "+currentSampleID+" started at "+currentSampleZeroTime);
+function processStack(x,y){
+	parseCsvTable(TABLEFILENAME,x,y); //change so that parseCsvTable returns a array with all the plates of a stack
+	print("current plate: "+x+","+y+" = "+CURRENTSAMPLEID+" started at "+CURRENTSAMPLEZEROTIME);
 	if (currentSampleID!="undefined"){
 		robotSetRegister(X_PLATE,x);
 		robotSetRegister(Y_PLATE,y);
 		//process the stack
-		for (z=num_layers;z>0; z--){ //plates are picked from the top
+		for (z=NUMLAYERS;z>0; z--){ //plates are picked from the top
 			robotSetRegister(Z_PLATE,z);
 			robotSetRegister(TODO,P_TO_A);
 			waitForRobotWhileRunning(); 
             //start recording
-            recordAssay(x,y,z,CAM,timestamp)
+            TIMESTAMP = parseInt(exec("/home/user/fanucrobot/unixTime.sh"));	
+        	while ("/tmp/busy_"+CAMBUS[z])){
+		        wait(5000);
+	        }            
+            recordAssay(x,y,z);
 		
 		
 		}
+
+        for (z=NUMLAYSERS; z>0;z--){
+            //make sure camera has finished before removing the plate
+            while (File.exists("/tmp/busy_"+CAMBUS[z])){
+                wait(5000);
+            }
+
+            robotSetRegister(Z_PLATE,z);
+			robotSetRegister(TODO,P_FROM_A);
+			waitForRobotWhileRunning();
+            
+        }
 
 		
 	}else{
@@ -217,6 +237,31 @@ function processStack(t,x,y){
 		wait(onePlateDuration*1000);
 		 	
 	}
-	print("done with "+currentSampleID);
+	print("done with "+CURRENTSAMPLEID);
 	print("------------------");
 }
+
+
+function parseCsvTable(tableFileName,x,yReal){
+	CURRENTSAMPLEID="undefined";
+	CURRENTSAMPLEZEROTIME="undefined";
+	
+    //change format to x*y as first dimension and z as second, then return a array of z from position (x*y)
+    y=maxY+1-yReal;
+	linesTable=split(File.openAsString(tableFileName),"\n");
+
+	
+	if (y<lengthOf(linesTable)){
+		//print(linesTable[y]);
+		colRaw=split(linesTable[y],"\t");
+		if (x<lengthOf(colRaw)){
+			sampleField=split(colRaw[x],"/"); //delimiter between ID and UNIX time
+			if (lengthOf(sampleField)==2){
+				currentSampleID=sampleField[0];
+				currentSampleZeroTime=sampleField[1];
+			}
+
+		}
+	}
+}
+
