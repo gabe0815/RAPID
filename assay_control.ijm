@@ -27,13 +27,13 @@ var CAMBUS=newArray(CAMSERIALS.length);
 var PTPCAM="/home/user/applications/RAPID/ptpcam/ptpcam";
 var CMD; //used to execute non blocking shell scripts
 var CAM;
-var DOWNDIR = "/mnt/1TBraid01/imagesets01/20150508_vibassay_continous/dl";
+var DOWNDIR = "/mnt/1TBraid01/imagesets01/20150617_vibassay_continous/dl";
 var TARGETDIR;
 var SAMPLEID;
 var TIMESTAMP;
 
 //assay variables
-var TABLEFILENAME="/mnt/1TBraid01/imagesets01/sampleTable.csv";
+var TABLEFILENAME="/home/user/applications/RAPID/sampleTable_newFormat.tsv";
 var CURRENTSAMPLEID;
 var CURRENTSAMPLEZEROTIME;
 var MAXY=7;
@@ -69,19 +69,20 @@ macro "start recording [s] "{
 	checkCameras(); //resets and re-initializes cameras in case of failure
 	
 	while(true){
-		for (y=1;y<=maxY;y++){
-            if ((y % 2) != 1){
-                STACKREVERSED = true; //assay starts with correctly ordered stack            
-            } else {
-                STACKREVERSED = false;
-            }
-			for (x=1;x<=maxX;x++){
+		for (y=1;y<=MAXY;y++){
+            		if ((y % 2) != 1){
+               			 STACKREVERSED = true; //assay starts with correctly ordered stack            
+            		} else {
+                		STACKREVERSED = false;
+            		}
+			
+			for (x=1;x<=MAXX;x++){
 				while (File.exists("/home/user/pause.txt")==true){
 					print("pause active");
 					wait(1000);
 				}
-		        checkCameras(); 
-		        processStack(x,y);
+		        	checkCameras(); 
+		        	processStack(x,y);
 			}
 		}
 		
@@ -149,6 +150,7 @@ function checkCameras(){
 		}
 		
 	}
+	
 	if (numCameras != CAMBUS.length){
 		//reset cameras
 		robotSetRegister(TODO,VIB_5S);
@@ -185,16 +187,16 @@ function rebootCameras(){
 	
 	print("rebooting cameras ...");
 	for (i = 0; i < CAMBUS.length; i++){ 
-				r = exec("/home/user/applications/RAPID/ptpcam/rebootCam_arg01.sh", CAMBUS[i]);
-		        print(r);
+		r = exec("/home/user/applications/RAPID/ptpcam/rebootCam_arg01.sh", CAMBUS[i]);
+		print(r);
 	}
 }
 
 function recordAssay(x,y,z){
     //psmag01_arg.sh does everything from recording to downloading and adding sampleID and timestamp
-	CMD="/home/user/applications/RAPID/psmag01_arg.sh"; //usage: ./psmag01_arg.sh [cameraBus] [targetDir] [sampleID] [timestamp]
+	CMD="/home/user/applications/RAPID/ptpcam/psmag01_arg.sh"; //usage: ./psmag01_arg.sh [cameraBus] [targetDir] [sampleID] [timestamp]
 	CAM = CAMBUS[z];
-    TARGETDIR = DOWNDIR+toString(TIMESTAMP)+"_"+toString(x)+"_"+toString(y);
+    	TARGETDIR = DOWNDIR+toString(TIMESTAMP)+"_"+toString(x)+"_"+toString(y);
 	SAMPLEID=CURRENTSAMPLEID+"\n"+CURRENTSAMPLEZEROTIME;
 
 	doCommand("execute CMD"); // ./psmag01_arg.sh CAM TARGETDIR SAMPLEID TIMESTAMP
@@ -217,45 +219,44 @@ function processStack(x,y){
 		robotSetRegister(X_PLATE,x);
 		robotSetRegister(Y_PLATE,y);
 		//process the stack
-		for (z=MAXZ;z>0; z--){ //plates are picked from the top
-			robotSetRegister(Z_PLATE,z);
+		for (z=MAXZ-1; z>=0; z--){ //plates are picked from the top
+			robotSetRegister(Z_PLATE,z+1); //robot z stack starts with 1
 			robotSetRegister(TODO,P_TO_A);
-			waitForRobotWhileRunning(); 
-		            //start recording
-		            TIMESTAMP = parseInt(exec("/home/user/applications/RAPID/robot/unixTime.sh"));	
-		            //get current plate ID, check if order is reversed
-		             if (STACKREVERSED){
-		                z_plate = MAXZ - z_plate; //invert z index if stack is reversed
-		              	z_plate += 1;
-		             } else {
+			waitForRobotWhileRunning();
+		        //start recording
+		        TIMESTAMP = parseInt(exec("/home/user/applications/RAPID/robot/unixTime.sh"));	
+		        //get current plate ID, check if order is reversed
+		        if (STACKREVERSED){
+		                z_plate = MAXZ - z; //invert z index if stack is reversed
+		              	z_plate -= 1;
+		        } else {
 		                z_plate = z;                
-		             }
+		        }
 		           
 		            
-		            sampleField=split(currentStack[z_plate],"/"); //delimiter between ID and UNIX time
-			    if (lengthOf(sampleField)==2){
+		        sampleField=split(currentStack[z_plate],"/"); //delimiter between ID and UNIX time
+			if (lengthOf(sampleField)==2){
 				CURRENTSAMPLEID=sampleField[0];
 				CURRENTSAMPLEZEROTIME=sampleField[1];
-			    }
+			}
 		            	
-		            while ("/tmp/busy_"+CAMBUS[z])){
-				        wait(5000);
-			    }            
-		            recordAssay(x,y,z);
+		       	while (File.exists("/tmp/busy_"+CAMBUS[z])){
+			        wait(5000);
+			}            
+		        recordAssay(x,y,z);
 				
 		
 		}
 
-        for (z=MAXZ; z>0;z--){
-            //make sure camera has finished before removing the plate
-            while (File.exists("/tmp/busy_"+CAMBUS[z])){
-                wait(5000);
-            }
+        	for (z=MAXZ-1; z>=0; z--){
+            	//make sure camera has finished before removing the plate
+           		 while (File.exists("/tmp/busy_"+CAMBUS[z])){
+                		wait(5000);
+            		}
 
-        	robotSetRegister(Z_PLATE,z);
-		robotSetRegister(TODO,P_FROM_A);
-		waitForRobotWhileRunning();
-            
+        		robotSetRegister(Z_PLATE,z);
+			robotSetRegister(TODO,P_FROM_A);
+			waitForRobotWhileRunning();
         }
 
 		
@@ -269,14 +270,16 @@ function processStack(x,y){
 }
 
 function waitForRobotWhileRunning(){
-	a=exec("/home/user/applications/RAPID/robot/wait_while_running.sh");
-	print(a);
+	//as a test, replace actual robot movements with wait
+	//a=exec("/home/user/applications/RAPID/robot/wait_while_running.sh");
+	//print(a);
+	wait(15000);
 }
 //****************************MISC************************************************************
 
 function parseCsvTable(tableFileName,x,y){
 
-    linesTable=split(File.openAsString(tableFile),"\n");
+    linesTable=split(File.openAsString(tableFileName),"\n");
 
     //slice through xy to get arrays of z
     currentStack = newArray(MAXZ);

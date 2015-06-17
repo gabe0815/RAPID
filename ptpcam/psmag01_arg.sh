@@ -21,7 +21,7 @@ fi
 
 $PTPCAM --dev=$1 -D
 
-echo -e $3 > sampleID.txt
-echo -e $4 > timestamp.txt
+`echo -e $3 > sampleID.txt`
+`echo -e $4 > timestamp.txt`
 
 rm /tmp/busy_$1.lck
