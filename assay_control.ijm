@@ -38,8 +38,9 @@ var CURRENTSAMPLEID;
 var CURRENTSAMPLEZEROTIME;
 var MAXY=7;
 var MAXX=10;
-var NUMLAYERS=4; 
-
+var MAXZ=4; 
+var STACKREVERSED = false;
+var STACKDURATION;
 
 macro "upload psmag01.lua [u] "{
 	initCameras();
@@ -199,19 +200,37 @@ function robotSetRegister(registerNumber,registerValue){
 }
 
 function processStack(x,y){
-	parseCsvTable(TABLEFILENAME,x,y); //change so that parseCsvTable returns a array with all the plates of a stack
-	print("current plate: "+x+","+y+" = "+CURRENTSAMPLEID+" started at "+CURRENTSAMPLEZEROTIME);
-	if (currentSampleID!="undefined"){
+	currentStack = parseCsvTable(TABLEFILENAME,x,y); //returns array with plates of stack x,y in the order specified in the table
+
+
+    
+	print("current stack: "+x+","+y);
+	if (currentStack[0]!=0){ //0 indicates an empty stack
 		robotSetRegister(X_PLATE,x);
 		robotSetRegister(Y_PLATE,y);
 		//process the stack
-		for (z=NUMLAYERS;z>0; z--){ //plates are picked from the top
+		for (z=MAXZ;z>0; z--){ //plates are picked from the top
 			robotSetRegister(Z_PLATE,z);
 			robotSetRegister(TODO,P_TO_A);
 			waitForRobotWhileRunning(); 
             //start recording
             TIMESTAMP = parseInt(exec("/home/user/fanucrobot/unixTime.sh"));	
-        	while ("/tmp/busy_"+CAMBUS[z])){
+            //get current plate ID, check if order is reversed
+             if (STACKREVERSED){
+                z_plate = MAXZ - z_plate; //invert z index if stack is reversed
+              	z_plate += 1;
+             } else {
+                z_plate = z;                
+             }
+           
+            
+            sampleField=split(currentStack[z_plate],"/"); //delimiter between ID and UNIX time
+	        if (lengthOf(sampleField)==2){
+		            CURRENTSAMPLEID=sampleField[0];
+		            CURRENTSAMPLEZEROTIME=sampleField[1];
+	        }
+            	
+            while ("/tmp/busy_"+CAMBUS[z])){
 		        wait(5000);
 	        }            
             recordAssay(x,y,z);
@@ -219,7 +238,7 @@ function processStack(x,y){
 		
 		}
 
-        for (z=NUMLAYSERS; z>0;z--){
+        for (z=MAXZ; z>0;z--){
             //make sure camera has finished before removing the plate
             while (File.exists("/tmp/busy_"+CAMBUS[z])){
                 wait(5000);
@@ -233,8 +252,8 @@ function processStack(x,y){
 
 		
 	}else{
-		print("waiting "+onePlateDuration+"s.");
-		wait(onePlateDuration*1000);
+		print("waiting "+STACKDURATION+"s.");
+		wait(STACKDURATION*1000);
 		 	
 	}
 	print("done with "+CURRENTSAMPLEID);
@@ -242,25 +261,23 @@ function processStack(x,y){
 }
 
 
-function parseCsvTable(tableFileName,x,yReal){
-	CURRENTSAMPLEID="undefined";
-	CURRENTSAMPLEZEROTIME="undefined";
-	
-    //change format to x*y as first dimension and z as second, then return a array of z from position (x*y)
-    y=maxY+1-yReal;
-	linesTable=split(File.openAsString(tableFileName),"\n");
+function parseCsvTable(tableFileName,x,y){
 
-	
-	if (y<lengthOf(linesTable)){
-		//print(linesTable[y]);
-		colRaw=split(linesTable[y],"\t");
-		if (x<lengthOf(colRaw)){
-			sampleField=split(colRaw[x],"/"); //delimiter between ID and UNIX time
-			if (lengthOf(sampleField)==2){
-				currentSampleID=sampleField[0];
-				currentSampleZeroTime=sampleField[1];
-			}
+    linesTable=split(File.openAsString(tableFile),"\n");
 
-		}
-	}
+    //slice through xy to get arrays of z
+    currentStack = newArray(MAXZ);
+    for (i=1; i< linesTable.length; i++){ //first line contains header
+	    colRaw=split(linesTable[i],"\t");
+	    index = ((y-1)*MAXX) + x; 
+	    currentStack[i-1] = colRaw[index];	
+    }
+
+    for (i=0; i<currentStack.length; i++){
+	    print(currentStack[i]);
+	
+    }
+	
+    return currentStack; 
+    		
 }
