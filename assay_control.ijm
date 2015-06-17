@@ -14,9 +14,9 @@ var P_FROM_A=2;
 
 var X_PLATE=2;
 var Y_PLATE=3;
-var Z_PLATE= ;
+var Z_PLATE=5; 
 
-var VIB_5S=5;
+var VIB_5S=5; //make sure to add this in mainmenu of robots
 
 var TODO=11;
 
@@ -80,6 +80,7 @@ macro "start recording [s] "{
 					print("pause active");
 					wait(1000);
 				}
+		        checkCameras(); 
 		        processStack(x,y);
 			}
 		}
@@ -218,28 +219,28 @@ function processStack(x,y){
 			robotSetRegister(Z_PLATE,z);
 			robotSetRegister(TODO,P_TO_A);
 			waitForRobotWhileRunning(); 
-            //start recording
-            TIMESTAMP = parseInt(exec("/home/user/fanucrobot/unixTime.sh"));	
-            //get current plate ID, check if order is reversed
-             if (STACKREVERSED){
-                z_plate = MAXZ - z_plate; //invert z index if stack is reversed
-              	z_plate += 1;
-             } else {
-                z_plate = z;                
-             }
-           
-            
-            sampleField=split(currentStack[z_plate],"/"); //delimiter between ID and UNIX time
-	        if (lengthOf(sampleField)==2){
-		            CURRENTSAMPLEID=sampleField[0];
-		            CURRENTSAMPLEZEROTIME=sampleField[1];
-	        }
-            	
-            while ("/tmp/busy_"+CAMBUS[z])){
-		        wait(5000);
-	        }            
-            recordAssay(x,y,z);
-		
+		            //start recording
+		            TIMESTAMP = parseInt(exec("/home/user/fanucrobot/unixTime.sh"));	
+		            //get current plate ID, check if order is reversed
+		             if (STACKREVERSED){
+		                z_plate = MAXZ - z_plate; //invert z index if stack is reversed
+		              	z_plate += 1;
+		             } else {
+		                z_plate = z;                
+		             }
+		           
+		            
+		            sampleField=split(currentStack[z_plate],"/"); //delimiter between ID and UNIX time
+			    if (lengthOf(sampleField)==2){
+				CURRENTSAMPLEID=sampleField[0];
+				CURRENTSAMPLEZEROTIME=sampleField[1];
+			    }
+		            	
+		            while ("/tmp/busy_"+CAMBUS[z])){
+				        wait(5000);
+			    }            
+		            recordAssay(x,y,z);
+				
 		
 		}
 
@@ -249,14 +250,14 @@ function processStack(x,y){
                 wait(5000);
             }
 
-            robotSetRegister(Z_PLATE,z);
-			robotSetRegister(TODO,P_FROM_A);
-			waitForRobotWhileRunning();
+        	robotSetRegister(Z_PLATE,z);
+		robotSetRegister(TODO,P_FROM_A);
+		waitForRobotWhileRunning();
             
         }
 
 		
-	}else{
+	} else {
 		print("waiting "+STACKDURATION+"s.");
 		wait(STACKDURATION*1000);
 		 	
