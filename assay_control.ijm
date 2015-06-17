@@ -265,3 +265,6 @@ function parseCsvTable(tableFileName,x,yReal){
 	}
 }
 
+function aNewFunction(){
+
+}
