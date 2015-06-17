@@ -40,7 +40,7 @@ var MAXY=7;
 var MAXX=10;
 var MAXZ=4; 
 var STACKREVERSED = false;
-var STACKDURATION;
+var STACKDURATION = 180;
 
 macro "upload psmag01.lua [u] "{
 	initCameras();
@@ -70,6 +70,11 @@ macro "start recording [s] "{
 	
 	while(true){
 		for (y=1;y<=maxY;y++){
+            if ((y % 2) != 1){
+                STACKREVERSED = true; //assay starts with correctly ordered stack            
+            } else {
+                STACKREVERSED = false;
+            }
 			for (x=1;x<=maxX;x++){
 				while (File.exists("/home/user/pause.txt")==true){
 					print("pause active");
