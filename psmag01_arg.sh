@@ -1,15 +1,27 @@
 #!/bin/bash
 
-#/home/user/applications/ptpcam/ptpcam --chdk="lua loadfile(\"A/CHDK/SCRIPTS/phoser1m.lua\")()"
+#usage: ./psmag01_arg.sh [cameraBus] [targetDir] [sampleID] [timestamp]
+
+PTPCAM=/home/user/apps/ptpcam/ptpcam_32bit
 
 touch /tmp/busy_$1.lck
-/home/user/apps/ptpcam/ptpcam_32bit --dev=$1 --chdk="lua loadfile(\"A/CHDK/SCRIPTS/psmag01.lua\")()"
+
+$PTPCAM --dev=$1 --chdk="lua loadfile(\"A/CHDK/SCRIPTS/psmag01.lua\")()"
 
 sleep 90
 
-DIR=/home/user/lens_test/`date +%s`
-mkdir -p $DIR
-cd $DIR 
-/home/user/apps/ptpcam/ptpcam_32bit --dev=$1 -G
-/home/user/apps/ptpcam/ptpcam_32bit --dev=$1 -D
+mkdir -p $2
+cd $2
+
+$PTPCAM --dev=$1 -G
+
+if [ -f PS.FI2 ]; then 
+    rm PS.FI2
+fi
+
+$PTPCAM --dev=$1 -D
+
+echo -e $3 > sampleID.txt
+echo -e $4 > timestamp.txt
+
 rm /tmp/busy_$1.lck
