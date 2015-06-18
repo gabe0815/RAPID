@@ -16,7 +16,7 @@ var X_PLATE=2;
 var Y_PLATE=3;
 var Z_PLATE=5; 
 
-var VIB_5S=5; //make sure to add this in mainmenu of robots
+var VIB_5S=5; //make sure to add this in mainmenu of robot
 
 var TODO=11;
 
@@ -66,27 +66,22 @@ macro "reboot [r]"{
 }
 macro "start recording [s] "{
 	initCameras();
-	checkCameras(); //resets and re-initializes cameras in case of failure
-	
+		
 	while(true){
 		for (y=1;y<=MAXY;y++){
-            		if ((y % 2) != 1){
-               			 STACKREVERSED = true; //assay starts with correctly ordered stack            
-            		} else {
-                		STACKREVERSED = false;
-            		}
-			
+
 			for (x=1;x<=MAXX;x++){
 				while (File.exists("/home/user/pause.txt")==true){
 					print("pause active");
 					wait(1000);
 				}
-		        	checkCameras(); 
+		        	//checkCameras(); //resets and re-initializes cameras in case of failure
 		        	processStack(x,y);
 			}
 		}
-		
+		STACKREVERSED = !STACKREVERSED; //each round the stack gets flipped
 	}
+	
 }
 
 	
@@ -171,6 +166,20 @@ function checkCameras(){
 	
 }
 
+function checkCamera(camBus){
+	print("checking if camera " + camBus +" is still running");
+
+	device = "--dev=" + CAMBUS[camBus];
+	camID = exec(PTPCAM, device, "-i");
+	if (indexOf(camID, CAMSERIALS[camBus]) == -1){
+		print("camera " + camBus + " could not connect, try to reset camera");
+		
+		
+	} else {
+		print("camera " + camBus + " ready!");
+	}
+	
+}
 
 function rebootCameras(){
 	//only reboot if cameras ar "free", busy.lck is touched/removed in shell script. NOTE there is a seperate lock file for each camera.
@@ -214,7 +223,7 @@ function processStack(x,y){
 
 
     
-	print("current stack: "+x+","+y);
+	print("current stack: "+x+","+y+" reversed stacks: " + STACKREVERSED);
 	if (currentStack[0]!=0){ //0 indicates an empty stack
 		robotSetRegister(X_PLATE,x);
 		robotSetRegister(Y_PLATE,y);
@@ -242,7 +251,8 @@ function processStack(x,y){
 		            	
 		       	while (File.exists("/tmp/busy_"+CAMBUS[z])){
 			        wait(5000);
-			}            
+			}
+			checkCamera(z);            
 		        recordAssay(x,y,z);
 				
 		
