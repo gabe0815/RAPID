@@ -9,14 +9,15 @@
 var KARELchangeRegVal="/home/user/applications/RAPID/robot/KARELchangeRegVal.sh";
 
 //register values
+//robot programs
 var P_TO_A=1;
 var P_FROM_A=2;
+var RESET = 5;
 
+//robot numeric registers
 var X_PLATE=2;
 var Y_PLATE=3;
 var Z_PLATE=5; 
-
-var VIB_5S=5; //make sure to add this in mainmenu of robot
 
 var TODO=11;
 
@@ -78,12 +79,18 @@ macro "start recording [s] "{
 		        	//checkCameras(); //resets and re-initializes cameras in case of failure
 		        	processStack(x,y);
 			}
+            
+            rebootCameras();
 		}
 		STACKREVERSED = !STACKREVERSED; //each round the stack gets flipped
 	}
 	
 }
 
+macro "hard reset cameras"{
+    rebootCameras(); //waits for all cameras to complete, then reboots    
+    robotSetRegister(TODO,RESET); //shuts down power of cameras
+}
 	
 
 macro "execute CMD" {
@@ -173,7 +180,9 @@ function checkCamera(camBus){
 	camID = exec(PTPCAM, device, "-i");
 	if (indexOf(camID, CAMSERIALS[camBus]) == -1){
 		print("camera " + camBus + " could not connect, try to reset camera");
-		
+        //remove lock file then wait for all cameras to finish and reset.
+        File.delete("/tmp/busy_" + CAMBUS[camBus] + ".lck");
+        doCommand("hard reset cameras");
 		
 	} else {
 		print("camera " + camBus + " ready!");
@@ -252,7 +261,7 @@ function processStack(x,y){
 		       	while (File.exists("/tmp/busy_"+CAMBUS[z])){
 			        wait(5000);
 			}
-			checkCamera(z);            
+			    checkCamera(z);            
 		        recordAssay(x,y,z);
 				
 		
