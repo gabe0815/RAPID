@@ -34,11 +34,11 @@ var SAMPLEID;
 var TIMESTAMP;
 
 //assay variables
-var TABLEFILENAME="/home/user/applications/RAPID/sampleTable_newFormat.tsv";
+var TABLEFILENAME="/home/user/applications/RAPID/sampleTable_test.csv";
 var CURRENTSAMPLEID;
 var CURRENTSAMPLEZEROTIME;
-var MAXY=7;
-var MAXX=10;
+var MAXY=2; //for test purposes, set x,y limits to 2,2 default: Y=7, X=10
+var MAXX=2;
 var MAXZ=4; 
 var STACKREVERSED = false;
 var STACKDURATION = 180;
@@ -80,7 +80,7 @@ macro "start recording [s] "{
 		        	processStack(x,y);
 			}
             
-            rebootCameras();
+            //rebootCameras(); //skip rebooting for testing purposes.
 		}
 		STACKREVERSED = !STACKREVERSED; //each round the stack gets flipped
 	}
@@ -181,8 +181,10 @@ function checkCamera(camBus){
 	if (indexOf(camID, CAMSERIALS[camBus]) == -1){
 		print("camera " + camBus + " could not connect, try to reset camera");
         //remove lock file then wait for all cameras to finish and reset.
-        File.delete("/tmp/busy_" + CAMBUS[camBus] + ".lck");
-        doCommand("hard reset cameras");
+        //remove hard reset for testing purposes
+        //File.delete("/tmp/busy_" + CAMBUS[camBus] + ".lck");
+        //doCommand("hard reset cameras");
+        exit("Couldn't connect to camera " + CAMBUS[camBus])
 		
 	} else {
 		print("camera " + camBus + " ready!");
@@ -244,11 +246,11 @@ function processStack(x,y){
 		        //start recording
 		        TIMESTAMP = parseInt(exec("/home/user/applications/RAPID/robot/unixTime.sh"));	
 		        //get current plate ID, check if order is reversed
-		        if (STACKREVERSED){
-		                z_plate = MAXZ - z; //invert z index if stack is reversed
-		              	z_plate -= 1;
+		        if (STACKREVERSED){ 
+		                z_plate = z; 
 		        } else {
-		                z_plate = z;                
+		               z_plate = MAXZ - z; //invert z index if stack is in normal order as currentStack goes from top to bottom
+		               z_plate -= 1;               
 		        }
 		           
 		            
@@ -272,8 +274,8 @@ function processStack(x,y){
            		 while (File.exists("/tmp/busy_"+CAMBUS[z])){
                 		wait(5000);
             		}
-
-        		robotSetRegister(Z_PLATE,z);
+			z_plate = z+1; //zstack goes from 1-4
+        		robotSetRegister(Z_PLATE,z_plate);
 			robotSetRegister(TODO,P_FROM_A);
 			waitForRobotWhileRunning();
         }
@@ -290,9 +292,9 @@ function processStack(x,y){
 
 function waitForRobotWhileRunning(){
 	//as a test, replace actual robot movements with wait
-	//a=exec("/home/user/applications/RAPID/robot/wait_while_running.sh");
-	//print(a);
-	wait(15000);
+	a=exec("/home/user/applications/RAPID/robot/wait_while_running.sh");
+	print(a);
+	//wait(15000);
 }
 //****************************MISC************************************************************
 
