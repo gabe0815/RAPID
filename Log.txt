@@ -1,0 +1,4049 @@
+CAM_0 = 036
+CAM_1 = 034
+CAM_2 = 035
+CAM_3 = 037
+IFP000_1/1434552993
+IFP000_2/1434552993
+IFP000_3/1434552993
+IFP000_4/1434552993
+current stack: 1,1 reversed stacks: 0
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_4
+------------------
+IFP000_5/1434552993
+IFP000_6/1434552993
+IFP000_7/1434552993
+IFP000_8/1434552993
+current stack: 2,1 reversed stacks: 0
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_8
+------------------
+0
+0
+0
+0
+current stack: 1,2 reversed stacks: 0
+waiting 180s.
+done with IFP000_8
+------------------
+0
+0
+0
+0
+current stack: 2,2 reversed stacks: 0
+waiting 180s.
+done with IFP000_8
+------------------
+IFP000_1/1434552993
+IFP000_2/1434552993
+IFP000_3/1434552993
+IFP000_4/1434552993
+current stack: 1,1 reversed stacks: 1
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_1
+------------------
+IFP000_5/1434552993
+IFP000_6/1434552993
+IFP000_7/1434552993
+IFP000_8/1434552993
+current stack: 2,1 reversed stacks: 1
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_5
+------------------
+0
+0
+0
+0
+current stack: 1,2 reversed stacks: 1
+waiting 180s.
+done with IFP000_5
+------------------
+0
+0
+0
+0
+current stack: 2,2 reversed stacks: 1
+waiting 180s.
+done with IFP000_5
+------------------
+IFP000_1/1434552993
+IFP000_2/1434552993
+IFP000_3/1434552993
+IFP000_4/1434552993
+current stack: 1,1 reversed stacks: 0
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_4
+------------------
+IFP000_5/1434552993
+IFP000_6/1434552993
+IFP000_7/1434552993
+IFP000_8/1434552993
+current stack: 2,1 reversed stacks: 0
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_8
+------------------
+0
+0
+0
+0
+current stack: 1,2 reversed stacks: 0
+waiting 180s.
+done with IFP000_8
+------------------
+0
+0
+0
+0
+current stack: 2,2 reversed stacks: 0
+waiting 180s.
+done with IFP000_8
+------------------
+IFP000_1/1434552993
+IFP000_2/1434552993
+IFP000_3/1434552993
+IFP000_4/1434552993
+current stack: 1,1 reversed stacks: 1
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_1
+------------------
+IFP000_5/1434552993
+IFP000_6/1434552993
+IFP000_7/1434552993
+IFP000_8/1434552993
+current stack: 2,1 reversed stacks: 1
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_5
+------------------
+0
+0
+0
+0
+current stack: 1,2 reversed stacks: 1
+waiting 180s.
+done with IFP000_5
+------------------
+0
+0
+0
+0
+current stack: 2,2 reversed stacks: 1
+waiting 180s.
+done with IFP000_5
+------------------
+IFP000_1/1434552993
+IFP000_2/1434552993
+IFP000_3/1434552993
+IFP000_4/1434552993
+current stack: 1,1 reversed stacks: 0
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_4
+------------------
+IFP000_5/1434552993
+IFP000_6/1434552993
+IFP000_7/1434552993
+IFP000_8/1434552993
+current stack: 2,1 reversed stacks: 0
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_8
+------------------
+0
+0
+0
+0
+current stack: 1,2 reversed stacks: 0
+waiting 180s.
+done with IFP000_8
+------------------
+0
+0
+0
+0
+current stack: 2,2 reversed stacks: 0
+waiting 180s.
+done with IFP000_8
+------------------
+IFP000_1/1434552993
+IFP000_2/1434552993
+IFP000_3/1434552993
+IFP000_4/1434552993
+current stack: 1,1 reversed stacks: 1
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_1
+------------------
+IFP000_5/1434552993
+IFP000_6/1434552993
+IFP000_7/1434552993
+IFP000_8/1434552993
+current stack: 2,1 reversed stacks: 1
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_5
+------------------
+0
+0
+0
+0
+current stack: 1,2 reversed stacks: 1
+waiting 180s.
+done with IFP000_5
+------------------
+0
+0
+0
+0
+current stack: 2,2 reversed stacks: 1
+waiting 180s.
+done with IFP000_5
+------------------
+IFP000_1/1434552993
+IFP000_2/1434552993
+IFP000_3/1434552993
+IFP000_4/1434552993
+current stack: 1,1 reversed stacks: 0
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_4
+------------------
+IFP000_5/1434552993
+IFP000_6/1434552993
+IFP000_7/1434552993
+IFP000_8/1434552993
+current stack: 2,1 reversed stacks: 0
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_8
+------------------
+0
+0
+0
+0
+current stack: 1,2 reversed stacks: 0
+waiting 180s.
+done with IFP000_8
+------------------
+0
+0
+0
+0
+current stack: 2,2 reversed stacks: 0
+waiting 180s.
+done with IFP000_8
+------------------
+IFP000_1/1434552993
+IFP000_2/1434552993
+IFP000_3/1434552993
+IFP000_4/1434552993
+current stack: 1,1 reversed stacks: 1
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_1
+------------------
+IFP000_5/1434552993
+IFP000_6/1434552993
+IFP000_7/1434552993
+IFP000_8/1434552993
+current stack: 2,1 reversed stacks: 1
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_5
+------------------
+0
+0
+0
+0
+current stack: 1,2 reversed stacks: 1
+waiting 180s.
+done with IFP000_5
+------------------
+0
+0
+0
+0
+current stack: 2,2 reversed stacks: 1
+waiting 180s.
+done with IFP000_5
+------------------
+IFP000_1/1434552993
+IFP000_2/1434552993
+IFP000_3/1434552993
+IFP000_4/1434552993
+current stack: 1,1 reversed stacks: 0
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_4
+------------------
+IFP000_5/1434552993
+IFP000_6/1434552993
+IFP000_7/1434552993
+IFP000_8/1434552993
+current stack: 2,1 reversed stacks: 0
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_8
+------------------
+0
+0
+0
+0
+current stack: 1,2 reversed stacks: 0
+waiting 180s.
+done with IFP000_8
+------------------
+0
+0
+0
+0
+current stack: 2,2 reversed stacks: 0
+waiting 180s.
+done with IFP000_8
+------------------
+IFP000_1/1434552993
+IFP000_2/1434552993
+IFP000_3/1434552993
+IFP000_4/1434552993
+current stack: 1,1 reversed stacks: 1
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_1
+------------------
+IFP000_5/1434552993
+IFP000_6/1434552993
+IFP000_7/1434552993
+IFP000_8/1434552993
+current stack: 2,1 reversed stacks: 1
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_5
+------------------
+0
+0
+0
+0
+current stack: 1,2 reversed stacks: 1
+waiting 180s.
+done with IFP000_5
+------------------
+0
+0
+0
+0
+current stack: 2,2 reversed stacks: 1
+waiting 180s.
+done with IFP000_5
+------------------
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+IFP000_1/1434552993
+IFP000_2/1434552993
+IFP000_3/1434552993
+IFP000_4/1434552993
+current stack: 1,1 reversed stacks: 0
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_4
+------------------
+IFP000_5/1434552993
+IFP000_6/1434552993
+IFP000_7/1434552993
+IFP000_8/1434552993
+current stack: 2,1 reversed stacks: 0
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_8
+------------------
+0
+0
+0
+0
+current stack: 1,2 reversed stacks: 0
+waiting 180s.
+done with IFP000_8
+------------------
+0
+0
+0
+0
+current stack: 2,2 reversed stacks: 0
+waiting 180s.
+done with IFP000_8
+------------------
+IFP000_1/1434552993
+IFP000_2/1434552993
+IFP000_3/1434552993
+IFP000_4/1434552993
+current stack: 1,1 reversed stacks: 1
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_1
+------------------
+IFP000_5/1434552993
+IFP000_6/1434552993
+IFP000_7/1434552993
+IFP000_8/1434552993
+current stack: 2,1 reversed stacks: 1
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_5
+------------------
+0
+0
+0
+0
+current stack: 1,2 reversed stacks: 1
+waiting 180s.
+done with IFP000_5
+------------------
+0
+0
+0
+0
+current stack: 2,2 reversed stacks: 1
+waiting 180s.
+done with IFP000_5
+------------------
+IFP000_1/1434552993
+IFP000_2/1434552993
+IFP000_3/1434552993
+IFP000_4/1434552993
+current stack: 1,1 reversed stacks: 0
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_4
+------------------
+IFP000_5/1434552993
+IFP000_6/1434552993
+IFP000_7/1434552993
+IFP000_8/1434552993
+current stack: 2,1 reversed stacks: 0
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_8
+------------------
+0
+0
+0
+0
+current stack: 1,2 reversed stacks: 0
+waiting 180s.
+done with IFP000_8
+------------------
+0
+0
+0
+0
+current stack: 2,2 reversed stacks: 0
+waiting 180s.
+done with IFP000_8
+------------------
+IFP000_1/1434552993
+IFP000_2/1434552993
+IFP000_3/1434552993
+IFP000_4/1434552993
+current stack: 1,1 reversed stacks: 1
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_1
+------------------
+IFP000_5/1434552993
+IFP000_6/1434552993
+IFP000_7/1434552993
+IFP000_8/1434552993
+current stack: 2,1 reversed stacks: 1
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_5
+------------------
+0
+0
+0
+0
+current stack: 1,2 reversed stacks: 1
+waiting 180s.
+done with IFP000_5
+------------------
+0
+0
+0
+0
+current stack: 2,2 reversed stacks: 1
+waiting 180s.
+done with IFP000_5
+------------------
+IFP000_1/1434552993
+IFP000_2/1434552993
+IFP000_3/1434552993
+IFP000_4/1434552993
+current stack: 1,1 reversed stacks: 0
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_4
+------------------
+IFP000_5/1434552993
+IFP000_6/1434552993
+IFP000_7/1434552993
+IFP000_8/1434552993
+current stack: 2,1 reversed stacks: 0
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_8
+------------------
+0
+0
+0
+0
+current stack: 1,2 reversed stacks: 0
+waiting 180s.
+done with IFP000_8
+------------------
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+pause active
+0
+0
+0
+0
+current stack: 2,2 reversed stacks: 0
+waiting 180s.
+done with IFP000_8
+------------------
+IFP000_1/1434552993
+IFP000_2/1434552993
+IFP000_3/1434552993
+IFP000_4/1434552993
+current stack: 1,1 reversed stacks: 1
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_1
+------------------
+IFP000_5/1434552993
+IFP000_6/1434552993
+IFP000_7/1434552993
+IFP000_8/1434552993
+current stack: 2,1 reversed stacks: 1
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_5
+------------------
+0
+0
+0
+0
+current stack: 1,2 reversed stacks: 1
+waiting 180s.
+done with IFP000_5
+------------------
+0
+0
+0
+0
+current stack: 2,2 reversed stacks: 1
+waiting 180s.
+done with IFP000_5
+------------------
+IFP000_1/1434552993
+IFP000_2/1434552993
+IFP000_3/1434552993
+IFP000_4/1434552993
+current stack: 1,1 reversed stacks: 0
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_4
+------------------
+IFP000_5/1434552993
+IFP000_6/1434552993
+IFP000_7/1434552993
+IFP000_8/1434552993
+current stack: 2,1 reversed stacks: 0
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_8
+------------------
+0
+0
+0
+0
+current stack: 1,2 reversed stacks: 0
+waiting 180s.
+done with IFP000_8
+------------------
+0
+0
+0
+0
+current stack: 2,2 reversed stacks: 0
+waiting 180s.
+done with IFP000_8
+------------------
+IFP000_1/1434552993
+IFP000_2/1434552993
+IFP000_3/1434552993
+IFP000_4/1434552993
+current stack: 1,1 reversed stacks: 1
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_1
+------------------
+IFP000_5/1434552993
+IFP000_6/1434552993
+IFP000_7/1434552993
+IFP000_8/1434552993
+current stack: 2,1 reversed stacks: 1
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_5
+------------------
+0
+0
+0
+0
+current stack: 1,2 reversed stacks: 1
+waiting 180s.
+done with IFP000_5
+------------------
+0
+0
+0
+0
+current stack: 2,2 reversed stacks: 1
+waiting 180s.
+done with IFP000_5
+------------------
+IFP000_1/1434552993
+IFP000_2/1434552993
+IFP000_3/1434552993
+IFP000_4/1434552993
+current stack: 1,1 reversed stacks: 0
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_4
+------------------
+IFP000_5/1434552993
+IFP000_6/1434552993
+IFP000_7/1434552993
+IFP000_8/1434552993
+current stack: 2,1 reversed stacks: 0
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_8
+------------------
+0
+0
+0
+0
+current stack: 1,2 reversed stacks: 0
+waiting 180s.
+done with IFP000_8
+------------------
+0
+0
+0
+0
+current stack: 2,2 reversed stacks: 0
+waiting 180s.
+done with IFP000_8
+------------------
+IFP000_1/1434552993
+IFP000_2/1434552993
+IFP000_3/1434552993
+IFP000_4/1434552993
+current stack: 1,1 reversed stacks: 1
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_1
+------------------
+IFP000_5/1434552993
+IFP000_6/1434552993
+IFP000_7/1434552993
+IFP000_8/1434552993
+current stack: 2,1 reversed stacks: 1
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_5
+------------------
+0
+0
+0
+0
+current stack: 1,2 reversed stacks: 1
+waiting 180s.
+done with IFP000_5
+------------------
+0
+0
+0
+0
+current stack: 2,2 reversed stacks: 1
+waiting 180s.
+done with IFP000_5
+------------------
+IFP000_1/1434552993
+IFP000_2/1434552993
+IFP000_3/1434552993
+IFP000_4/1434552993
+current stack: 1,1 reversed stacks: 0
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_4
+------------------
+IFP000_5/1434552993
+IFP000_6/1434552993
+IFP000_7/1434552993
+IFP000_8/1434552993
+current stack: 2,1 reversed stacks: 0
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_8
+------------------
+0
+0
+0
+0
+current stack: 1,2 reversed stacks: 0
+waiting 180s.
+done with IFP000_8
+------------------
+0
+0
+0
+0
+current stack: 2,2 reversed stacks: 0
+waiting 180s.
+done with IFP000_8
+------------------
+IFP000_1/1434552993
+IFP000_2/1434552993
+IFP000_3/1434552993
+IFP000_4/1434552993
+current stack: 1,1 reversed stacks: 1
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_1
+------------------
+IFP000_5/1434552993
+IFP000_6/1434552993
+IFP000_7/1434552993
+IFP000_8/1434552993
+current stack: 2,1 reversed stacks: 1
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_5
+------------------
+0
+0
+0
+0
+current stack: 1,2 reversed stacks: 1
+waiting 180s.
+done with IFP000_5
+------------------
+0
+0
+0
+0
+current stack: 2,2 reversed stacks: 1
+waiting 180s.
+done with IFP000_5
+------------------
+IFP000_1/1434552993
+IFP000_2/1434552993
+IFP000_3/1434552993
+IFP000_4/1434552993
+current stack: 1,1 reversed stacks: 0
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_4
+------------------
+IFP000_5/1434552993
+IFP000_6/1434552993
+IFP000_7/1434552993
+IFP000_8/1434552993
+current stack: 2,1 reversed stacks: 0
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_8
+------------------
+0
+0
+0
+0
+current stack: 1,2 reversed stacks: 0
+waiting 180s.
+done with IFP000_8
+------------------
+0
+0
+0
+0
+current stack: 2,2 reversed stacks: 0
+waiting 180s.
+done with IFP000_8
+------------------
+IFP000_1/1434552993
+IFP000_2/1434552993
+IFP000_3/1434552993
+IFP000_4/1434552993
+current stack: 1,1 reversed stacks: 1
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_1
+------------------
+IFP000_5/1434552993
+IFP000_6/1434552993
+IFP000_7/1434552993
+IFP000_8/1434552993
+current stack: 2,1 reversed stacks: 1
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_5
+------------------
+0
+0
+0
+0
+current stack: 1,2 reversed stacks: 1
+waiting 180s.
+done with IFP000_5
+------------------
+0
+0
+0
+0
+current stack: 2,2 reversed stacks: 1
+waiting 180s.
+done with IFP000_5
+------------------
+IFP000_1/1434552993
+IFP000_2/1434552993
+IFP000_3/1434552993
+IFP000_4/1434552993
+current stack: 1,1 reversed stacks: 0
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_4
+------------------
+IFP000_5/1434552993
+IFP000_6/1434552993
+IFP000_7/1434552993
+IFP000_8/1434552993
+current stack: 2,1 reversed stacks: 0
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_8
+------------------
+0
+0
+0
+0
+current stack: 1,2 reversed stacks: 0
+waiting 180s.
+done with IFP000_8
+------------------
+0
+0
+0
+0
+current stack: 2,2 reversed stacks: 0
+waiting 180s.
+done with IFP000_8
+------------------
+IFP000_1/1434552993
+IFP000_2/1434552993
+IFP000_3/1434552993
+IFP000_4/1434552993
+current stack: 1,1 reversed stacks: 1
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_1
+------------------
+IFP000_5/1434552993
+IFP000_6/1434552993
+IFP000_7/1434552993
+IFP000_8/1434552993
+current stack: 2,1 reversed stacks: 1
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_5
+------------------
+0
+0
+0
+0
+current stack: 1,2 reversed stacks: 1
+waiting 180s.
+done with IFP000_5
+------------------
+0
+0
+0
+0
+current stack: 2,2 reversed stacks: 1
+waiting 180s.
+done with IFP000_5
+------------------
+IFP000_1/1434552993
+IFP000_2/1434552993
+IFP000_3/1434552993
+IFP000_4/1434552993
+current stack: 1,1 reversed stacks: 0
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_4
+------------------
+IFP000_5/1434552993
+IFP000_6/1434552993
+IFP000_7/1434552993
+IFP000_8/1434552993
+current stack: 2,1 reversed stacks: 0
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_8
+------------------
+0
+0
+0
+0
+current stack: 1,2 reversed stacks: 0
+waiting 180s.
+done with IFP000_8
+------------------
+0
+0
+0
+0
+current stack: 2,2 reversed stacks: 0
+waiting 180s.
+done with IFP000_8
+------------------
+IFP000_1/1434552993
+IFP000_2/1434552993
+IFP000_3/1434552993
+IFP000_4/1434552993
+current stack: 1,1 reversed stacks: 1
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_1
+------------------
+IFP000_5/1434552993
+IFP000_6/1434552993
+IFP000_7/1434552993
+IFP000_8/1434552993
+current stack: 2,1 reversed stacks: 1
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_5
+------------------
+0
+0
+0
+0
+current stack: 1,2 reversed stacks: 1
+waiting 180s.
+done with IFP000_5
+------------------
+0
+0
+0
+0
+current stack: 2,2 reversed stacks: 1
+waiting 180s.
+done with IFP000_5
+------------------
+IFP000_1/1434552993
+IFP000_2/1434552993
+IFP000_3/1434552993
+IFP000_4/1434552993
+current stack: 1,1 reversed stacks: 0
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_4
+------------------
+IFP000_5/1434552993
+IFP000_6/1434552993
+IFP000_7/1434552993
+IFP000_8/1434552993
+current stack: 2,1 reversed stacks: 0
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_8
+------------------
+0
+0
+0
+0
+current stack: 1,2 reversed stacks: 0
+waiting 180s.
+done with IFP000_8
+------------------
+0
+0
+0
+0
+current stack: 2,2 reversed stacks: 0
+waiting 180s.
+done with IFP000_8
+------------------
+IFP000_1/1434552993
+IFP000_2/1434552993
+IFP000_3/1434552993
+IFP000_4/1434552993
+current stack: 1,1 reversed stacks: 1
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_1
+------------------
+IFP000_5/1434552993
+IFP000_6/1434552993
+IFP000_7/1434552993
+IFP000_8/1434552993
+current stack: 2,1 reversed stacks: 1
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_5
+------------------
+0
+0
+0
+0
+current stack: 1,2 reversed stacks: 1
+waiting 180s.
+done with IFP000_5
+------------------
+0
+0
+0
+0
+current stack: 2,2 reversed stacks: 1
+waiting 180s.
+done with IFP000_5
+------------------
+IFP000_1/1434552993
+IFP000_2/1434552993
+IFP000_3/1434552993
+IFP000_4/1434552993
+current stack: 1,1 reversed stacks: 0
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_4
+------------------
+IFP000_5/1434552993
+IFP000_6/1434552993
+IFP000_7/1434552993
+IFP000_8/1434552993
+current stack: 2,1 reversed stacks: 0
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_8
+------------------
+0
+0
+0
+0
+current stack: 1,2 reversed stacks: 0
+waiting 180s.
+done with IFP000_8
+------------------
+0
+0
+0
+0
+current stack: 2,2 reversed stacks: 0
+waiting 180s.
+done with IFP000_8
+------------------
+IFP000_1/1434552993
+IFP000_2/1434552993
+IFP000_3/1434552993
+IFP000_4/1434552993
+current stack: 1,1 reversed stacks: 1
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_1
+------------------
+IFP000_5/1434552993
+IFP000_6/1434552993
+IFP000_7/1434552993
+IFP000_8/1434552993
+current stack: 2,1 reversed stacks: 1
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_5
+------------------
+0
+0
+0
+0
+current stack: 1,2 reversed stacks: 1
+waiting 180s.
+done with IFP000_5
+------------------
+0
+0
+0
+0
+current stack: 2,2 reversed stacks: 1
+waiting 180s.
+done with IFP000_5
+------------------
+IFP000_1/1434552993
+IFP000_2/1434552993
+IFP000_3/1434552993
+IFP000_4/1434552993
+current stack: 1,1 reversed stacks: 0
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 2 is still running
+camera 2 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 1 is still running
+camera 1 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 0 is still running
+camera 0 ready!
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+
+
+waiting for robot to complete current task
+robot completed task
+done with IFP000_4
+------------------
+IFP000_5/1434552993
+IFP000_6/1434552993
+IFP000_7/1434552993
+IFP000_8/1434552993
+current stack: 2,1 reversed stacks: 0
+
+
+
+
+waiting for robot to complete current task
+robot completed task
+checking if camera 3 is still running
+camera 3 ready!
+
+
