@@ -5,6 +5,8 @@
 //2015
 //*************************************************************
 
+var VERSION = 0.9; //version and number of camera is written in sampleID through psmag01.sh, increase this number if something changes in this script or psmag01.lua
+
 //robot variables
 var KARELchangeRegVal="/home/user/applications/RAPID/robot/KARELchangeRegVal.sh";
 
@@ -25,6 +27,7 @@ var TODO=11;
 //camera variables
 var CAMSERIALS=newArray('B0A8859584994AFFB9EFAF7AB6382F77','B53A9EACCA6A4DAEAFE6E7CD227FC887','1955DD886CB34783993370E6B572FDBA','860869D768724772A766819D1BAD8411');
 var CAMBUS=newArray(CAMSERIALS.length);
+var CAMPOS; //physical camera which recorded the set, is written to sampleID.txt thorugh psmag01.sh
 var PTPCAM="/home/user/applications/RAPID/ptpcam/ptpcam";
 var CMD; //used to execute non blocking shell scripts
 var CAM;
@@ -39,7 +42,7 @@ var CURRENTSAMPLEID;
 var CURRENTSAMPLEZEROTIME;
 var MAXY=2; //for test purposes, set x,y limits to 2,2 default: Y=7, X=10
 var MAXX=2;
-var MAXZ=4; 
+var MAXZ=3; 
 var STACKREVERSED = false;
 var STACKDURATION = 180;
 
@@ -88,13 +91,14 @@ macro "start recording [s] "{
 }
 
 macro "hard reset cameras"{
-    rebootCameras(); //waits for all cameras to complete, then reboots    
+        
+   
     robotSetRegister(TODO,RESET); //shuts down power of cameras
 }
 	
 
 macro "execute CMD" {
-	r = exec("sh", CMD, CAM, TARGETDIR, SAMPLEID, TIMESTAMP);
+	r = exec("sh", CMD, CAM, TARGETDIR, SAMPLEID, TIMESTAMP, VERSION, CAMPOS);
 	//print(r);
 }
 
@@ -180,12 +184,30 @@ function checkCamera(camBus){
 	camID = exec(PTPCAM, device, "-i");
 	if (indexOf(camID, CAMSERIALS[camBus]) == -1){
 		print("camera " + camBus + " could not connect, try to reset camera");
-        //remove lock file then wait for all cameras to finish and reset.
-        //remove hard reset for testing purposes
-        //File.delete("/tmp/busy_" + CAMBUS[camBus] + ".lck");
-        //doCommand("hard reset cameras");
-        exit("Couldn't connect to camera " + CAMBUS[camBus])
+	        //remove lock file then wait for all cameras to finish and reset.
+	        File.delete("/tmp/busy_" + CAMBUS[camBus] + ".lck");
 		
+		do {
+		        lock = false;        
+		        for (i=0; i<CAMBUS.length; i++){
+		            if (File.exists("/tmp/busy_"+CAMBUS[i] + ".lck")){
+		                lock = true;            
+		            }        
+		        }
+				wait(3000);	
+		} while (lock);
+	        
+	       	//hard resets cameras by interrupting of power
+	       	robotSetRegister(TODO,RESET);
+
+	       	//delete all images from all cameras
+	       	for (j=0; j<CAMBUS.length; j++){
+	       		r = exec("/home/user/applications/RAPID/ptpcam/deleteImages_arg.sh", CAMBUS[j]);
+			print(r);
+	       	}
+	       	
+	       	
+
 	} else {
 		print("camera " + camBus + " ready!");
 	}
@@ -214,12 +236,12 @@ function rebootCameras(){
 
 function recordAssay(x,y,z){
     //psmag01_arg.sh does everything from recording to downloading and adding sampleID and timestamp
-	CMD="/home/user/applications/RAPID/ptpcam/psmag01_arg.sh"; //usage: ./psmag01_arg.sh [cameraBus] [targetDir] [sampleID] [timestamp]
+	CMD="/home/user/applications/RAPID/ptpcam/psmag01_arg.sh"; //usage: ./psmag01_arg.sh [cameraBus] [targetDir] [sampleID] [timestamp] [verion] [camera position]
 	CAM = CAMBUS[z];
     	TARGETDIR = DOWNDIR+toString(TIMESTAMP)+"_"+toString(x)+"_"+toString(y);
 	SAMPLEID=CURRENTSAMPLEID+"\n"+CURRENTSAMPLEZEROTIME;
-
-	doCommand("execute CMD"); // ./psmag01_arg.sh CAM TARGETDIR SAMPLEID TIMESTAMP
+	CAMPOS = z;
+	doCommand("execute CMD"); // ./psmag01_arg.sh CAM TARGETDIR SAMPLEID TIMESTAMP VERSION CAMPOS
 
 }
 

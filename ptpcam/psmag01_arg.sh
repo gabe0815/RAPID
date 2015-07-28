@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#usage: ./psmag01_arg.sh [cameraBus] [targetDir] [sampleID] [timestamp]
+#usage: ./psmag01_arg.sh [cameraBus] [targetDir] [sampleID] [timestamp] [AssayVersion] [physical camera position]
 
 PTPCAM=/home/user/applications/RAPID/ptpcam/ptpcam
 
@@ -22,6 +22,9 @@ fi
 $PTPCAM --dev=$1 -D
 
 echo "$3" > sampleID.txt
+echo "$5" >> sampleID.txt
+echo "$6" >> sampleID.txt
+
 echo "$4" > timestamp.txt
 
 rm /tmp/busy_$1.lck
