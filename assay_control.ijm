@@ -5,7 +5,7 @@
 //2015
 //*************************************************************
 
-var VERSION = 0.9; //version and number of camera is written in sampleID through psmag01.sh, increase this number if something changes in this script or psmag01.lua
+var VERSION = 0.9; //version and number of camera is written in version.txt through psmag01.sh, increase this number if something changes in this script or psmag01.lua
 
 //robot variables
 var KARELchangeRegVal="/home/user/applications/RAPID/robot/KARELchangeRegVal.sh";
@@ -27,14 +27,15 @@ var TODO=11;
 //camera variables
 var CAMSERIALS=newArray('B0A8859584994AFFB9EFAF7AB6382F77','B53A9EACCA6A4DAEAFE6E7CD227FC887','1955DD886CB34783993370E6B572FDBA','860869D768724772A766819D1BAD8411');
 var CAMBUS=newArray(CAMSERIALS.length);
-var CAMPOS; //physical camera which recorded the set, is written to sampleID.txt thorugh psmag01.sh
+var CAMSER; //camera serial number which recorded the set, is written to camera.txt through psmag01.sh
+var CAMPOS; //position on which the plate was recorded
 var PTPCAM="/home/user/applications/RAPID/ptpcam/ptpcam";
 var CMD; //used to execute non blocking shell scripts
 var CAM;
 var DOWNDIR = "/mnt/1TBraid01/imagesets01/20150617_vibassay_continous/dl";
 var TARGETDIR;
 var SAMPLEID;
-var TIMESTAMP;
+var TIMESTAMP=0;
 
 //assay variables
 var TABLEFILENAME="/home/user/applications/RAPID/sampleTable_test.csv";
@@ -70,7 +71,7 @@ macro "reboot [r]"{
 }
 macro "start recording [s] "{
 	initCameras();
-		
+	//set ZMAX on robot	
 	while(true){
 		for (y=1;y<=MAXY;y++){
 
@@ -79,7 +80,13 @@ macro "start recording [s] "{
 					print("pause active");
 					wait(1000);
 				}
-		        	//checkCameras(); //resets and re-initializes cameras in case of failure
+		        	//write the current stack and reversed flag to a file in case of failure.
+
+		     		logFile = "/home/user/applications/RAPID/currentStack.txt";
+		     		if (File.exists(logFile)){
+		     			File.delete(logFile);
+		     		}
+		     		File.append("time: " + TIMESTAMP + " x: " + x + " y: " + y + " stack reversed: " + STACKREVERSED, logFile);
 		        	processStack(x,y);
 			}
             
@@ -91,14 +98,12 @@ macro "start recording [s] "{
 }
 
 macro "hard reset cameras"{
-        
-   
-    robotSetRegister(TODO,RESET); //shuts down power of cameras
+	hardResetCameras();        
 }
 	
 
 macro "execute CMD" {
-	r = exec("sh", CMD, CAM, TARGETDIR, SAMPLEID, TIMESTAMP, VERSION, CAMPOS);
+	r = exec("sh", CMD, CAM, TARGETDIR, SAMPLEID, TIMESTAMP, VERSION, CAMSER, CAMPOS);
 	//print(r);
 }
 
@@ -187,24 +192,9 @@ function checkCamera(camBus){
 	        //remove lock file then wait for all cameras to finish and reset.
 	        File.delete("/tmp/busy_" + CAMBUS[camBus] + ".lck");
 		
-		do {
-		        lock = false;        
-		        for (i=0; i<CAMBUS.length; i++){
-		            if (File.exists("/tmp/busy_"+CAMBUS[i] + ".lck")){
-		                lock = true;            
-		            }        
-		        }
-				wait(3000);	
-		} while (lock);
-	        
-	       	//hard resets cameras by interrupting of power
-	       	robotSetRegister(TODO,RESET);
-
-	       	//delete all images from all cameras
-	       	for (j=0; j<CAMBUS.length; j++){
-	       		r = exec("/home/user/applications/RAPID/ptpcam/deleteImages_arg.sh", CAMBUS[j]);
-			print(r);
-	       	}
+		
+	        //wait for all cameras to finish and performs a hard reset/re-initialization
+		hardResetCameras();
 	       	
 	       	
 
@@ -234,14 +224,41 @@ function rebootCameras(){
 	}
 }
 
+function hardResetCameras(){
+	do {
+		lock = false;        
+	        for (i=0; i<CAMBUS.length; i++){
+	            if (File.exists("/tmp/busy_"+CAMBUS[i] + ".lck")){
+	                lock = true;            
+	            }        
+	        }
+			wait(3000);	
+	} while (lock);
+	 
+	 //hard resets cameras by interrupting of power
+       	robotSetRegister(TODO,RESET);
+	wait(10000); //reset will shut power for 5s
+	
+       	//delete all images from all cameras
+       	for (j=0; j<CAMBUS.length; j++){
+       		r = exec("/home/user/applications/RAPID/ptpcam/deleteImages_arg.sh", CAMBUS[j]);
+		print(r);
+       	}
+       	initCameras();
+       	rebootCameras();  //recover from crash
+       	initCameras();
+       	
+}
+
 function recordAssay(x,y,z){
     //psmag01_arg.sh does everything from recording to downloading and adding sampleID and timestamp
-	CMD="/home/user/applications/RAPID/ptpcam/psmag01_arg.sh"; //usage: ./psmag01_arg.sh [cameraBus] [targetDir] [sampleID] [timestamp] [verion] [camera position]
+	CMD="/home/user/applications/RAPID/ptpcam/psmag01_arg.sh"; //usage: ./psmag01_arg.sh [cameraBus] [targetDir] [sampleID] [timestamp] [verion] [camera serial number] [record position]
 	CAM = CAMBUS[z];
     	TARGETDIR = DOWNDIR+toString(TIMESTAMP)+"_"+toString(x)+"_"+toString(y);
 	SAMPLEID=CURRENTSAMPLEID+"\n"+CURRENTSAMPLEZEROTIME;
+	CAMSER = CAMSERIALS[z];
 	CAMPOS = z;
-	doCommand("execute CMD"); // ./psmag01_arg.sh CAM TARGETDIR SAMPLEID TIMESTAMP VERSION CAMPOS
+	doCommand("execute CMD"); // ./psmag01_arg.sh CAM TARGETDIR SAMPLEID TIMESTAMP VERSION CAMSER CAMPOS
 
 }
 
@@ -282,10 +299,10 @@ function processStack(x,y){
 				CURRENTSAMPLEZEROTIME=sampleField[1];
 			}
 		            	
-		       	while (File.exists("/tmp/busy_"+CAMBUS[z])){
+		       	while (File.exists("/tmp/busy_"+CAMBUS[z]+".lck")){
 			        wait(5000);
 			}
-			    checkCamera(z);            
+			checkCamera(z);            
 		        recordAssay(x,y,z);
 				
 		
@@ -293,7 +310,7 @@ function processStack(x,y){
 
         	for (z=MAXZ-1; z>=0; z--){
             	//make sure camera has finished before removing the plate
-           		 while (File.exists("/tmp/busy_"+CAMBUS[z])){
+           		while (File.exists("/tmp/busy_"+CAMBUS[z]+".lck")){
                 		wait(5000);
             		}
 			z_plate = z+1; //zstack goes from 1-4
