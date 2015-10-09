@@ -20,6 +20,7 @@ var RESET = 5;
 var X_PLATE=2;
 var Y_PLATE=3;
 var Z_PLATE=5; 
+var NUM_LAYERS=12;
 
 var TODO=11;
 
@@ -32,7 +33,8 @@ var CAMPOS; //position on which the plate was recorded
 var PTPCAM="/home/user/applications/RAPID/ptpcam/ptpcam";
 var CMD; //used to execute non blocking shell scripts
 var CAM;
-var DOWNDIR = "/mnt/1TBraid01/imagesets01/20150617_vibassay_continous/dl";
+//var DOWNDIR = "/mnt/1TBraid01/imagesets01/20150617_vibassay_continous/dl";
+var DOWNDIR = "/mnt/4TBraid02/201509_vibassay_continous/dl";
 var TARGETDIR;
 var SAMPLEID;
 var TIMESTAMP=0;
@@ -43,7 +45,7 @@ var CURRENTSAMPLEID;
 var CURRENTSAMPLEZEROTIME;
 var MAXY=2; //for test purposes, set x,y limits to 2,2 default: Y=7, X=10
 var MAXX=2;
-var MAXZ=3; 
+var MAXZ=4; 
 var STACKREVERSED = false;
 var STACKDURATION = 180;
 
@@ -60,6 +62,13 @@ macro "init cameras [i]"{
 	
 }
 
+macro "setup cameras [f]"{
+	for (i = 0; i < CAMBUS.length; i++){ 
+		r = exec("/home/user/applications/RAPID/ptpcam/setfoc_arg.sh", CAMBUS[i]);
+		print(r);
+	}
+	
+}
 macro "check cameras [c]"{
 	checkCameras();
 	
@@ -71,7 +80,8 @@ macro "reboot [r]"{
 }
 macro "start recording [s] "{
 	initCameras();
-	//set ZMAX on robot	
+	//set ZMAX on robot
+	robotSetRegister(NUM_LAYERS, MAXZ);
 	while(true){
 		for (y=1;y<=MAXY;y++){
 
@@ -254,7 +264,7 @@ function recordAssay(x,y,z){
     //psmag01_arg.sh does everything from recording to downloading and adding sampleID and timestamp
 	CMD="/home/user/applications/RAPID/ptpcam/psmag01_arg.sh"; //usage: ./psmag01_arg.sh [cameraBus] [targetDir] [sampleID] [timestamp] [verion] [camera serial number] [record position]
 	CAM = CAMBUS[z];
-    	TARGETDIR = DOWNDIR+toString(TIMESTAMP)+"_"+toString(x)+"_"+toString(y);
+    	TARGETDIR = DOWNDIR+toString(TIMESTAMP)+"_"+toString(x)+"_"+toString(y)+"_" + toString(z);
 	SAMPLEID=CURRENTSAMPLEID+"\n"+CURRENTSAMPLEZEROTIME;
 	CAMSER = CAMSERIALS[z];
 	CAMPOS = z;
