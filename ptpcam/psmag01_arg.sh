@@ -5,10 +5,13 @@
 PTPCAM=/home/user/applications/RAPID/ptpcam/ptpcam
 
 touch /tmp/busy_$1.lck
+touch /tmp/busy_rec_$1.lck
 
 $PTPCAM --dev=$1 --chdk="lua loadfile(\"A/CHDK/SCRIPTS/psmag01.lua\")()"
 
 sleep 90
+
+rm /tmp/busy_rec_$1.lck
 
 mkdir -p $2
 cd $2

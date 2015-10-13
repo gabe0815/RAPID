@@ -320,7 +320,7 @@ function processStack(x,y){
 
         	for (z=MAXZ-1; z>=0; z--){
             	//make sure camera has finished before removing the plate
-           		while (File.exists("/tmp/busy_"+CAMBUS[z]+".lck")){
+           		while (File.exists("/tmp/busy_rec_"+CAMBUS[z]+".lck")){   // /tmp/busy_rec_$1.lck is deleted as soon as the recording stops
                 		wait(5000);
             		}
 			z_plate = z+1; //zstack goes from 1-4
