@@ -40,11 +40,11 @@ var SAMPLEID;
 var TIMESTAMP=0;
 
 //assay variables
-var TABLEFILENAME="/home/user/applications/RAPID/sampleTable_test.csv";
+var TABLEFILENAME="/home/user/applications/RAPID/sampleTable_1.tsv";
 var CURRENTSAMPLEID;
 var CURRENTSAMPLEZEROTIME;
-var MAXY=2; //for test purposes, set x,y limits to 2,2 default: Y=7, X=10
-var MAXX=2;
+var MAXY=7; //for test purposes, set x,y limits to 2,2 default: Y=7, X=10
+var MAXX=10;
 var MAXZ=4; 
 var STACKREVERSED = false;
 var STACKDURATION = 180;
