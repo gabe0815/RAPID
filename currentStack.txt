@@ -1,1 +1,1 @@
-time: 1444668156 x: 5 y: 1 stack reversed: 1
+time: 1444741860 x: 3 y: 1 stack reversed: 0

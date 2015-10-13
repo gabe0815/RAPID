@@ -34,7 +34,7 @@ var PTPCAM="/home/user/applications/RAPID/ptpcam/ptpcam";
 var CMD; //used to execute non blocking shell scripts
 var CAM;
 //var DOWNDIR = "/mnt/1TBraid01/imagesets01/20150617_vibassay_continous/dl";
-var DOWNDIR = "/mnt/4TBraid02/201509_vibassay_continous/dl";
+var DOWNDIR = "/mnt/4TBraid02/20151013_vibassay_test/dl";
 var TARGETDIR;
 var SAMPLEID;
 var TIMESTAMP=0;
@@ -309,7 +309,7 @@ function processStack(x,y){
 				CURRENTSAMPLEZEROTIME=sampleField[1];
 			}
 		            	
-		       	while (File.exists("/tmp/busy_"+CAMBUS[z]+".lck")){
+		       	while (File.exists("/tmp/busy_"+CAMBUS[z]+".lck")){ // /tmp/busy_$1.lck indicates if camera is still being in use (recording AND downloading)
 			        wait(5000);
 			}
 			checkCamera(z);            
