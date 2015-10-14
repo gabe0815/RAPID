@@ -100,7 +100,7 @@ macro "start recording [s] "{
 		        	processStack(x,y);
 			}
             
-            //rebootCameras(); //skip rebooting for testing purposes.
+            		rebootCameras(); //reboot every MAXX round
 		}
 		STACKREVERSED = !STACKREVERSED; //each round the stack gets flipped
 	}
