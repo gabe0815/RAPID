@@ -34,17 +34,17 @@ var PTPCAM="/home/user/applications/RAPID/ptpcam/ptpcam";
 var CMD; //used to execute non blocking shell scripts
 var CAM;
 //var DOWNDIR = "/mnt/1TBraid01/imagesets01/20150617_vibassay_continous/dl";
-var DOWNDIR = "/mnt/4TBraid02/201509_vibassay_continous/dl";
+var DOWNDIR = "/mnt/4TBraid02/20151013_vibassay_test/dl";
 var TARGETDIR;
 var SAMPLEID;
 var TIMESTAMP=0;
 
 //assay variables
-var TABLEFILENAME="/home/user/applications/RAPID/sampleTable_test.csv";
+var TABLEFILENAME="/home/user/applications/RAPID/sampleTable_1.tsv";
 var CURRENTSAMPLEID;
 var CURRENTSAMPLEZEROTIME;
-var MAXY=2; //for test purposes, set x,y limits to 2,2 default: Y=7, X=10
-var MAXX=2;
+var MAXY=7; //for test purposes, set x,y limits to 2,2 default: Y=7, X=10
+var MAXX=10;
 var MAXZ=4; 
 var STACKREVERSED = false;
 var STACKDURATION = 180;
@@ -309,7 +309,7 @@ function processStack(x,y){
 				CURRENTSAMPLEZEROTIME=sampleField[1];
 			}
 		            	
-		       	while (File.exists("/tmp/busy_"+CAMBUS[z]+".lck")){
+		       	while (File.exists("/tmp/busy_"+CAMBUS[z]+".lck")){ // /tmp/busy_$1.lck indicates if camera is still being in use (recording AND downloading)
 			        wait(5000);
 			}
 			checkCamera(z);            
