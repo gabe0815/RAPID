@@ -47,7 +47,7 @@ var MAXY=7; //for test purposes, set x,y limits to 2,2 default: Y=7, X=10
 var MAXX=10;
 var MAXZ=4; 
 var STACKREVERSED = false;
-var STACKDURATION = 180;
+var STACKDURATION = 225; //at 15% speed, measured over a 2 day period
 
 macro "upload psmag01.lua [u] "{
 	initCameras();

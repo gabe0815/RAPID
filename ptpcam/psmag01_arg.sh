@@ -35,7 +35,7 @@ echo "$6" > camera.txt
 echo "$7" >> camera.txt
 
 #temperature logging
-if [ -f /tmp/temperatue.log ]
+if [ -f /tmp/temperature.log ]
 then
 	cp /tmp/temperature.log temperature.txt
 else 
