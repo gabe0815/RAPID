@@ -9,7 +9,7 @@
 
 OneWire  ds(2);  // on pin 2 (a 4.7K resistor is necessary)
 byte sensor0[8] = {0x10,0x37,0x2C,0xBF,0x2,0x8,0x0,0x78}; //ROM = 10 37 2C BF 2 8 0 78
-//byte sensor1[8] = {};
+byte sensor1[8] = {0x10,0x35,0x8B,0xBF,0x2,0x8,0x0,0x74};
 byte type_s;
 double temp;
 int incomingByte = 0; 
@@ -17,15 +17,22 @@ int incomingByte = 0;
 void setup(){
 
     Serial.begin(9600);
-   //if (ds.search(addr)){
-    //Serial.println("Temperature sensor found!");
-  //}
-  //for (int i = 0; i < 8; i++){
-  //   Serial.print(addr[i], HEX);
-  //}
-  //Serial.println();
-  // the first ROM byte indicates which chip
-  switch (sensor0[0]) {
+
+}
+
+void loop(){
+  // if we get a valid byte, read analog ins:
+  if (Serial.available() > 0) {
+    incomingByte = Serial.read();
+    // get incoming byte:
+    getTemp(sensor0);
+    getTemp(sensor1);
+  }
+   
+
+}
+double getTemp(byte device[8]) {
+    switch (device[0]) {
     case 0x10:
       type_s = 1;
       break;
@@ -36,20 +43,7 @@ void setup(){
       type_s = 0;
       break;
     } 
-    
-}
-
-void loop(){
-  // if we get a valid byte, read analog ins:
-  if (Serial.available() > 0) {
-    incomingByte = Serial.read();
-    // get incoming byte:
-    getTemp(sensor0);
-  }
-   
-
-}
-double getTemp(byte device[8]) {
+  
   //Serial.println("measuring...");
   byte i;
   byte present = 0;
@@ -57,7 +51,7 @@ double getTemp(byte device[8]) {
 
   float celsius;
   
-  if (OneWire::crc8(device, 7) != sensor0[7]) {
+  if (OneWire::crc8(device, 7) != device[7]) {
       Serial.println("CRC is not valid!");
   }
  
@@ -95,7 +89,7 @@ double getTemp(byte device[8]) {
     //// default is 12 bit resolution, 750 ms conversion time
   }
   celsius = (double)raw / 16.0;
-  Serial.println(celsius);
+  Serial.print(celsius);
 
   return celsius;
 }
