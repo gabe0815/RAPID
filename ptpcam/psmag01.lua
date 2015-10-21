@@ -13,7 +13,9 @@ function mode_photo()
   set_prop(props.FLASH_MODE,2) -- turn off flash
   sleep(100)
   set_nd_filter(2) -- nd filter out ( 0=auto, 1=in, 2=out )
-  press("shoot_half")
+  press("shoot_half") -- take a shot make sure settings take effect
+  press("shoot_full")
+  release("shoot_full")
   set_aflock(1)
   set_aelock(1) --NOTE: set_aelock blocks the shooting function shoot(), user press("shoot_half"), press("shoot_full") instead.
   sleep(200)

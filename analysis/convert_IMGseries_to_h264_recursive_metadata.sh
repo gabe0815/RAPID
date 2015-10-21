@@ -46,6 +46,12 @@ do
 	metadatafile=$outfile"_metadata.txt"
 	qrimage=$outfile"_qrcode.jpg"
 	qrtext=$outfile"_qrcode.txt"
+	
+	if [ -f $parentDir"/IMG_0001.JPG" ]
+	then
+		rm $parentDir"/IMG_0001.JPG" #delete first image as it is allways too bright for reasons unknown
+	fi
+	
 
 	if [ ! -f $outfile ]
 	then
