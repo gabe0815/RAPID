@@ -2,6 +2,12 @@
 
 import serial
 from time import sleep
+import os 
+#remove old log file
+try:
+    os.remove("/tmp/temperature.log")
+except OSError:
+    pass
 
 ser = serial.Serial('/dev/ttyUSB0', 9600, timeout=5)
 
