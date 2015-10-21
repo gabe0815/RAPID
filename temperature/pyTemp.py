@@ -10,7 +10,7 @@ sleep(1);
 
 with open("/tmp/temperature.log", "a") as myfile:
 	myfile.write(ser.read(5))
-	myfile.write(", ")
+	myfile.write(",")
 	myfile.write(ser.read(5))
 
 ser.close()
