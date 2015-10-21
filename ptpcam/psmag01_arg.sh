@@ -1,6 +1,8 @@
 #!/bin/bash
 
 #usage: ./psmag01_arg.sh [cameraBus] [targetDir] [sampleID] [timestamp] [AssayVersion] [camera serial] [physical camera position]
+#furthermore it will read the temperature from a file and copy it in to the directory
+
 
 PTPCAM=/home/user/applications/RAPID/ptpcam/ptpcam
 
@@ -31,5 +33,14 @@ echo "$4" > timestamp.txt
 echo "$5" > version.txt
 echo "$6" > camera.txt
 echo "$7" >> camera.txt
+
+#temperature logging
+if [ -f /tmp/temperatue.log ]
+then
+	cp /tmp/temperature.log temperature.txt
+else 
+	echo "-1,-1" > temperature.txt
+fi
+
 
 rm /tmp/busy_$1.lck
