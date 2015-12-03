@@ -5,7 +5,8 @@
 
 
 PIDFILE=/home/user/conversion.pid
-filePath=/mnt/4TBraid02/20151021_vibassay_set1/
+filePath=/mnt/4TBraid02/20151125_vibassay_test/
+#filePath=/mnt/4TBraid02/20151021_vibassay_set1/
 
 
 if [ -f $PIDFILE ]

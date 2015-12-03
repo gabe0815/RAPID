@@ -34,17 +34,18 @@ var PTPCAM="/home/user/applications/RAPID/ptpcam/ptpcam";
 var CMD; //used to execute non blocking shell scripts
 var CAM;
 //var DOWNDIR = "/mnt/1TBraid01/imagesets01/20150617_vibassay_continous/dl";
-var DOWNDIR = "/mnt/4TBraid02/20151021_vibassay_set1/dl";
+//var DOWNDIR = "/mnt/4TBraid02/20151021_vibassay_set1/dl";
+var DOWNDIR = "/mnt/4TBraid02/20151125_vibassay_test/dl";
 var TARGETDIR;
 var SAMPLEID;
 var TIMESTAMP=0;
 
 //assay variables
-var TABLEFILENAME="/home/user/applications/RAPID/sampleTable_newFormat_IFP134.csv";
+var TABLEFILENAME="/home/user/applications/RAPID/sampleTable_small.csv";
 var CURRENTSAMPLEID;
 var CURRENTSAMPLEZEROTIME;
-var MAXY=7; //for test purposes, set x,y limits to 2,2 default: Y=7, X=10
-var MAXX=10;
+var MAXY=3; //for test purposes, set x,y limits to 2,2 default: Y=7, X=10
+var MAXX=3;
 var MAXZ=4; 
 var STACKREVERSED = false;
 var STACKDURATION = 225; //at 15% speed, measured over a 2 day period
@@ -82,12 +83,15 @@ macro "start recording [s] "{
 	initCameras();
 	//set ZMAX on robot
 	robotSetRegister(NUM_LAYERS, MAXZ);
+	//testing only, remove!!!!
+	counter = 0;
 	while(true){
 		for (y=1;y<=MAXY;y++){
 
 			for (x=1;x<=MAXX;x++){
 				while (File.exists("/home/user/pause.txt")==true){
-					print("pause active");
+					getDateAndTime(year, month, dayOfWeek, dayOfMonth, hour, minute, second, msec);
+					print("\\Update: pause active: "+dayOfMonth+"."+month+1+"."+year+"-"+hour+":"+minute+":"+second);
 					wait(1000);
 				}
 		        	//write the current stack and reversed flag to a file in case of failure.
@@ -99,8 +103,10 @@ macro "start recording [s] "{
 		     		File.append("time: " + TIMESTAMP + " x: " + x + " y: " + y + " stack reversed: " + STACKREVERSED, logFile);
 		        	processStack(x,y);
 			}
-            
-            		rebootCameras(); //reboot every MAXX round
+            		counter++;
+            		if (counter % 10 == 0){
+            			rebootCameras(); //reboot every MAXX round
+			}
 		}
 		STACKREVERSED = !STACKREVERSED; //each round the stack gets flipped
 	}
