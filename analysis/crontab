@@ -1,0 +1,2 @@
+*/10 * * * * /home/user/applications/RAPID/analysis/convert_IMGseries_to_h264_recursive_metadata.sh
+*/5 * * * * /home/user/applications/RAPID/temperature/pyTemp.py
