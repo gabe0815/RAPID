@@ -35,17 +35,18 @@ var CMD; //used to execute non blocking shell scripts
 var CAM;
 //var DOWNDIR = "/mnt/1TBraid01/imagesets01/20150617_vibassay_continous/dl";
 //var DOWNDIR = "/mnt/4TBraid02/20151021_vibassay_set1/dl";
-var DOWNDIR = "/mnt/4TBraid02/20151125_vibassay_test/dl";
+//var DOWNDIR = "/mnt/4TBraid02/20151125_vibassay_test/dl";
+var DOWNDIR = "/mnt/4TBraid02/20151203_vibassay_set2/dl";
 var TARGETDIR;
 var SAMPLEID;
 var TIMESTAMP=0;
 
 //assay variables
-var TABLEFILENAME="/home/user/applications/RAPID/sampleTable_small.csv";
+var TABLEFILENAME="/home/user/applications/RAPID/sampleTable_20151204.csv";
 var CURRENTSAMPLEID;
 var CURRENTSAMPLEZEROTIME;
-var MAXY=3; //for test purposes, set x,y limits to 2,2 default: Y=7, X=10
-var MAXX=3;
+var MAXY=7; //for test purposes, set x,y limits to 2,2 default: Y=7, X=10
+var MAXX=10;
 var MAXZ=4; 
 var STACKREVERSED = false;
 var STACKDURATION = 225; //at 15% speed, measured over a 2 day period
