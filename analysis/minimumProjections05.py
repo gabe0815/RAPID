@@ -7,6 +7,7 @@ import time
 import sys
 import os, os.path
 
+
 startTime = time.time()
 
 vidPath = sys.argv[1]
@@ -19,32 +20,16 @@ with open(timestamps) as f:
     seconds = f.readlines()
 
 for i in xrange(len( seconds )):
-    if (abs(int(seconds[i+1]) - int(seconds[i])) > 4):
-        before_end = i+1
+    if (abs(int(seconds[i+1]) - int(seconds[i])) >= 4):
+        before_end = i
         break
 
-before_start = 1
+before_start = 0
 after_start = before_end + 1
 after_end = nFrames
 
-#fps = (nFrames - 2) / float(total_video_length)
 
-#determine the range before and after vibration:
-
-
-#if nFrames > 30:
-#    before_start = 1
-#    before_end = 21
-#    after_start = 23
-#    after_end = nFrames
-
-#else:
-#    before_start = 0
-#    before_end = 8
-#   after_start = 10
-#    after_end =  nFrames
-
-print("Number of Frames: %d, before start: %d, before_end %d, after start: %d, after end %d") % (nFrames, before_start, before_end, after_start, after_end)
+print("File: %s, Number of Frames: %d, before start: %d, before_end %d, after start: %d, after end %d") % (vidPath, nFrames, before_start, before_end, after_start, after_end)
 
 
 
@@ -60,7 +45,7 @@ with open(paramPath, 'w') as parameters:
 #create paths for saving jpegs
 imgBefore = vidPath + "_2fps.AVI_"+str(before_start)+"_"+str(before_end) + "_before.jpg"
 imgAfter = vidPath + "_2fps.AVI_"+str(after_start)+"_"+str(after_end) + "_after.jpg"
-firstFrame = vidPath + "_2fps.AVI_1stframe.jpg"
+#firstFrame = vidPath + "_2fps.AVI_1stframe.jpg"
 
 #print ("before_start %d, before_end %d, after_start %d, after_end %d") % (before_start, before_end, after_start, after_end)
 
@@ -69,8 +54,8 @@ firstFrame = vidPath + "_2fps.AVI_1stframe.jpg"
 
 for f in xrange( nFrames ):
     ret, frame = vidFile.read()
-    if f == 0:
-        cv2.imwrite(firstFrame, cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY))
+    #if f == 0:
+        #cv2.imwrite(firstFrame, cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY))
         
 
     if f >= before_start and f <= before_end:
