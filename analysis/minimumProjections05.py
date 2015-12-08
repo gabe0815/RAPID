@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+# usage:
+# find `pwd` -name "imgseries_h264.AVI" | parallel ~/applicatins/RAPID/analysis/minimumProjections05.py {} 
+
 import numpy as np
 import cv2
 import cv2.cv as cv

@@ -1,5 +1,6 @@
 #!/bin/bash
-
+#usage:
+#find `pwd` -name "imgseries_h264.AVI" | parallel extract_timestamps.sh {}
 
 if [ ! -f $1_metadata.txt_extract.txt ]; then
 	echo "exctracting timestamps"

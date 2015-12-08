@@ -18,7 +18,11 @@ rm /tmp/busy_rec_$1.lck
 mkdir -p $2
 cd $2
 
+touch download.lck
+
 $PTPCAM --dev=$1 -G
+
+rm download.lck
 
 if [ -f PS.FI2 ]; then 
     rm PS.FI2

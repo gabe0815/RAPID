@@ -47,8 +47,13 @@ do
 	metadatafile=$outfile"_metadata.txt"
 	qrimage=$outfile"_qrcode.jpg"
 	qrtext=$outfile"_qrcode.txt"
+
+	if [ -f $parentDir"/download.lck" ]
+	then
+		continue
+	fi
 	
-	if [ -f $parentDir"/IMG_0001.JPG" ]
+	if [ -f $parentDir"/IMG_0001.JPG" ] 
 	then
 		rm $parentDir"/IMG_0001.JPG" #delete first image as it is allways too bright for reasons unknown
 	fi
@@ -63,6 +68,13 @@ do
 		echo "deleting original JPG files"
 		rm `echo $parentDir"/IMG_????.JPG"`
 		echo "done"
+		if [ -f $metadatafile ]
+		then
+			echo "exctracting timestamps"
+			grep -a timestamp $metadatafile | cut -d " " -f 5,6 | sed "s/:/-/; s/:/-/"  > $metadatafile"_tmp.txt"
+    			while read j; do date --date="$j" +%s; done < $metadatafile"_tmp.txt" > $metadatafile"_extract.txt"
+      			rm $metadatafile"_tmp.txt"
+		fi
 
 	else 
 		echo "$outfile exists, skipping..."
