@@ -84,8 +84,7 @@ macro "start recording [s] "{
 	initCameras();
 	//set ZMAX on robot
 	robotSetRegister(NUM_LAYERS, MAXZ);
-	//testing only, remove!!!!
-	counter = 0;
+
 	while(true){
 		for (y=1;y<=MAXY;y++){
 
@@ -104,10 +103,9 @@ macro "start recording [s] "{
 		     		File.append("time: " + TIMESTAMP + " x: " + x + " y: " + y + " stack reversed: " + STACKREVERSED, logFile);
 		        	processStack(x,y);
 			}
-            		counter++;
-            		if (counter % 10 == 0){
+            		
             			rebootCameras(); //reboot every MAXX round
-			}
+			
 		}
 		STACKREVERSED = !STACKREVERSED; //each round the stack gets flipped
 	}
