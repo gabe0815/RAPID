@@ -81,14 +81,26 @@ macro "reboot [r]"{
 	
 }
 macro "start recording [s] "{
+    Dialog.create("Setup");
+    Dialog.addMessage("Please enter x and y coordinates \n indicating the start position of the assay");
+    Dialog.addNumber("x-coordinate", 1);
+    Dialog.addNumber("y-coordinate", 1);
+    Dialog.addMessage("note: false corresponds to 4-3-2-1 from top to bottom");
+    Dialog.addCheckbox("reversed", false);
+    Dialog.show();
+    startX = Dialog.getNumber();
+    startY = Dialog.getNumber();
+    STACKREVERSED = Dialog.getCheckbox();
+
+    
 	initCameras();
 	//set ZMAX on robot
 	robotSetRegister(NUM_LAYERS, MAXZ);
 
 	while(true){
-		for (y=1;y<=MAXY;y++){
+		for (y=startY;y<=MAXY;y++){
 
-			for (x=1;x<=MAXX;x++){
+			for (x=startX;x<=MAXX;x++){
 				while (File.exists("/home/user/pause.txt")==true){
 					getDateAndTime(year, month, dayOfWeek, dayOfMonth, hour, minute, second, msec);
 					print("\\Update: pause active: "+dayOfMonth+"."+month+1+"."+year+"-"+hour+":"+minute+":"+second);
@@ -103,10 +115,13 @@ macro "start recording [s] "{
 		     		File.append("time: " + TIMESTAMP + " x: " + x + " y: " + y + " stack reversed: " + STACKREVERSED, logFile);
 		        	processStack(x,y);
 			}
-            		
+            		    //reset startX to 1 in case the recording was resumed
+                        startX = 1;
             			rebootCameras(); //reboot every MAXX round
 			
 		}
+        //reset startY to 1 in case the recording was resumed
+        startY = 1;
 		STACKREVERSED = !STACKREVERSED; //each round the stack gets flipped
 	}
 	
