@@ -5,6 +5,12 @@
 //2015
 //*************************************************************
 
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//
+//change STACKREVERSED back to false when started fresh!
+//
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 var VERSION = 0.9; //version and number of camera is written in version.txt through psmag01.sh, increase this number if something changes in this script or psmag01.lua
 
 //robot variables
@@ -48,7 +54,7 @@ var CURRENTSAMPLEZEROTIME;
 var MAXY=7; //for test purposes, set x,y limits to 2,2 default: Y=7, X=10
 var MAXX=10;
 var MAXZ=4; 
-var STACKREVERSED = false;
+var STACKREVERSED = true;
 var STACKDURATION = 225; //at 15% speed, measured over a 2 day period
 
 macro "upload psmag01.lua [u] "{

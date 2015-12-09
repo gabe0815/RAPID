@@ -4,10 +4,17 @@
 #http://bencane.com/2015/09/22/preventing-duplicate-cron-job-executions/
 
 
+PIDANALYSIS=/home/user/analysis.pid
 PIDFILE=/home/user/conversion.pid
 filePath=/mnt/4TBraid02/20151203_vibassay_set2/
 #filePath=/mnt/4TBraid02/20151021_vibassay_set1/
 
+#make shure only conversion or analysis is running at the given moment, otherwise the load is too high and might cause a crash
+if [ -f $PIDANALYSIS ]
+then
+   echo "analysis script running"
+   exit 1
+fi
 
 if [ -f $PIDFILE ]
 then

@@ -4,9 +4,16 @@
 #http://bencane.com/2015/09/22/preventing-duplicate-cron-job-executions/
 
 
+PIDCONVERSION=/home/user/conversion.pid
 PIDFILE=/home/user/analysis.pid
 filePath=/mnt/4TBraid02/20151203_vibassay_set2/
 #filePath=/mnt/4TBraid02/20151021_vibassay_set1/
+
+if [ -f $PIDCONVERSION ]
+then
+   echo "conversion script is running, exiting ..."
+   exit 1
+fi
 
 
 if [ -f $PIDFILE ]
@@ -35,6 +42,6 @@ else
   fi
 fi
 
-find  $filePath -name "imgseries_h264.AVI" | parallel /home/user/applications/RAPID/analysis/minimumProjections05.py {}
+find  $filePath -name "imgseries_h264.AVI" | parallel -P 4 "if [ ! -f {}_parameters.txt ]; then /home/user/applications/RAPID/analysis/minimumProjections05.py {}; else echo skipping {} ;fi"
 
 rm $PIDFILE
