@@ -258,6 +258,7 @@ function rebootCameras(){
 		r = exec("/home/user/applications/RAPID/ptpcam/rebootCam_arg01.sh", CAMBUS[i]);
 		print(r);
 	}
+    wait(5000); 
 }
 
 function hardResetCameras(){
