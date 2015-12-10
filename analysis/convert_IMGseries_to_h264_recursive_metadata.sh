@@ -3,11 +3,12 @@
 #create a cron job which runs this script every hour. NOTE: only one instance of this script will run at a given time due to the pid file lock. The pid fil lock part was copied from here:
 #http://bencane.com/2015/09/22/preventing-duplicate-cron-job-executions/
 
+#$IMAGEPATH is stored globally for all scripts in config.sh
+. config.sh
 
-PIDANALYSIS=/home/user/analysis.pid
-PIDFILE=/home/user/conversion.pid
-filePath=/mnt/4TBraid02/20151203_vibassay_set2/
-#filePath=/mnt/4TBraid02/20151021_vibassay_set1/
+
+PIDANALYSIS=~/analysis.pid
+PIDFILE=~/conversion.pid
 
 #make shure only conversion or analysis is running at the given moment, otherwise the load is too high and might cause a crash
 if [ -f $PIDANALYSIS ]
@@ -42,7 +43,7 @@ else
   fi
 fi
 
-cd $filePath
+cd $IMAGEPATH
 
 FILES=$(find ./ -name timestamp.txt)
 for file in $FILES
@@ -52,8 +53,6 @@ do
 	outfile=$parentDir"/imgseries_h264.AVI"
 	timestampfile=$parentDir"/timestamp.txt"
 	metadatafile=$outfile"_metadata.txt"
-	qrimage=$outfile"_qrcode.jpg"
-	qrtext=$outfile"_qrcode.txt"
 
 	if [ -f $parentDir"/download.lck" ]
 	then

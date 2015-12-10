@@ -3,11 +3,11 @@
 #create a cron job which runs this script every hour. NOTE: only one instance of this script will run at a given time due to the pid file lock. The pid fil lock part was copied from here:
 #http://bencane.com/2015/09/22/preventing-duplicate-cron-job-executions/
 
+#$IMAGEPATH is stored globally for all scripts in config.sh
+. config.sh
 
-PIDCONVERSION=/home/user/conversion.pid
-PIDFILE=/home/user/analysis.pid
-filePath=/mnt/4TBraid02/20151203_vibassay_set2/
-#filePath=/mnt/4TBraid02/20151021_vibassay_set1/
+PIDCONVERSION=~/conversion.pid
+PIDFILE=~/analysis.pid
 
 if [ -f $PIDCONVERSION ]
 then
@@ -42,6 +42,6 @@ else
   fi
 fi
 
-find  $filePath -name "imgseries_h264.AVI" | parallel -P 4 "if [ ! -f {}_parameters.txt ]; then /home/user/applications/RAPID/analysis/minimumProjections05.py {}; else echo skipping {} ;fi"
+find  $IMAGEPATH -name "imgseries_h264.AVI" | parallel -P 4 "if [ ! -f {}_parameters.txt ]; then ~/applications/RAPID/analysis/minimumProjections05.py {}; else echo skipping {} ;fi"
 
 rm $PIDFILE
