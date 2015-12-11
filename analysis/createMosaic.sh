@@ -5,7 +5,7 @@
 
 #get sample list 
 if [ -f $IMAGEPATH/sampleIDs.txt ]; then
-    rm $IMAGEPATH/sampleIDs.txt ]
+    rm $IMAGEPATH/sampleIDs.txt 
 fi
 
 for i in $(find $IMAGEPATH -name "sampleID.txt"); do echo -en $i'\t'; head -n1 $i; done >> $IMAGEPATH"/sampleIDs.txt"
