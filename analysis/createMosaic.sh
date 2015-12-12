@@ -1,8 +1,10 @@
 #!/bin/bash
 
-#function assembleMosaic {
-	
-#}
+function assembleMosaic {
+	FILENAME="${1%.*}"".jpg"
+	IMGLIST=$(while read i; do FILE=$( echo "$i" | cut -f1); DIRNAME=$(dirname $FILE); TIME=$(echo "$i"|cut -f3); HOURS=$(echo "scale=2; $TIME/3600" | bc -l ); AFTER=$(find $DIRNAME -name "*after.jpg"); echo "-label" $HOURS"h" $AFTER; done < $1)
+	montage $IMGLIST -tile 5x -geometry 307x230+2+2 $FILENAME
+}
 
 #IMAGEPATH is stored in config.sh to make it accessible to all scripts
 . ~/applications/RAPID/analysis/config.sh
@@ -41,7 +43,7 @@ cut -f2 $IMAGEPATH"/sampleIDs.txt" | sort | uniq >> $IMAGEPATH"/sampleIDs_uniqe.
 #compile list for each sampleID
 
 #while read j; do grep "\<$j\>" $IMAGEPATH"/sampleIDs.txt" > $IMAGEPATH"/sample_$j.txt"; assembleMosaic $IMAGEPATH"/sample_$j.txt"; done < $IMAGEPATH"/sampleIDs_uniqe.txt"
-while read j; do grep "\<$j\>" $IMAGEPATH"/sampleIDs.txt" > $IMAGEPATH"/sample_$j.txt"; done < $IMAGEPATH"/sampleIDs_uniqe.txt"
+while read j; do grep "\<$j\>" $IMAGEPATH"/sampleIDs.txt" > $IMAGEPATH"/sample_$j.txt"; sort -k3 -n $IMAGEPATH"/sample_$j.txt" > $IMAGEPATH"/sample_"$j"_sorted.txt"; assembleMosaic $IMAGEPATH"/sample_"$j"_sorted.txt"; rm $IMAGEPATH"/sample_"$j"_sorted.txt" $IMAGEPATH"/sample_$j.txt"; done < $IMAGEPATH"/sampleIDs_uniqe.txt"
 
 #create a mosaic
 
