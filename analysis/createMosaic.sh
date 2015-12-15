@@ -39,7 +39,6 @@ function assembleMosaic {
 
 ########## main script starts here ############ 
 
-: <<'END'
 
 if [ -f $IMAGEPATH/sampleIDs.txt ]; then
     rm $IMAGEPATH/sampleIDs.txt 
@@ -71,7 +70,6 @@ done >> $IMAGEPATH"/sampleIDs.txt"
 cut -f2 $IMAGEPATH"/sampleIDs.txt" | sort | uniq >> $IMAGEPATH"/sampleIDs_uniqe.txt"
 
 #compile list for each sampleID
-END
 
 while read j; 
 	do 
