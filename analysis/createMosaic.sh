@@ -1,13 +1,26 @@
 #!/bin/bash
 
-function assembleMosaic {
-	FILENAME="${1%.*}"".jpg"
-	IMGLIST=$(while read i; do FILE=$( echo "$i" | cut -f1); DIRNAME=$(dirname $FILE); TIME=$(echo "$i"|cut -f3); HOURS=$(echo "scale=2; $TIME/3600" | bc -l ); AFTER=$(find $DIRNAME -name "*after.jpg"); echo "-label" $HOURS"h" $AFTER; done < $1)
-	montage $IMGLIST -tile 5x -geometry 307x230+2+2 $FILENAME
-}
-
 #IMAGEPATH is stored in config.sh to make it accessible to all scripts
 . ~/applications/RAPID/analysis/config.sh
+
+function assembleMosaic {
+
+	FILEPATH="${1%.*}"
+  	FILENAME=$(basename "$1")
+	SAMPLEID="${FILENAME%.*}"
+ 
+	IMGLIST_BEFORE=$(while read i; do FILE=$( echo "$i" | cut -f1); DIRNAME=$(dirname $FILE); TIME=$(echo "$i"|cut -f3); HOURS=$(echo "scale=2; $TIME/3600" | bc -l ); AFTER=$(find $DIRNAME -name "*before.jpg"); echo "-label" $HOURS"h" $AFTER; done < $1)
+	IMGLIST_AFTER=$(while read i; do FILE=$( echo "$i" | cut -f1); DIRNAME=$(dirname $FILE); TIME=$(echo "$i"|cut -f3); HOURS=$(echo "scale=2; $TIME/3600" | bc -l ); AFTER=$(find $DIRNAME -name "*after.jpg"); echo "-label" $HOURS"h" $AFTER; done < $1)
+	IMGLIST_COMBINED=$(while read i; do FILE=$( echo "$i" | cut -f1); DIRNAME=$(dirname $FILE); TIME=$(echo "$i"|cut -f3); HOURS=$(echo "scale=2; $TIME/3600" | bc -l ); AFTER=$(find $DIRNAME -name "*combined.jpg"); echo "-label" $HOURS"h" $AFTER; done < $1)
+	IMGLIST_PHOTO=$(while read i; do FILE=$( echo "$i" | cut -f1); DIRNAME=$(dirname $FILE); TIME=$(echo "$i"|cut -f3); HOURS=$(echo "scale=2; $TIME/3600" | bc -l ); AFTER=$(find $DIRNAME -regextype posix-extended -regex '.*_[0-9]{2}\.jpg'); echo "-label" $HOURS"h" $AFTER; done < $1)
+	montage $IMGLIST_BEFORE -tile 5x -geometry 307x230+2+2 -title $SAMPLEID $FILEPATH"_montage_before.jpg"
+	montage $IMGLIST_AFTER -tile 5x -geometry 307x230+2+2 -title $SAMPLEID $FILEPATH"_montage_after.jpg"
+	montage $IMGLIST_COMBINED -tile 5x -geometry 307x230+2+2 -title $SAMPLEID $FILEPATH"_montage_combined.jpg"
+	montage $IMGLIST_PHOTO -tile 5x -geometry 307x230+2+2 -title $SAMPLEID $FILEPATH"_montage_photo.jpg"
+}
+
+
+
 
 #get sample list 
 if [ -f $IMAGEPATH/sampleIDs.txt ]; then
