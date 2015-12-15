@@ -5,12 +5,6 @@
 //2015
 //*************************************************************
 
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//
-//change STACKREVERSED back to false when started fresh!
-//
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 var VERSION = 0.9; //version and number of camera is written in version.txt through psmag01.sh, increase this number if something changes in this script or psmag01.lua
 
 //robot variables
