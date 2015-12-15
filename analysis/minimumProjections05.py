@@ -24,11 +24,14 @@ with open(timestamps) as f:
 
 for i in xrange(len( seconds )):
     if (abs(int(seconds[i+1]) - int(seconds[i])) >= 4):
-        before_end = i
+	#skip the frame at which the vibration started, use the one before that
+        before_end = i-1
         break
 
+
 before_start = 0
-after_start = before_end + 1
+#as we use a frame before the vibration started, we have to increase by 2 to take the one after the vibration started
+after_start = before_end + 2
 after_end = nFrames
 
 

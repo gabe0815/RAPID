@@ -4,7 +4,7 @@
 #http://bencane.com/2015/09/22/preventing-duplicate-cron-job-executions/
 
 #$IMAGEPATH is stored globally for all scripts in config.sh
-. config.sh
+. ~/applications/RAPID/analysis/config.sh
 
 
 PIDANALYSIS=~/analysis.pid
