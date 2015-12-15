@@ -6,6 +6,6 @@
 
 TIMEFILE=$(dirname $1)"/timestamp.txt"
 TIME=$(cat $TIMEFILE)
-DATE=$(date -d @$TIME +'%D %T')
+DATE=$(date -d @$TIME +'%d/%m/%y %T')
 
 printf %s "$DATE," ; head -n1 $1; echo -e ""
