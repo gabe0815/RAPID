@@ -3,6 +3,8 @@
 #IMAGEPATH is stored in config.sh to make it accessible to all scripts
 . ~/applications/RAPID/analysis/config.sh
 
+
+############ helper functions ##############
 function assembleMosaic {
 
 	FILEPATH="${1%.*}"
@@ -32,16 +34,66 @@ function assembleMosaic {
 				fi
 				echo "-label" $HOURS"h" $IMAGE; 
 			done < $1)
+#		montage $IMGLIST -tile 3x -geometry 614x460+2+2 -title $SAMPLEID $FILEPATH"_montage_${SETS[$k]}_large.jpg"
 		montage $IMGLIST -tile 5x -geometry 307x230+2+2 -title $SAMPLEID $FILEPATH"_montage_${SETS[$k]}.jpg"
 	done
 }
 
 
+function createHTML {
+	
+	#variables within functions are global, as long as the function has been called
+	for m in "${SETS[@]}"
+		do
+		
+		HTML=$IMAGEPATH"/"$m"_overview.html"
+
+		#write header to the file
+		echo "<!doctype html public \"-//w3c//dtd html 4.0 transitional//en\">
+		<html><head>
+		<meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">
+		<meta name=\"Author\" content=\"J. Hench, G. Schweighauser\">
+		<title>image viewer</title>
+		<base target=\"imageFrame\">
+		<script>
+		if(window == window.top)
+		{
+		var address=window.location;
+		var s='<html><head><title>image viewer</title></head>'+
+		'<frameset cols=\"15%,85%\" frameborder=\"4\" onload=\"return true;\" onunload=\"return true;\">' +
+		'<frame src=\"'+address+'?\" name=\"indexframe\">'+
+		'<frame src=\"file:///\" name=\"imageFrame\">'+
+		'</frameset>'+
+		'</html>';
+		document.write(s)    
+		}
+		</script>
+		</head>
+		<body text=\"#000000\" bgcolor=\"#C0C0C0\" link=\"#0000FF\" vlink=\"#8154D1\" alink=\"#ED181E\">" > $HTML 
+
+		#go through sampleIDs unique list and find montage images.
+		while read i; 
+			do 
+			FILE=$(find $IMAGEPATH -name "*_"$i"_*"$m".jpg")
+			#echo $FILE	
+			echo "<a href=\"$FILE\">$i</a><br>" >> $HTML
+		done < $IMAGEPATH"/sampleIDs_unique.txt"
+
+		#write footer to the file
+		echo "
+		</body>
+		</html>" >> $HTML
+	done
+}
 ########## main script starts here ############ 
 
 
 if [ -f $IMAGEPATH/sampleIDs.txt ]; then
     rm $IMAGEPATH/sampleIDs.txt 
+fi
+
+if [ -f $IMAGEPATH"/sampleIDs_unique.txt" ]; then
+	rm $IMAGEPATH"/sampleIDs_unique.txt"
 fi
 
 
@@ -67,9 +119,8 @@ done >> $IMAGEPATH"/sampleIDs.txt"
 
 
 #get unique sampleID
-cut -f2 $IMAGEPATH"/sampleIDs.txt" | sort | uniq >> $IMAGEPATH"/sampleIDs_uniqe.txt"
+cut -f2 $IMAGEPATH"/sampleIDs.txt" | sort -V | uniq >> $IMAGEPATH"/sampleIDs_unique.txt"
 
-#compile list for each sampleID
 
 while read j; 
 	do 
@@ -78,5 +129,7 @@ while read j;
 	assembleMosaic $IMAGEPATH"/sample_"$j"_sorted.txt"; 
 	#remove all temp files	
 	rm $IMAGEPATH"/sample_"$j"_sorted.txt" $IMAGEPATH"/sample_$j.txt"; 
-done < $IMAGEPATH"/sampleIDs_uniqe.txt"
+done < $IMAGEPATH"/sampleIDs_unique.txt"
+
+createHTML
 
