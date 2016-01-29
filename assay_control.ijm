@@ -26,7 +26,6 @@ var TODO=11;
 
 
 //camera variables
-//var CAMSERIALS=newArray('B0A8859584994AFFB9EFAF7AB6382F77','B53A9EACCA6A4DAEAFE6E7CD227FC887','1955DD886CB34783993370E6B572FDBA','860869D768724772A766819D1BAD8411');
 var CAMSERIALS=newArray('17B763C447E54F2D8B018317A13AFD1B','B53A9EACCA6A4DAEAFE6E7CD227FC887','1955DD886CB34783993370E6B572FDBA','860869D768724772A766819D1BAD8411');
 var CAMBUS=newArray(CAMSERIALS.length);
 var CAMSER; //camera serial number which recorded the set, is written to camera.txt through psmag01.sh
@@ -34,10 +33,7 @@ var CAMPOS; //position on which the plate was recorded
 var PTPCAM="/home/user/applications/RAPID/ptpcam/ptpcam";
 var CMD; //used to execute non blocking shell scripts
 var CAM;
-//var DOWNDIR = "/mnt/1TBraid01/imagesets01/20150617_vibassay_continous/dl";
-//var DOWNDIR = "/mnt/4TBraid02/20151021_vibassay_set1/dl";
-//var DOWNDIR = "/mnt/4TBraid02/20151125_vibassay_test/dl";
-//var DOWNDIR = "/mnt/4TBraid02/20151203_vibassay_set2/dl";
+
 var DOWNDIR = "/mnt/4TBraid02/20160122_vibassay_set3/dl";
 var TARGETDIR;
 var SAMPLEID;
@@ -83,6 +79,17 @@ macro "reboot [r]"{
 	
 }
 macro "start recording [s] "{
+    //delete all busy_*.lck files in /tmp/
+    files = getFileList("/tmp/");
+		for (i=0; i<files.length; i++){
+			if (indexOf("/tmp/"+files[i], "busy_") != -1){
+				File.delete("/tmp/"+files[i]);
+            } 
+        }
+
+    
+
+    //start of macro
     Dialog.create("Setup");
     Dialog.addMessage("Please enter x and y coordinates \n indicating the start position of the assay");
     Dialog.addNumber("x-coordinate", 1);
@@ -93,8 +100,8 @@ macro "start recording [s] "{
     startX = Dialog.getNumber();
     startY = Dialog.getNumber();
     STACKREVERSED = Dialog.getCheckbox();
-
     
+
 	initCameras();
 	//set ZMAX on robot
 	robotSetRegister(NUM_LAYERS, MAXZ);
@@ -118,7 +125,7 @@ macro "start recording [s] "{
 		        	processStack(x,y);
 			}
             		    //reset startX to 1 in case the recording was resumed
-                        	startX = 1;
+                        startX = 1;
             			rebootCameras(); //reboot every MAXX round
 			
 		}
@@ -254,7 +261,7 @@ function rebootCameras(){
 		r = exec("/home/user/applications/RAPID/ptpcam/rebootCam_arg01.sh", CAMBUS[i]);
 		print(r);
 	}
-    wait(5000); 
+    wait(10000); 
 }
 
 function hardResetCameras(){
