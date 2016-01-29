@@ -26,7 +26,8 @@ var TODO=11;
 
 
 //camera variables
-var CAMSERIALS=newArray('B0A8859584994AFFB9EFAF7AB6382F77','B53A9EACCA6A4DAEAFE6E7CD227FC887','1955DD886CB34783993370E6B572FDBA','860869D768724772A766819D1BAD8411');
+//var CAMSERIALS=newArray('B0A8859584994AFFB9EFAF7AB6382F77','B53A9EACCA6A4DAEAFE6E7CD227FC887','1955DD886CB34783993370E6B572FDBA','860869D768724772A766819D1BAD8411');
+var CAMSERIALS=newArray('17B763C447E54F2D8B018317A13AFD1B','B53A9EACCA6A4DAEAFE6E7CD227FC887','1955DD886CB34783993370E6B572FDBA','860869D768724772A766819D1BAD8411');
 var CAMBUS=newArray(CAMSERIALS.length);
 var CAMSER; //camera serial number which recorded the set, is written to camera.txt through psmag01.sh
 var CAMPOS; //position on which the plate was recorded
@@ -36,13 +37,14 @@ var CAM;
 //var DOWNDIR = "/mnt/1TBraid01/imagesets01/20150617_vibassay_continous/dl";
 //var DOWNDIR = "/mnt/4TBraid02/20151021_vibassay_set1/dl";
 //var DOWNDIR = "/mnt/4TBraid02/20151125_vibassay_test/dl";
-var DOWNDIR = "/mnt/4TBraid02/20151203_vibassay_set2/dl";
+//var DOWNDIR = "/mnt/4TBraid02/20151203_vibassay_set2/dl";
+var DOWNDIR = "/mnt/4TBraid02/20160122_vibassay_set3/dl";
 var TARGETDIR;
 var SAMPLEID;
 var TIMESTAMP=0;
 
 //assay variables
-var TABLEFILENAME="/home/user/applications/RAPID/sampleTable_20151204.csv";
+var TABLEFILENAME="/home/user/applications/RAPID/sampleTable_20160122.csv";
 var CURRENTSAMPLEID;
 var CURRENTSAMPLEZEROTIME;
 var MAXY=7; //for test purposes, set x,y limits to 2,2 default: Y=7, X=10
@@ -116,12 +118,12 @@ macro "start recording [s] "{
 		        	processStack(x,y);
 			}
             		    //reset startX to 1 in case the recording was resumed
-                        startX = 1;
+                        	startX = 1;
             			rebootCameras(); //reboot every MAXX round
 			
 		}
-        //reset startY to 1 in case the recording was resumed
-        startY = 1;
+        	//reset startY to 1 in case the recording was resumed
+        	startY = 1;
 		STACKREVERSED = !STACKREVERSED; //each round the stack gets flipped
 	}
 	
