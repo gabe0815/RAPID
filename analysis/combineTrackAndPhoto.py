@@ -11,16 +11,18 @@ import os, os.path
 afterTrackImg = cv2.imread(sys.argv[1])
 afterPhotoImg = cv2.imread(sys.argv[2])
 
-
-
 height, width, channels = afterTrackImg.shape
 afterTrackImg = cv2.cvtColor(afterTrackImg,  cv.CV_BGR2GRAY)
 #afterTrackImgNorm = cv2.equalizeHist(afterTrackImg)
 
+#try adaptive thresholding
+#cv2.adaptiveThreshold(src, maxValue, adaptiveMethod, thresholdType, blockSize, C)
+afterTrackThresh = cv2.adaptiveThreshold(afterTrackImg, 255,  cv.CV_ADAPTIVE_THRESH_GAUSSIAN_C, cv.CV_THRESH_BINARY_INV, 3, 0)
+
 colorAfterTrackImg = np.zeros((height,width,3), np.uint8)
 colorAfterTrackImg.fill(255)
 
-colorAfterTrackImg[:,:,1] = afterTrackImg
+colorAfterTrackImg[:,:,1] = afterTrackThresh
 weight=0.5
 combinedImg = cv2.addWeighted( colorAfterTrackImg, weight, afterPhotoImg, 1-weight, 0 )
 cv2.imwrite( sys.argv[1]+"_overlay.jpg", combinedImg)
