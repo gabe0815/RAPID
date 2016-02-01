@@ -10,8 +10,10 @@ function assembleMosaic {
 	FILEPATH="${1%.*}"
   	FILENAME=$(basename "$1")
 	SAMPLEID="${FILENAME%.*}"
-	SEARCHSTRINGS=("before" "after" "combined" "_[0-9][0-9]") 	# is used in "find" command
-	SETS=("before" "after" "combined" "photo") 			#will used in path name of output
+#	SEARCHSTRINGS=("before" "after" "combined" "_[0-9][0-9]" "overlay") 	# is used in "find" command
+	SEARCHSTRINGS=("overlay") 	# is used in "find" command
+#	SETS=("before" "after" "combined" "photo" "overlay") 			#will used in path name of output
+	SETS=("overlay")
 	
 	#loop through array with index, so we can refer to both array's elements
 	len=${#SETS[@]}
@@ -34,8 +36,8 @@ function assembleMosaic {
 				fi
 				echo "-label" $HOURS"h" $IMAGE; 
 			done < $1)
-#		montage $IMGLIST -tile 3x -geometry 614x460+2+2 -title $SAMPLEID $FILEPATH"_montage_${SETS[$k]}_large.jpg"
-		montage $IMGLIST -tile 5x -geometry 307x230+2+2 -title $SAMPLEID $FILEPATH"_montage_${SETS[$k]}.jpg"
+		montage $IMGLIST -tile 3x -geometry 614x460+2+2 -title $SAMPLEID $FILEPATH"_montage_${SETS[$k]}_large.jpg"
+#		montage $IMGLIST -tile 5x -geometry 307x230+2+2 -title $SAMPLEID $FILEPATH"_montage_${SETS[$k]}.jpg"
 	done
 }
 
