@@ -51,7 +51,7 @@ with open(paramPath, 'w') as parameters:
 #create paths for saving jpegs
 imgBefore = vidPath + "_2fps.AVI_"+str(before_start)+"_"+str(before_end) + "_before.jpg"
 imgAfter = vidPath + "_2fps.AVI_"+str(after_start)+"_"+str(after_end) + "_after.jpg"
-#firstFrame = vidPath + "_2fps.AVI_1stframe.jpg"
+
 
 #print ("before_start %d, before_end %d, after_start %d, after_end %d") % (before_start, before_end, after_start, after_end)
 
@@ -111,18 +111,26 @@ colorAfter = np.zeros((height,width,3), np.uint8)
 colorBefore[:,:,0] = before_projection[:]
 colorAfter[:,:,2] = after_projection[:]
 
-combinedImg = cv2.addWeighted( colorBefore, 0.5, colorAfter, 0.5, 0 )
-imgCombined = vidPath + "_2fps.AVI_combined.jpg"
+weight=0.5
+combinedImg = cv2.addWeighted( colorBefore, weight, colorAfter, 1-weight, 0 )
 
 before_projection = cv2.bitwise_not(before_projection)
 after_projection = cv2.bitwise_not(after_projection)
 
+#combine colour track with photo
+colorAfterTrackImg = np.zeros((height,width,3), np.uint8)
+colorAfterTrackImg.fill(255)
 
+weight=0.5
+colorAfterTrackImg[:,:,1] = after_projection[:]
+combinedTrackAndPhoto = cv2.addWeighted( colorAfterTrackImg, weight, afterPhotoImg, 1-weight, 0 )
 
 
 cv2.imwrite(imgBefore, before_projection)
 cv2.imwrite(imgAfter, after_projection)
-cv2.imwrite(imgCombined, combinedImg)
+cv2.imwrite(vidPath + "_2fps.AVI_combined.jpg", combinedImg)
+cv2.imwrite(vidPath + "_2fps.AVI_overlay.jpg", combinedTrackAndPhoto)
+
 
 vidFile.release()
 
