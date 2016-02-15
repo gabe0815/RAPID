@@ -122,8 +122,12 @@ colorAfterTrackImg = np.zeros((height,width,3), np.uint8)
 colorAfterTrackImg.fill(255)
 
 weight=0.5
+
+#we have to convert the color to gray and the back again to get a 3 channel gray image to overlay with the track
+afterPhotoImg = cv2.cvtColor(first_after, cv2.COLOR_BGR2GRAY)
+
 colorAfterTrackImg[:,:,1] = after_projection[:]
-combinedTrackAndPhoto = cv2.addWeighted( colorAfterTrackImg, weight, afterPhotoImg, 1-weight, 0 )
+combinedTrackAndPhoto = cv2.addWeighted( colorAfterTrackImg, weight, cv2.cvtColor(afterPhotoImg, cv2.COLOR_GRAY2BGR,), 1-weight, 0 )
 
 
 cv2.imwrite(imgBefore, before_projection)
