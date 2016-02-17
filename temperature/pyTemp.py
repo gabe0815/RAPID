@@ -10,6 +10,7 @@ except OSError:
     pass
 
 ser = serial.Serial('/dev/ttyUSB0', 9600, timeout=5)
+sleep(5)
 
 ser.write("\x00")
 sleep(1);
