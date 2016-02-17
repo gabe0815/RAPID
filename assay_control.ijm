@@ -38,13 +38,13 @@ var CAM;
 //var DOWNDIR = "/mnt/4TBraid02/20151021_vibassay_set1/dl";
 //var DOWNDIR = "/mnt/4TBraid02/20151125_vibassay_test/dl";
 //var DOWNDIR = "/mnt/4TBraid02/20151203_vibassay_set2/dl";
-var DOWNDIR = "/mnt/4TBraid02/20160122_vibassay_set3/dl";
+var DOWNDIR = "/mnt/4TBraid02/20160217_vibassay_set4/dl";
 var TARGETDIR;
 var SAMPLEID;
 var TIMESTAMP=0;
 
 //assay variables
-var TABLEFILENAME="/home/user/applications/RAPID/sampleTable_20160122.csv";
+var TABLEFILENAME="/home/user/applications/RAPID/sampleTable_20160217.csv";
 var CURRENTSAMPLEID;
 var CURRENTSAMPLEZEROTIME;
 var MAXY=7; //for test purposes, set x,y limits to 2,2 default: Y=7, X=10
