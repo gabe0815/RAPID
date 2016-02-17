@@ -42,6 +42,7 @@ else
   fi
 fi
 
-find  $IMAGEPATH -name "imgseries_h264.AVI" | parallel -P 4 "if [ ! -f {}_parameters.txt ]; then ~/applications/RAPID/analysis/minimumProjections05.py {}; else echo skipping {} ;fi"
+find  $IMAGEPATH -name "imgseries_h264.AVI" | parallel -P 4 "if [ ! -f {}_parameters,txt ]; then ~/applications/RAPID/analysis/minimumProjections05.py {}; else echo skipping {} ;fi"
+#find  $IMAGEPATH -name "imgseries_h264.AVI" | parallel -P 8 "~/applications/RAPID/analysis/minimumProjections05.py {}"
 
 rm $PIDFILE
