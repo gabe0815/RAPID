@@ -120,6 +120,7 @@ macro "start recording [s] "{
             		    //reset startX to 1 in case the recording was resumed
                         	startX = 1;
             			rebootCameras(); //reboot every MAXX round
+            			initCameras(); 
 			
 		}
         	//reset startY to 1 in case the recording was resumed
