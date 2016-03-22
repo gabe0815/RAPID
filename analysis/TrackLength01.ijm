@@ -1,6 +1,7 @@
 // track length analysis by Gaussian Blur and Skeletonize
 //run this macro like this:
-//for i in $(ls -d */) | parallel "if [ ! -f {}trackROIs.zip ]; then /mnt/1TBraid01/applications/Fiji.app/ImageJ-linux64 --allow-multiple -macro /path/to/macro.ijm {}; fi"
+//for i in $(ls -d */) | parallel -j12 "if [ ! -f {}trackROIs.zip ]; then /mnt/1TBraid01/applications/Fiji.app/ImageJ-linux64 --allow-multiple -macro /mnt/1TBraid01/homefolders/gschweighauser/RAPID/analysis/TrackLength01.ijm {}; fi"
+
 
 
 
@@ -21,13 +22,18 @@ run("Quit"); //quit imageJ process after completion to release RAM.
 function AnalyzeTrackLength(sourceDir){
     //get all paths    
     imgBefore = exec("find", sourceDir, "-name", "*_before.jpg");
-	imgBefore = substring(imgBefore, 0, lengthOf(imgBefore) -1); //remove newline
     imgAfter =  exec("find", sourceDir, "-name", "*_after.jpg");	
-    imgAfter = substring(imgAfter, 0, lengthOf(imgAfter) -1);
     imgOverlay = exec("find", sourceDir, "-name", "*_overlay.jpg");
+  
+    if ((lengthOf(imgBefore) == 0) || (lengthOf(imgAfter) == 0) || (lengthOf(imgOverlay) == 0)) {
+        run("Quit");
+    }
+
+	imgBefore = substring(imgBefore, 0, lengthOf(imgBefore) -1); //remove newline
+    imgAfter = substring(imgAfter, 0, lengthOf(imgAfter) -1);
     imgOverlay = substring(imgOverlay, 0, lengthOf(imgOverlay) -1);   
 
-	
+
     File.saveString("trackVersion "+trackVersion+"\tlength\tarea\n", ""+sourceDir+trackOutput);
 	roiManager("reset");
 	open(""+imgBefore);
@@ -55,9 +61,6 @@ function AnalyzeTrackLength(sourceDir){
 	roiManager("Deselect");
 	roiManager("Save",""+sourceDir+trackROIs);
 	roiManager("reset");
-	//remove later
-	File.append(sourceDir+"\t"+resBefore+"\t"+resAfter, trackDemo);
-	print(sourceDir+","+resBefore+","+resAfter);
 }
 
 function MeasureTrack(thisImage, sourceDir, description)
@@ -95,4 +98,5 @@ function MeasureTrack(thisImage, sourceDir, description)
 	roiManager("Rename",description+"Skeleton");
 	File.append(""+description+"\t"+toString(nPixelsLength)+"\t"+toString(nPixelsArea), ""+sourceDir+trackOutput);
 	close();
+    return toString(nPixelsLength)+"\t"+toString(nPixelsArea);
 }
