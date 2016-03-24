@@ -58,27 +58,31 @@ macro "save annotations [s] "{
 	file = File.openAsString(fileList+"_mosaic_coordinates.txt");
 	lines=split(file,"\n");
 	for (i=0; i<lengthOf(lines); i++){
-		for (j=0; j<roiManager("Count"); j++){
-			roiManager("Select", j);
-			print(Roi.getName);
-			path = split(lines[i], ",");
-			if (indexOf(lines[i], Roi.getName) != -1){
-				print(lines[i]);
+		//remove all censored flags first, then add them
+		path = split(lines[i], ",");
+		if (File.exists(path[0]+"censored.txt")){
+			File.delete(path[0]+"censored.txt");
+		}
+	}
+
+	for (i=0; i<roiManager("Count"); i++){
+		roiManager("Select", i);
+		print(Roi.getName);
+		for (j=0; j<lengthOf(lines);j++){
+			path = split(lines[j], ",");
+			if (indexOf(lines[j], Roi.getName) != -1){
+				print(lines[j]);
 				print("censoring " + path[0]);
 				File.saveString("censored", path[0]+"censored.txt");
 				break;
-			} else if (File.exists(path[0]+"censored.txt")){
-				File.delete(path[0]+"censored.txt");
 			}
-			
 		}
-		
-		
-		
 	}
+	
 	roiManager("Reset");
 	run("Remove Overlay");
-
+	run("Select None");
+	
 }
 
 macro "open annotations [o] "{
@@ -96,9 +100,12 @@ macro "open annotations [o] "{
 			roiManager("Rename",path[1]+","+path[2]);
 		}
 	}
-	run("From ROI Manager")
-	run("Show Overlay");
-	run("Overlay Options...", "stroke=none width=10 fill=#660000ff apply");
+	if (roiManager("Count")!=0){
+		run("From ROI Manager");
+		run("Show Overlay");
+		run("Overlay Options...", "stroke=none width=10 fill=#660000ff apply");
+	}
+	run("Select None");
 }
 macro "annotate images [a] " {
 	
@@ -128,8 +135,11 @@ macro "remove annotation [r] "{
 			roiManager("Delete");
 		}
 		run("Remove Overlay");
-		run("From ROI Manager");
-		run("Overlay Options...", "stroke=none width=10 fill=#660000ff apply");
+		if (roiManager("Count")!=0){
+			run("From ROI Manager");
+			run("Overlay Options...", "stroke=none width=10 fill=#660000ff apply");
+		}
+		
 	}
-	
+	run("Select None");
 }
