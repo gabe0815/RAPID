@@ -1,8 +1,13 @@
 #!/bin/bash
 
 #IMAGEPATH is stored in config.sh to make it accessible to all scripts
-. ~/applications/RAPID/analysis/config.sh
+. ~/RAPID/analysis/config.sh
 
+
+WIDTH=3072
+HEIGHT=2304
+COLUMNS=4
+SCALE=0.25
 
 ############ helper functions ##############
 function assembleMosaic {
@@ -10,15 +15,16 @@ function assembleMosaic {
 	FILEPATH="${1%.*}"
   	FILENAME=$(basename "$1")
 	SAMPLEID="${FILENAME%.*}"
-	SEARCHSTRINGS=("before" "after" "combined" "_[0-9][0-9]" "overlay") 	# is used in "find" command
-#	SEARCHSTRINGS=("overlay") 	# is used in "find" command
-	SETS=("before" "after" "combined" "photo" "overlay") 			#will used in path name of output
-#	SETS=("overlay")
+#	SEARCHSTRINGS=("before" "after" "combined" "_[0-9][0-9]" "overlay" "tracklength") 	# is used in "find" command
+#	SETS=("before" "after" "combined" "photo" "overlay" "tracklength") 			#will used in path name of output
+	SEARCHSTRINGS=("tracklength") 	# is used in "find" command
+	SETS=("tracklength") 			#will used in path name of output
 	
 	#loop through array with index, so we can refer to both array's elements
 	len=${#SETS[@]}
 	for (( k=0; k<${len}; k++ ));
 	do
+        echo assembling $1 ...
 		#go through list and compile input for "montage" function		
 		IMGLIST=$(while read i;
 			do 
@@ -36,8 +42,8 @@ function assembleMosaic {
 				fi
 				echo "-label" $HOURS"h" $IMAGE; 
 			done < $1)
-#		montage $IMGLIST -tile 3x -geometry 614x460+2+2 -title $SAMPLEID $FILEPATH"_montage_${SETS[$k]}_large.jpg"
-		montage $IMGLIST -tile 5x -geometry 307x230+2+2 -title $SAMPLEID $FILEPATH"_montage_${SETS[$k]}.jpg"
+		montage $IMGLIST -tile "$COLUMNS"x -geometry $(echo "$WIDTH"*"$SCALE"/1 | bc)x$(echo "$HEIGTH"*"$SCALE"/1 | bc) -title $SAMPLEID $FILEPATH"_montage_${SETS[$k]}.jpg"
+        echo 'montage $IMGLIST -tile "$COLUMNS"x -geometry $(echo "$WIDTH"*"$SCALE"/1 | bc)x$(echo "$HEIGTH"*"$SCALE"/1 | bc) -title $SAMPLEID $FILEPATH"_montage_${SETS[$k]}.jpg'
 	done
 }
 
@@ -90,13 +96,13 @@ function createHTML {
 ########## main script starts here ############ 
 
 
-if [ -f $IMAGEPATH/sampleIDs.txt ]; then
-    rm $IMAGEPATH/sampleIDs.txt 
-fi
+#if [ -f $IMAGEPATH/sampleIDs.txt ]; then
+#    rm $IMAGEPATH/sampleIDs.txt 
+#fi
 
-if [ -f $IMAGEPATH"/sampleIDs_unique.txt" ]; then
-	rm $IMAGEPATH"/sampleIDs_unique.txt"
-fi
+#if [ -f $IMAGEPATH"/sampleIDs_unique.txt" ]; then
+#	rm $IMAGEPATH"/sampleIDs_unique.txt"
+#fi
 
 
 #exclude all sets that have been recorded before 2015-12-06 17:30:00 as until then, the assay was not working properly.
@@ -133,5 +139,5 @@ while read j;
 	rm $IMAGEPATH"/sample_"$j"_sorted.txt" $IMAGEPATH"/sample_$j.txt"; 
 done < $IMAGEPATH"/sampleIDs_unique.txt"
 
-createHTML
+#createHTML
 
