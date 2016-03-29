@@ -1,6 +1,6 @@
 // track length analysis by Gaussian Blur and Skeletonize
 //run this macro like this:
-//for i in $(ls -d */) | parallel -j12 "if [ ! -f {}trackROIs.zip ]; then /mnt/1TBraid01/applications/Fiji.app/ImageJ-linux64 --allow-multiple -macro /mnt/1TBraid01/homefolders/gschweighauser/RAPID/analysis/TrackLength01.ijm {}; fi"
+//ls -d /media/imagesets04/20160217_vibassay_set4/*/ |  parallel --eta -j32 "if [ ! -f {}trackROIs.zip ]; then /mnt/1TBraid01/applications/Fiji.app/ImageJ-linux64 --allow-multiple -macro /mnt/1TBraid01/homefolders/gschweighauser/RAPID/analysis/TrackLength01.ijm {}; fi"
 
 
 
