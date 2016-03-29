@@ -1,3 +1,3 @@
 #!/bin/bash
 
-IMAGEPATH=/mnt/4TBraid02/20151203_vibassay_set2
+IMAGEPATH=/media/imagesets04/20160217_vibassay_set4
