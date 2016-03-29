@@ -14,8 +14,8 @@ function assembleMosaic {
 	FILEPATH="${1%.*}"
   	FILENAME=$(basename "$1")
 	SAMPLEID="${FILENAME%.*}"
-#	SEARCHSTRINGS=("before" "after" "combined" "_[0-9][0-9]" "overlay" "tracklength") 	# is used in "find" command
-#	SETS=("before" "after" "combined" "photo" "overlay" "tracklength") 			#will used in path name of output
+#	SEARCHSTRINGS=("before" "after" "combined" "_[0-9][0-9]" "overlay" "trackarea") 	# is used in "find" command
+#	SETS=("before" "after" "combined" "photo" "overlay" "tracklarea") 			#will used in path name of output
 	SEARCHSTRINGS=("tracklength") 	# is used in "find" command
 	SETS=("tracklength") 			#will used in path name of output
 	
