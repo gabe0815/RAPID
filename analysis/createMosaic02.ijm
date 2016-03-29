@@ -1,12 +1,14 @@
 //generate mosaic and index file for future annotation
-
-
 //mosaic parameters
 var scaleFactor = 0.25;
 var columns = 4; 
-var height =  2304 * scaleFactor;
-var width = 3072 * scaleFactor;
+var height =  2304;
+var width = 3072;
+
 var fileList = "/media/imagesets04/20160217_vibassay_set4/sample_IFP213_52.txt";
+
+width *= scaleFactor;
+heigth *= scaleFactor;
 
 function createMosaic(fileList) {
 	//setBatchMode(true);
@@ -141,5 +143,5 @@ macro "remove annotation [r] "{
 		}
 		
 	}
-	run("Select None");
+	r
 }
