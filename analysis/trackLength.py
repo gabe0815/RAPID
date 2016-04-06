@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+#run this script like this: 
+#ls -d /media/imagesets04/20160311_vibassay_set5/*/ |  parallel --eta -j16 "/home/user/RAPID/analysis/trackLength.py {}"
 import cv2
 import numpy as np
 from matplotlib import pyplot as plt
@@ -7,11 +10,10 @@ import os
 def threshold(parentDir, trackFile, description):
     
     for f in os.listdir(parentDir):
-        if '_'+description+'.jpg' in f:
-            print f
+        if f.endswith('_'+description+'.jpg'):
+            #print f
             thisImage = parentDir + f
    
-    #print thisImage
     img = cv2.imread(thisImage,0)
     img = cv2.medianBlur(img,15)    
 
@@ -23,8 +25,7 @@ def threshold(parentDir, trackFile, description):
 
     if description == "after":
         for f in os.listdir(parentDir):
-            if '_overlay.jpg' in f:
-                print f
+            if f.endswith('_overlay.jpg'):
                 thisImage = parentDir + f
                 #overlay countour and area
                 img = cv2.imread(thisImage)            
@@ -32,18 +33,15 @@ def threshold(parentDir, trackFile, description):
                 cv2.putText(img, str(cv2.countNonZero(th)), (100,2200), cv2.FONT_HERSHEY_SIMPLEX, 5, (0,0,255), 10)  
                 cv2.imwrite(thisImage+"_tracklength.jpg", img)
    
-
-            
-#src = sys.argv[1]
-src = '/home/gabe/OldAlbert/media/4TBexternal/sync/imagesets/dl1455724911_2_1_1/'
-
+src = sys.argv[1]
+#src = "/media/imagesets04/20160311_vibassay_set5/dl1457762574_3_4_0/"
 try:
     os.remove(src + "trackLength.tsv")
 except OSError:
     pass
 
 trackLength = open(src + "trackLength.tsv", 'w')
-trackLength.write("trackVersion v1\tlength\tarea")
+trackLength.write("trackVersion v1.5\tlength\tarea")
 
 threshold(src, trackLength, "before")
 threshold(src, trackLength, "after")
