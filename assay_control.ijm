@@ -26,25 +26,21 @@ var TODO=11;
 
 
 //camera variables
-//var CAMSERIALS=newArray('B0A8859584994AFFB9EFAF7AB6382F77','B53A9EACCA6A4DAEAFE6E7CD227FC887','1955DD886CB34783993370E6B572FDBA','860869D768724772A766819D1BAD8411');
-var CAMSERIALS=newArray('17B763C447E54F2D8B018317A13AFD1B','B53A9EACCA6A4DAEAFE6E7CD227FC887','1955DD886CB34783993370E6B572FDBA','860869D768724772A766819D1BAD8411');
+var CAMSERIALS=newArray('0971C5B47AA949D7A4FD6038C1AD2B62','B53A9EACCA6A4DAEAFE6E7CD227FC887','1955DD886CB34783993370E6B572FDBA','860869D768724772A766819D1BAD8411');
 var CAMBUS=newArray(CAMSERIALS.length);
 var CAMSER; //camera serial number which recorded the set, is written to camera.txt through psmag01.sh
 var CAMPOS; //position on which the plate was recorded
 var PTPCAM="/home/user/applications/RAPID/ptpcam/ptpcam";
 var CMD; //used to execute non blocking shell scripts
 var CAM;
-//var DOWNDIR = "/mnt/1TBraid01/imagesets01/20150617_vibassay_continous/dl";
-//var DOWNDIR = "/mnt/4TBraid02/20151021_vibassay_set1/dl";
-//var DOWNDIR = "/mnt/4TBraid02/20151125_vibassay_test/dl";
-//var DOWNDIR = "/mnt/4TBraid02/20151203_vibassay_set2/dl";
-var DOWNDIR = "/mnt/4TBraid02/20160217_vibassay_set4/dl";
+var DOWNDIR = "/mnt/4TBraid02/20160504_vibassay_set7/dl";
+
 var TARGETDIR;
 var SAMPLEID;
 var TIMESTAMP=0;
 
 //assay variables
-var TABLEFILENAME="/home/user/applications/RAPID/sampleTable_20160217.csv";
+var TABLEFILENAME="/home/user/applications/RAPID/sampleTable_20160504.csv";
 var CURRENTSAMPLEID;
 var CURRENTSAMPLEZEROTIME;
 var MAXY=7; //for test purposes, set x,y limits to 2,2 default: Y=7, X=10
