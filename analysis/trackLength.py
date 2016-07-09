@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #run this script like this: 
-#ls -d /media/imagesets04/20160311_vibassay_set5/*/ |  parallel --eta -j16 "/home/user/RAPID/analysis/trackLength.py {}"
+#ls -d /media/imagesets04/20160311_vibassay_set5/*/ |  parallel --eta -j16 "/mnt/1TBraid01/homefolders/gschweighauser/RAPID/analysis/trackLength.py {}"
 import cv2
 import numpy as np
 from matplotlib import pyplot as plt
