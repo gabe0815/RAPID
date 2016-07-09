@@ -7,15 +7,19 @@ from matplotlib import pyplot as plt
 import sys
 import os
 
+
+
 def threshold(parentDir, trackFile, description):
-    
+    kernel = np.ones((5,5),np.uint8)
+    version = "V2"
+
     for f in os.listdir(parentDir):
         if f.endswith('_'+description+'.jpg'):
             #print f
             thisImage = parentDir + f
    
     img = cv2.imread(thisImage,0)
-    img = cv2.medianBlur(img,15)
+    img = cv2.medianBlur(img,27)
     #get minimum
     minVal, maxVal, minLoc, maxLoc = cv2.minMaxLoc(img)
     if minVal > 200:
@@ -23,9 +27,19 @@ def threshold(parentDir, trackFile, description):
     
     else:
         #thresholding
-        th = cv2.adaptiveThreshold(img,255,cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV,15,2) 
-        contours, hierarchy = cv2.findContours(th,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE) 
-        trackFile.write('\n'+description+'\t'+str(0)+'\t'+str(cv2.countNonZero(th)))
+        th = cv2.adaptiveThreshold(img,255,cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY,15,2)
+        th = cv2.morphologyEx(th, cv2.MORPH_OPEN, kernel, iterations = 2)
+        th = cv2.bitwise_not(th)
+        contours, hierarchy = cv2.findContours(th,cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE) 
+        #find biggest contour        
+        maxArea = 0        
+        maxCnt = -1
+        for cnt in contours:
+            if cv2.contourArea(cnt) > maxArea:
+                maxArea = cv2.contourArea(cnt)   
+                maxCnt = cnt
+
+        trackFile.write('\n'+description+'\t'+str(0)+'\t'+str(maxArea))
         
 
     if description == "after":
@@ -38,20 +52,20 @@ def threshold(parentDir, trackFile, description):
                 if minVal > 200:
                     cv2.putText(img, str(0), (100,2200), cv2.FONT_HERSHEY_SIMPLEX, 5, (0,0,255), 10)  
                 else:
-                    cv2.drawContours(img, contours, -1, (0,0,255), 1)
-                    cv2.putText(img, str(cv2.countNonZero(th)), (100,2200), cv2.FONT_HERSHEY_SIMPLEX, 5, (0,0,255), 10)                      
+                    cv2.drawContours(img, maxCnt, -1, (0,0,255), 1)
+                    cv2.putText(img, str(maxArea), (100,2200), cv2.FONT_HERSHEY_SIMPLEX, 5, (0,0,255), 10)                      
 
         cv2.imwrite(thisImage+"_tracklength.jpg", img)
    
-src = sys.argv[1]
-#src = "/media/imagesets04/20160311_vibassay_set5/dl1457709627_6_1_2/"
+#src = sys.argv[1]
+src = "/media/imagesets04/20160311_vibassay_set5/dl1457709627_6_1_2/"
 try:
     os.remove(src + "trackLength.tsv")
 except OSError:
     pass
 
 trackLength = open(src + "trackLength.tsv", 'w')
-trackLength.write("trackVersion v1.5\tlength\tarea")
+trackLength.write("trackVersion %s\tlength\tarea") % version
 
 threshold(src, trackLength, "before")
 threshold(src, trackLength, "after")
