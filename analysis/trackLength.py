@@ -8,10 +8,10 @@ import sys
 import os
 
 
+version = "v2"
 
 def threshold(parentDir, trackFile, description):
     kernel = np.ones((5,5),np.uint8)
-    version = "V2"
 
     for f in os.listdir(parentDir):
         if f.endswith('_'+description+'.jpg'):
@@ -19,11 +19,11 @@ def threshold(parentDir, trackFile, description):
             thisImage = parentDir + f
    
     img = cv2.imread(thisImage,0)
-    img = cv2.medianBlur(img,27)
+    img = cv2.medianBlur(img,17)
     #get minimum
     minVal, maxVal, minLoc, maxLoc = cv2.minMaxLoc(img)
     if minVal > 200:
-        trackFile.write('\n'+description+'\t'+str(0)+'\t'+str(0))
+        trackFile.write("\n"+description+"\t"+str(0)+"\t"+str(0))
     
     else:
         #thresholding
@@ -39,12 +39,12 @@ def threshold(parentDir, trackFile, description):
                 maxArea = cv2.contourArea(cnt)   
                 maxCnt = cnt
 
-        trackFile.write('\n'+description+'\t'+str(0)+'\t'+str(maxArea))
+        trackFile.write("\n"+description+"\t"+str(0)+"\t"+str(maxArea))
         
 
     if description == "after":
         for f in os.listdir(parentDir):
-            if f.endswith('_overlay.jpg'):
+            if f.endswith("_overlay.jpg"):
                 thisImage = parentDir + f
                 #overlay countour and area
                 img = cv2.imread(thisImage)            
@@ -57,15 +57,15 @@ def threshold(parentDir, trackFile, description):
 
         cv2.imwrite(thisImage+"_tracklength.jpg", img)
    
-#src = sys.argv[1]
-src = "/media/imagesets04/20160311_vibassay_set5/dl1457709627_6_1_2/"
+src = sys.argv[1]
+#src = "/media/imagesets04/20160311_vibassay_set5/dl1457709627_6_1_2/"
 try:
     os.remove(src + "trackLength.tsv")
 except OSError:
     pass
 
-trackLength = open(src + "trackLength.tsv", 'w')
-trackLength.write("trackVersion %s\tlength\tarea") % version
+trackLength = open(src + "trackLength.tsv", "w")
+trackLength.write("trackVersion" + str(version) + "\tlength\tarea")
 
 threshold(src, trackLength, "before")
 threshold(src, trackLength, "after")
