@@ -18,10 +18,10 @@ function assembleMosaic {
 	sampleID="${filename%.*}" 
     while read i;
 		do
-            img=$(cut -f1 $i)
+            img=$( echo "$i" | cut -f1); 
             imglist=$imglist $img
     
-    done < $1)
+    done < $1
     montage $imglist -tile "$COLUMNS"x -geometry $(echo "$WIDTH"*"$SCALE"/1 | bc)x$(echo "$HEIGTH"*"$SCALE"/1 | bc) -title $sampleID $IMAGEPATH"_montage_tracklength.jpg"
 
     
