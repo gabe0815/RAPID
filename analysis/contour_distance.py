@@ -2,6 +2,7 @@
 #find largest contour
 #find center of all contours
 #check distance between point of contours which centers are closests and merge the contour
+#ceate a mask from each contour and count pixels to avoid over counting the same pixel twice
 #scipy: sudo apt-get install libblas-dev liblapack-dev libatlas-base-dev gfortran pip install scipy
 
 from scipy.spatial import distance as dist
@@ -18,7 +19,7 @@ def getCenter(cont):
 
 
 
-thisImage = "/home/user/mac/Documents/sync/lab_journal/2016/data201607/trackthresholding/noise.jpg"
+thisImage = "/home/user/mac/Documents/sync/lab_journal/2016/data201607/trackthresholding/clean.jpg"
 
 kernel = np.ones((5,5),np.uint8)
 
@@ -46,6 +47,10 @@ for cnt in contours:
         maxArea = cv2.contourArea(cnt)   
         maxCnt = cnt
 mainTrack = getCenter(maxCnt)
+#cv2.drawContours(img, maxCnt, -1, (0,0,255), 1)
+#cv2.namedWindow("biggest", cv2.WINDOW_NORMAL)
+#cv2.imshow("biggest", img)
+#cv2.waitKey(0)   
 
 #loop through all contours, measure center to center distance and closest points
 for cnt in contours:
@@ -57,14 +62,15 @@ for cnt in contours:
                 for p2 in cnt[:]:
                     distance = dist.euclidean(thisPoint, (p2[0][0], p2[0][1]))
                     if distance < minDistance:
-                        print "Distance: %d" % distance
+                        totalArea += cv2.contourArea(cnt)
                         cv2.drawContours(img, cnt, -1, (0,0,255), 1)
                         break
                 #break out of the inner loops
                 else:
                     continue
                 break
-
+print "total area: %d" % totalArea
+print "biggest area: %d" % maxArea
 
 cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
 cv2.imshow("Image", img)
