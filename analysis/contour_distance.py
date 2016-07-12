@@ -22,8 +22,6 @@ thisImage = "/home/user/mac/Documents/sync/lab_journal/2016/data201607/trackthre
 
 kernel = np.ones((5,5),np.uint8)
 
-
-
 img = cv2.imread(thisImage,0)
 img = cv2.medianBlur(img,17)
 
@@ -63,7 +61,8 @@ for cnt in contours:
                 for p2 in cnt[:]:
                     distance = dist.euclidean(thisPoint, (p2[0][0], p2[0][1]))
                     if distance < minDistance:
-                        print "Distance: %d" % distance
+                        #print "Distance: %d" % distance
+                        cv2.drawContours(img, cnt, -1, (0,0,255), 1)
                         break
                 #break out of the inner loops
                 else:
@@ -72,6 +71,8 @@ for cnt in contours:
             else:
                 continue
             break
+
+
 cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
 cv2.imshow("Image", img)
 cv2.waitKey(0)   
