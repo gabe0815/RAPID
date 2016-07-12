@@ -49,13 +49,8 @@ for cnt in contours:
         maxArea = cv2.contourArea(cnt)   
         maxCnt = cnt
 mainTrack = getCenter(maxCnt)
-#cv2.drawContours(img, maxCnt, -1, (0,0,255), 1)
-#cv2.namedWindow("biggest", cv2.WINDOW_NORMAL)
-#cv2.imshow("biggest", img)
-#cv2.waitKey(0)   
 
 #loop through all contours, measure center to center distance and closest points
-
 mask = np.zeros(img.shape,np.uint8) #for counting contour area
 for cnt in contours:
     if cv2.contourArea(cnt) > minArea:
@@ -77,7 +72,7 @@ for cnt in contours:
                 break
 
 print "non overlaping area: %d" % cv2.countNonZero(mask)
- cv2.imwrite("/home/user/track.jpg", mask)
+cv2.imwrite("/home/user/track.jpg", mask)
 cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
 cv2.imshow("Image", mask)
 cv2.waitKey(0)   
