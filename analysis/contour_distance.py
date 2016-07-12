@@ -77,6 +77,7 @@ for cnt in contours:
                 break
 
 print "non overlaping area: %d" % cv2.countNonZero(mask)
+ cv2.imwrite("/home/user/track.jpg", mask)
 cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
 cv2.imshow("Image", mask)
 cv2.waitKey(0)   
