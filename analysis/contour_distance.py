@@ -49,15 +49,22 @@ for cnt in contours:
 
 mainTrack = getCenter(maxCnt)
 
-print maxCnt[0]
+#print maxCnt[1][0][0]
+
+for x in maxCnt[:]:
+    print "x: %d y: %d" % (x[0][0], x[0][1])
 
 #for cnt in contours:
 #    if cv2.contourArea(cnt) > minArea:
 #        D = dist.euclidean(mainTrack, getCenter(cnt))
 #        if D < minDistanceToCenter:
 #           for p1 in maxCnt:
+#                thisPoint = (maxCnt[p1][0][0], maxCnt[p1][0][1]) 
 #                for p2 in cnt:
-#                    print "distance: %d area: %d" % )
+#                    distance = dist.euclidean(thisPoint, (cnt[p2][0][0], cnt[p2][0][1]))
+#                    if distance < minDistance:
+#                        print "Distance: %d" % distance
+#                        break
 
 cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
 cv2.imshow("Image", img)
