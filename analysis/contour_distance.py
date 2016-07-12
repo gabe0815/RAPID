@@ -3,6 +3,9 @@
 #find center of all contours
 #check distance between point of contours which centers are closests and merge the contour
 #ceate a mask from each contour and count pixels to avoid over counting the same pixel twice
+#note: contourArea is different from non-zero pixels as it uses another formula:
+#http://docs.opencv.org/2.4/modules/imgproc/doc/structural_analysis_and_shape_descriptors.html#cv2.contourArea
+#therefore, we'll only use countArea as approximation and use non-zero pixels for final reporting
 #scipy: sudo apt-get install libblas-dev liblapack-dev libatlas-base-dev gfortran pip install scipy
 
 from scipy.spatial import distance as dist
@@ -37,7 +40,6 @@ contours, hierarchy = cv2.findContours(th,cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)
 minArea = 50
 maxArea = 0        
 maxCnt = -1
-totalArea = 0
 minDistanceToCenter = 500
 minDistance = 20
 
@@ -54,7 +56,7 @@ mainTrack = getCenter(maxCnt)
 
 #loop through all contours, measure center to center distance and closest points
 
-mask = np.zeros(img.shape,np.uint8)
+mask = np.zeros(img.shape,np.uint8) #for counting contour area
 for cnt in contours:
     if cv2.contourArea(cnt) > minArea:
         D = dist.euclidean(mainTrack, getCenter(cnt))
@@ -64,17 +66,17 @@ for cnt in contours:
                 for p2 in cnt[:]:
                     distance = dist.euclidean(thisPoint, (p2[0][0], p2[0][1]))
                     if distance < minDistance:
-                        totalArea += cv2.contourArea(cnt)
                         cv2.drawContours(img, cnt, -1, (0,0,255), 1)
+                        #drawContours with option -1 draws the interiors without the outline itself
                         cv2.drawContours(mask,[cnt],0,255,-1)
+
                         break
                 #break out of the inner loops
                 else:
                     continue
                 break
-print "total area: %d" % totalArea
-print "biggest area: %d" % maxArea
 
+print "non overlaping area: %d" % cv2.countNonZero(mask)
 cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
 cv2.imshow("Image", mask)
 cv2.waitKey(0)   
