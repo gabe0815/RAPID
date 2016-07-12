@@ -39,7 +39,7 @@ minArea = 50
 maxArea = 0        
 maxCnt = -1
 totalArea = 0
-minDistanceToCenter = 500
+minDistanceToCenter = 100
 minDistance = 50
 
 for cnt in contours:
@@ -58,14 +58,20 @@ for cnt in contours:
     if cv2.contourArea(cnt) > minArea:
         D = dist.euclidean(mainTrack, getCenter(cnt))
         if D < minDistanceToCenter:
-           for p1 in maxCnt[:]:
+            for p1 in maxCnt[:]:
                 thisPoint = (p1[0][0], p1[0][1]) 
                 for p2 in cnt[:]:
                     distance = dist.euclidean(thisPoint, (p2[0][0], p2[0][1]))
                     if distance < minDistance:
                         print "Distance: %d" % distance
                         break
-
+                #break out of the inner loops
+                else:
+                    continue
+                break
+            else:
+                continue
+            break
 cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
 cv2.imshow("Image", img)
 cv2.waitKey(0)   
