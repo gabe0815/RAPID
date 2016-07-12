@@ -37,21 +37,17 @@ minArea = 50
 maxArea = 0        
 maxCnt = -1
 totalArea = 0
-minDistanceToCenter = 100
-minDistance = 50
+minDistanceToCenter = 500
+minDistance = 20
 
+#find biggest contour and its center
 for cnt in contours:
     if cv2.contourArea(cnt) > maxArea:
         maxArea = cv2.contourArea(cnt)   
         maxCnt = cnt
-
 mainTrack = getCenter(maxCnt)
 
-#print maxCnt[1][0][0]
-
-#for x in maxCnt[:]:
-#    print "x: %d y: %d" % (x[0][0], x[0][1])
-
+#loop through all contours, measure center to center distance and closest points
 for cnt in contours:
     if cv2.contourArea(cnt) > minArea:
         D = dist.euclidean(mainTrack, getCenter(cnt))
@@ -61,16 +57,13 @@ for cnt in contours:
                 for p2 in cnt[:]:
                     distance = dist.euclidean(thisPoint, (p2[0][0], p2[0][1]))
                     if distance < minDistance:
-                        #print "Distance: %d" % distance
+                        print "Distance: %d" % distance
                         cv2.drawContours(img, cnt, -1, (0,0,255), 1)
                         break
                 #break out of the inner loops
                 else:
                     continue
                 break
-            else:
-                continue
-            break
 
 
 cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
