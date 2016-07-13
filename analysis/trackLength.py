@@ -68,13 +68,13 @@ def measureArea(threshImg, minArea, minDistanceToCenter, minDistance):
 
     mask = np.zeros(img.shape,np.uint8) #for counting contour area
     for cnt in contours:
-    if cv2.contourArea(cnt) > minArea:
-        D = dist.euclidean(mainTrack, getCenter(cnt))
-        if D < minDistanceToCenter:
-            if contourDistance(maxCnt, cnt, minDistance):
-                #cv2.drawContours(img, cnt, -1, (0,0,255), 1)
-                #drawContours with option -1 draws the interiors without the outline itself
-                cv2.drawContours(mask,[cnt],0,255,-1)
+        if cv2.contourArea(cnt) > minArea:
+            D = dist.euclidean(mainTrack, getCenter(cnt))
+            if D < minDistanceToCenter:
+                if contourDistance(maxCnt, cnt, minDistance):
+                    #cv2.drawContours(img, cnt, -1, (0,0,255), 1)
+                    #drawContours with option -1 draws the interiors without the outline itself
+                    cv2.drawContours(mask,[cnt],0,255,-1)
     return (cv2.countNonZero(mask), mask)
 
 
