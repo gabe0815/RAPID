@@ -18,6 +18,17 @@ def getCenter(cont):
     return (cX, cY)
 
 
+def contourDistance(cont1, cont2, minDist):
+    #check distance from cont1 to cont2 for all points until minDist is reached.
+    for p1 in cont1[:]:
+        thisPoint = (p1[0][0], p1[0][1]) 
+        for p2 in cont2[:]:
+            distance = dist.euclidean(thisPoint, (p2[0][0], p2[0][1]))
+            if distance < minDist:
+                return 1
+    
+    return 0               
+
 
 thisImage = "/home/user/mac/Documents/sync/lab_journal/2016/data201607/trackthresholding/imgseries_h264.AVI_2fps.AVI_27_55_after.jpg"
 
@@ -49,25 +60,16 @@ mainTrack = getCenter(maxCnt)
 
 #loop through all contours, measure center to center distance and closest points
 mask = np.zeros(img.shape,np.uint8) #for counting contour area
+
 for cnt in contours:
     if cv2.contourArea(cnt) > minArea:
         D = dist.euclidean(mainTrack, getCenter(cnt))
         if D < minDistanceToCenter:
-            for p1 in maxCnt[:]:
-                thisPoint = (p1[0][0], p1[0][1]) 
-                for p2 in cnt[:]:
-                    distance = dist.euclidean(thisPoint, (p2[0][0], p2[0][1]))
-                    if distance < minDistance:
-                        cv2.drawContours(img, cnt, -1, (0,0,255), 1)
-                        #drawContours with option -1 draws the interiors without the outline itself
-                        cv2.drawContours(mask,[cnt],0,255,-1)
-
-                        break
-                #break out of the inner loops
-                else:
-                    continue
-                break
-
+            if contourDistance(maxCnt, cnt, minDistance):
+                cv2.drawContours(img, cnt, -1, (0,0,255), 1)
+                #drawContours with option -1 draws the interiors without the outline itself
+                cv2.drawContours(mask,[cnt],0,255,-1)
+    
 print "non overlaping area: %d" % cv2.countNonZero(mask)
 #cv2.imwrite("/home/user/track.jpg", mask)
 cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
