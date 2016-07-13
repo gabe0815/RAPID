@@ -43,7 +43,6 @@ th = cv2.morphologyEx(th, cv2.MORPH_OPEN, kernel, iterations = 2)
 th = cv2.bitwise_not(th)
 contours, hierarchy = cv2.findContours(th,cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE) 
 
-#find biggest contour         
 
 minArea = 50
 maxArea = 0        
