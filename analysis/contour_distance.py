@@ -1,8 +1,5 @@
-#measure distance
-#find largest contour
-#find center of all contours
-#check distance between point of contours which centers are closests and merge the contour
-#ceate a mask from each contour and count pixels to avoid over counting the same pixel twice
+#!/usr/bin/env python
+
 #note: contourArea is different from non-zero pixels as it uses another formula:
 #http://docs.opencv.org/2.4/modules/imgproc/doc/structural_analysis_and_shape_descriptors.html#cv2.contourArea
 #therefore, we'll only use countArea as approximation and use non-zero pixels for final reporting
@@ -22,7 +19,7 @@ def getCenter(cont):
 
 
 
-thisImage = "/home/user/mac/Documents/sync/lab_journal/2016/data201607/trackthresholding/clean.jpg"
+thisImage = "/home/user/mac/Documents/sync/lab_journal/2016/data201607/trackthresholding/imgseries_h264.AVI_2fps.AVI_27_55_after.jpg"
 
 kernel = np.ones((5,5),np.uint8)
 
@@ -72,7 +69,7 @@ for cnt in contours:
                 break
 
 print "non overlaping area: %d" % cv2.countNonZero(mask)
-cv2.imwrite("/home/user/track.jpg", mask)
+#cv2.imwrite("/home/user/track.jpg", mask)
 cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
 cv2.imshow("Image", mask)
 cv2.waitKey(0)   
