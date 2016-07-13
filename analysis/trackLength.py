@@ -108,11 +108,11 @@ try:
 except OSError:
     pass
 
-trackLength = open(src + "trackLength.tsv", "w")
-trackLength.write("trackVersion" + str(version) + "\tlength\tarea")
+trackFile = open(src + "trackLength.tsv", "w")
+trackFile.write("trackVersion" + str(version) + "\tlength\tarea")
 
 for descr in descriptions:
     area = analyseTrack(src, descr)
     trackFile.write("\n"+description+"\t"+str(0)+"\t"+str(area))
 
-trackLength.close()
+trackFile.close()
