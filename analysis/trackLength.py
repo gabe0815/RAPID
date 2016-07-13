@@ -3,21 +3,15 @@
 #ls -d /media/imagesets04/20160311_vibassay_set5/*/ |  parallel --eta -j16 "/mnt/1TBraid01/homefolders/gschweighauser/RAPID/analysis/trackLength.py {}"
 import cv2
 import numpy as np
-from matplotlib import pyplot as plt
 import sys
 import os
 
 
-version = "v2"
+version = "v3"
 
-def threshold(parentDir, trackFile, description):
+def threshold(img):
     kernel = np.ones((5,5),np.uint8)
-
-    for f in os.listdir(parentDir):
-        if f.endswith('_'+description+'.jpg'):
-            #print f
-            thisImage = parentDir + f
-   
+  
     img = cv2.imread(thisImage,0)
     img = cv2.medianBlur(img,17)
     #get minimum
@@ -30,16 +24,62 @@ def threshold(parentDir, trackFile, description):
         th = cv2.adaptiveThreshold(img,255,cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY,15,2)
         th = cv2.morphologyEx(th, cv2.MORPH_OPEN, kernel, iterations = 2)
         th = cv2.bitwise_not(th)
-        contours, hierarchy = cv2.findContours(th,cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE) 
-        #find biggest contour        
-        maxArea = 0        
-        maxCnt = -1
-        for cnt in contours:
-            if cv2.contourArea(cnt) > maxArea:
-                maxArea = cv2.contourArea(cnt)   
-                maxCnt = cnt
+        return th        
 
-        trackFile.write("\n"+description+"\t"+str(0)+"\t"+str(maxArea))
+
+def findImage(parentDir, description):
+    for f in os.listdir(parentDir):
+        if f.endswith('_'+description+'.jpg'):
+            #print f
+            return parentDir + f
+
+def getCenter(cont):
+    M = cv2.moments(cont)
+    cX = int(M["m10"] / M["m00"])
+    cY = int(M["m01"] / M["m00"])
+    return (cX, cY)
+
+
+def contourDistance(cont1, cont2, minDist):
+    #check distance from cont1 to cont2 for all points until minDist is reached.
+    for p1 in cont1[:]:
+        thisPoint = (p1[0][0], p1[0][1]) 
+        for p2 in cont2[:]:
+            distance = dist.euclidean(thisPoint, (p2[0][0], p2[0][1]))
+            if distance < minDist:
+                return 1
+    
+    return 0
+
+
+def measureArea(threshImg, minArea, minDistanceToCenter, minDistance):
+    contours, hierarchy = cv2.findContours(threshImg,cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE) 
+    #find biggest contour        
+    maxArea = 0        
+    maxCnt = -1
+    for cnt in contours:
+        if cv2.contourArea(cnt) > maxArea:
+            maxArea = cv2.contourArea(cnt)   
+            maxCnt = cnt
+
+    mainTrack = getCenter(maxCnt)    
+
+    mask = np.zeros(img.shape,np.uint8) #for counting contour area
+    for cnt in contours:
+    if cv2.contourArea(cnt) > minArea:
+        D = dist.euclidean(mainTrack, getCenter(cnt))
+        if D < minDistanceToCenter:
+            if contourDistance(maxCnt, cnt, minDistance):
+                cv2.drawContours(img, cnt, -1, (0,0,255), 1)
+                #drawContours with option -1 draws the interiors without the outline itself
+                cv2.drawContours(mask,[cnt],0,255,-1)
+    return cv2.countNonZero(mask)
+
+
+
+
+
+trackFile.write("\n"+description+"\t"+str(0)+"\t"+str(maxArea))
         
 
     if description == "after":
