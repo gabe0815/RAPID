@@ -9,15 +9,15 @@ import os
 
 version = "v3"
 
-def threshold(img):
+def threshold(imgPath):
     kernel = np.ones((5,5),np.uint8)
   
-    img = cv2.imread(thisImage,0)
+    img = cv2.imread(imgPath,0)
     img = cv2.medianBlur(img,17)
-    #get minimum
+    #adaptive threshold goes crazy if there is just noise, so we filter out images with no tracks and return an empty image
     minVal, maxVal, minLoc, maxLoc = cv2.minMaxLoc(img)
     if minVal > 200:
-        trackFile.write("\n"+description+"\t"+str(0)+"\t"+str(0))
+        return cv2.bitwise_not(np.zeros(img.shape,np.uint8))
     
     else:
         #thresholding
@@ -32,6 +32,8 @@ def findImage(parentDir, description):
         if f.endswith('_'+description+'.jpg'):
             #print f
             return parentDir + f
+        else:
+            return -1
 
 def getCenter(cont):
     M = cv2.moments(cont)
@@ -70,35 +72,37 @@ def measureArea(threshImg, minArea, minDistanceToCenter, minDistance):
         D = dist.euclidean(mainTrack, getCenter(cnt))
         if D < minDistanceToCenter:
             if contourDistance(maxCnt, cnt, minDistance):
-                cv2.drawContours(img, cnt, -1, (0,0,255), 1)
+                #cv2.drawContours(img, cnt, -1, (0,0,255), 1)
                 #drawContours with option -1 draws the interiors without the outline itself
                 cv2.drawContours(mask,[cnt],0,255,-1)
-    return cv2.countNonZero(mask)
+    return (cv2.countNonZero(mask), mask)
 
 
+def analyseTrack(parentDir, description):
+    imgPath = findImage(parentDir, description)
+    if imgPath == -1:
+        return -1
+    else:
+        threshImg = threshold(imgPath)
+        area, mask = measureArea(threshImg, 50, 500, 20)
+        #drawContour on overlay:
+        if description == "after":
+            imgPath = findImage(parentDir, "overlay")
+            if imgPath != -1:
+                ret, dst = cv2.threshold(mask, 127, 255, cv2.THRESH_BINARY)
+                contours, hierarchy = cv2.findContours(dst,cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)
+                img = cv2.imread(imgPath)
+                cv2.drawContours(img, contours, -1, (0,0,255), 1)
+                cv2.putText(img, str(area), (100,2200), cv2.FONT_HERSHEY_SIMPLEX, 5, (0,0,255), 10)
+                cv2.imwrite(imgPath+"_tracklength.jpg", img)            
+        return area     
+    
+################# main program starts here #################
 
-
-
-trackFile.write("\n"+description+"\t"+str(0)+"\t"+str(maxArea))
-        
-
-    if description == "after":
-        for f in os.listdir(parentDir):
-            if f.endswith("_overlay.jpg"):
-                thisImage = parentDir + f
-                #overlay countour and area
-                img = cv2.imread(thisImage)            
-
-                if minVal > 200:
-                    cv2.putText(img, str(0), (100,2200), cv2.FONT_HERSHEY_SIMPLEX, 5, (0,0,255), 10)  
-                else:
-                    cv2.drawContours(img, maxCnt, -1, (0,0,255), 1)
-                    cv2.putText(img, str(maxArea), (100,2200), cv2.FONT_HERSHEY_SIMPLEX, 5, (0,0,255), 10)                      
-
-        cv2.imwrite(thisImage+"_tracklength.jpg", img)
-   
 src = sys.argv[1]
-#src = "/media/imagesets04/20160311_vibassay_set5/dl1457709627_6_1_2/"
+
+descriptions = ("before", "after")
+
 try:
     os.remove(src + "trackLength.tsv")
 except OSError:
@@ -107,7 +111,8 @@ except OSError:
 trackLength = open(src + "trackLength.tsv", "w")
 trackLength.write("trackVersion" + str(version) + "\tlength\tarea")
 
-threshold(src, trackLength, "before")
-threshold(src, trackLength, "after")
+for descr in descriptions:
+    area = analyseTrack(src, descr)
+    trackFile.write("\n"+description+"\t"+str(0)+"\t"+str(area))
 
 trackLength.close()
