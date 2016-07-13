@@ -32,8 +32,8 @@ def findImage(parentDir, description):
         if f.endswith('_'+description+'.jpg'):
             #print f
             return parentDir + f
-        else:
-            return -1
+
+    return -1
 
 def getCenter(cont):
     M = cv2.moments(cont)
@@ -109,10 +109,10 @@ except OSError:
     pass
 
 trackFile = open(src + "trackLength.tsv", "w")
-trackFile.write("trackVersion" + str(version) + "\tlength\tarea")
+trackFile.write("trackVersion " + str(version) + "\tlength\tarea")
 
 for descr in descriptions:
     area = analyseTrack(src, descr)
-    trackFile.write("\n"+description+"\t"+str(0)+"\t"+str(area))
+    trackFile.write("\n"+descr+"\t"+str(0)+"\t"+str(area))
 
 trackFile.close()
