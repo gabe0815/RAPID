@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #run this script like this: 
 #ls -d /media/imagesets04/20160311_vibassay_set5/*/ |  parallel --eta -j16 "/mnt/1TBraid01/homefolders/gschweighauser/RAPID/analysis/trackLength.py {}"
+from scipy.spatial import distance as dist
 import cv2
 import numpy as np
 import sys
@@ -66,7 +67,7 @@ def measureArea(threshImg, minArea, minDistanceToCenter, minDistance):
 
     mainTrack = getCenter(maxCnt)    
 
-    mask = np.zeros(img.shape,np.uint8) #for counting contour area
+    mask = np.zeros(threshImg.shape,np.uint8) #for counting contour area
     for cnt in contours:
         if cv2.contourArea(cnt) > minArea:
             D = dist.euclidean(mainTrack, getCenter(cnt))
