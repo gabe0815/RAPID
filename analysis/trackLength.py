@@ -44,16 +44,11 @@ def getCenter(cont):
 
 
 def contourDistance(cont1, cont2, minDist):
-    #check distance from cont1 to cont2 for all points until minDist is reached.
-    for p1 in cont1[:]:
-        thisPoint = (p1[0][0], p1[0][1]) 
-        for p2 in cont2[:]:
-            distance = dist.euclidean(thisPoint, (p2[0][0], p2[0][1]))
-            #print distance
-            if distance < minDist:
-                return 1
-    
-    return 0
+    cont1 = np.squeeze(cont1)
+    cont2 = np.squeeze(cont2)
+    D = dist.cdist(cont1, cont2)
+    print np.amin(D)
+    return np.amin(D)
 
 
 def measureArea(threshImg, minArea, minDistanceToCenter, minDistance):
@@ -72,8 +67,10 @@ def measureArea(threshImg, minArea, minDistanceToCenter, minDistance):
     for cnt in contours:
         if cv2.contourArea(cnt) > minArea:
             D = dist.euclidean(mainTrack, getCenter(cnt))
-            if D < minDistanceToCenter and D != 0:
-                if contourDistance(maxCnt, cnt, minDistance):
+            if D < minDistanceToCenter:
+                if D == 0:
+                    cv2.drawContours(mask,[cnt],0,255,-1)
+                elif contourDistance(maxCnt, cnt, minDistance):
                     #cv2.drawContours(img, cnt, -1, (0,0,255), 1)
                     #drawContours with option -1 draws the interiors without the outline itself
                     cv2.drawContours(mask,[cnt],0,255,-1)
@@ -116,7 +113,7 @@ except OSError:
     pass
 
 trackFile = open(src + "trackLength.tsv", "w")
-trackFile.write("trackVersion " + str(version) + "\tlength\tarea")
+trackFile.write("trackVersion." + str(version) + "\tlength\tarea")
 
 for descr in descriptions:
     area = analyseTrack(src, descr)
