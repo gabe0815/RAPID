@@ -49,6 +49,7 @@ def contourDistance(cont1, cont2, minDist):
         thisPoint = (p1[0][0], p1[0][1]) 
         for p2 in cont2[:]:
             distance = dist.euclidean(thisPoint, (p2[0][0], p2[0][1]))
+            #print distance
             if distance < minDist:
                 return 1
     
@@ -71,7 +72,7 @@ def measureArea(threshImg, minArea, minDistanceToCenter, minDistance):
     for cnt in contours:
         if cv2.contourArea(cnt) > minArea:
             D = dist.euclidean(mainTrack, getCenter(cnt))
-            if D < minDistanceToCenter:
+            if D < minDistanceToCenter and D != 0:
                 if contourDistance(maxCnt, cnt, minDistance):
                     #cv2.drawContours(img, cnt, -1, (0,0,255), 1)
                     #drawContours with option -1 draws the interiors without the outline itself
