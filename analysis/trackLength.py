@@ -87,6 +87,11 @@ def analyseTrack(parentDir, description):
     else:
         threshImg = threshold(imgPath)
         area, mask = measureArea(threshImg, 50, 500, 20)
+        
+        #exclude areas which are too big
+        if area >= (mask.shape[0] * mask.shape[1] / 6):
+            return -1
+
         #drawContour on overlay:
         if description == "after":
             imgPath = findImage(parentDir, "overlay")
