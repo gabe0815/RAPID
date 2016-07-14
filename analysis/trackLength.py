@@ -18,7 +18,7 @@ def threshold(imgPath):
     #adaptive threshold goes crazy if there is just noise, so we filter out images with no tracks and return an empty image
     minVal, maxVal, minLoc, maxLoc = cv2.minMaxLoc(img)
     if minVal > 200:
-        return cv2.bitwise_not(np.zeros(img.shape,np.uint8))
+        return (img, cv2.bitwise_not(np.zeros(img.shape,np.uint8)))
     
     else:
         #thresholding
