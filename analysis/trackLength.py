@@ -77,7 +77,6 @@ def measureArea(origImg, threshImg, minArea, minDistanceToCenter, minDistance):
     #do a secod thresholding on the mask to exclude holes that were previously included
     maskedImg = cv2.bitwise_and(origImg, origImg,mask=mask)
     th = cv2.adaptiveThreshold(origImg,255,cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV,15,2)
-
     return (cv2.countNonZero(th), th)
 
 
