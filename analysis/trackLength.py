@@ -47,7 +47,6 @@ def contourDistance(cont1, cont2, minDist):
     cont1 = np.squeeze(cont1)
     cont2 = np.squeeze(cont2)
     D = dist.cdist(cont1, cont2)
-    print np.amin(D)
     return np.amin(D)
 
 
