@@ -8,7 +8,7 @@ import sys
 import os
 
 
-version = "v4"
+version = "v5"
 
 def threshold(imgPath):
     kernel = np.ones((5,5),np.uint8)
@@ -25,7 +25,7 @@ def threshold(imgPath):
         th = cv2.adaptiveThreshold(img,255,cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY,15,2)
         th = cv2.morphologyEx(th, cv2.MORPH_OPEN, kernel, iterations = 2)
         th = cv2.bitwise_not(th)
-        return th        
+        return (img, th)        
 
 
 def findImage(parentDir, description):
@@ -50,7 +50,7 @@ def contourDistance(cont1, cont2, minDist):
     return np.amin(D)
 
 
-def measureArea(threshImg, minArea, minDistanceToCenter, minDistance):
+def measureArea(origImg, threshImg, minArea, minDistanceToCenter, minDistance):
     contours, hierarchy = cv2.findContours(threshImg,cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE) 
     #find biggest contour        
     maxArea = 0        
@@ -73,6 +73,13 @@ def measureArea(threshImg, minArea, minDistanceToCenter, minDistance):
                     #cv2.drawContours(img, cnt, -1, (0,0,255), 1)
                     #drawContours with option -1 draws the interiors without the outline itself
                     cv2.drawContours(mask,[cnt],0,255,-1)
+
+    #do a secod thresholding on the mask to exclude holes that were previously included
+    maskedImg = cv2.bitwise_and(origImg, origImg,mask=mask)
+    th = cv2.adaptiveThreshold(img,255,cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV,15,2)
+    contours, hierarchy = cv2.findContours(th,cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE) 
+    #fill the holes with black    
+    cv2.drawContours(mask,contours,0,0,-1)
     return (cv2.countNonZero(mask), mask)
 
 
@@ -81,8 +88,8 @@ def analyseTrack(parentDir, description):
     if imgPath == -1:
         return -1
     else:
-        threshImg = threshold(imgPath)
-        area, mask = measureArea(threshImg, 50, 500, 20)
+        img, th = threshold(imgPath)
+        area, mask = measureArea(img, th, 50, 500, 20)
         
         #exclude areas which are too big
         if area >= (mask.shape[0] * mask.shape[1] / 6):
