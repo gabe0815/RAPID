@@ -43,7 +43,7 @@ def getCenter(cont):
     return (cX, cY)
 
 
-def contourDistance(cont1, cont2, minDist):
+def contourDistance(cont1, cont2):
     cont1 = np.squeeze(cont1)
     cont2 = np.squeeze(cont2)
     D = dist.cdist(cont1, cont2)
@@ -63,21 +63,37 @@ def measureArea(origImg, threshImg, minArea, minDistanceToCenter, minDistance):
     mainTrack = getCenter(maxCnt)    
 
     mask = np.zeros(threshImg.shape,np.uint8) #for counting contour area
+    cntIndex = 0    
     for cnt in contours:
         if cv2.contourArea(cnt) > minArea:
             D = dist.euclidean(mainTrack, getCenter(cnt))
             if D < minDistanceToCenter:
                 if D == 0:
-                    cv2.drawContours(mask,[cnt],0,255,-1)
-                elif contourDistance(maxCnt, cnt, minDistance):
+                    cv2.drawContours(mask,contours,cntIndex,255,-1)
+                    #print cntIndex
+                elif contourDistance(maxCnt, cnt) < minDistance:
                     #cv2.drawContours(img, cnt, -1, (0,0,255), 1)
                     #drawContours with option -1 draws the interiors without the outline itself
-                    cv2.drawContours(mask,[cnt],0,255,-1)
+                    cv2.drawContours(mask,contours,cntIndex,255,-1)
+        cntIndex += 1
+    
 
-    #do a secod thresholding on the mask to exclude holes that were previously included
-    maskedImg = cv2.bitwise_and(origImg, origImg,mask=mask)
+    #do a secod thresholding on the image and apply the mask to exclude holes etc.
     th = cv2.adaptiveThreshold(origImg,255,cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV,15,2)
-    return (cv2.countNonZero(th), th)
+    maskedImg = cv2.bitwise_and(origImg,th,mask=mask)    
+    contours, hierarchy = cv2.findContours(maskedImg,cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)
+    mask = np.zeros(threshImg.shape,np.uint8)
+    #draw contours bigger than minArea
+    cntIndex = 0
+    for cnt in contours:
+        if cv2.contourArea(cnt) > minArea:
+            cv2.drawContours(mask,contours,cntIndex,255,-1)
+        cntIndex +=1
+    
+    #cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
+    #cv2.imshow("Image", mask)
+    #cv2.waitKey(0)
+    return (cv2.countNonZero(mask), mask)
 
 
 def analyseTrack(parentDir, description):
@@ -86,7 +102,7 @@ def analyseTrack(parentDir, description):
         return -1
     else:
         img, th = threshold(imgPath)
-        area, mask = measureArea(img, th, 50, 500, 20)
+        area, mask = measureArea(img, th, 50, 500, 10)
         
         #exclude areas which are too big
         if area >= (mask.shape[0] * mask.shape[1] / 6):
