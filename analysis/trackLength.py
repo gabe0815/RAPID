@@ -8,7 +8,7 @@ import sys
 import os
 
 
-version = "v5"
+version = "v6"
 
 def threshold(imgPath):
     kernel = np.ones((5,5),np.uint8)
