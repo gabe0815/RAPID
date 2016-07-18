@@ -60,7 +60,7 @@ def measureArea(origImg, threshImg, minArea, minDistanceToCenter, minDistance):
         if cv2.contourArea(cnt) > maxArea:
             maxArea = cv2.contourArea(cnt)   
             maxCnt = cnt
-            print maxArea
+            #print maxArea
 
     mainTrack = getCenter(maxCnt)    
 
