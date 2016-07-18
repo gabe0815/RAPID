@@ -8,7 +8,7 @@ import sys
 import os
 
 
-version = "v6"
+version = "v7"
 
 def threshold(imgPath):
     kernel = np.ones((5,5),np.uint8)
@@ -23,7 +23,7 @@ def threshold(imgPath):
     else:
         #thresholding
         th = cv2.adaptiveThreshold(img,255,cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY,15,2)
-        th = cv2.morphologyEx(th, cv2.MORPH_OPEN, kernel, iterations = 2)
+        th = cv2.morphologyEx(th, cv2.MORPH_OPEN, kernel, iterations = 1)
         th = cv2.bitwise_not(th)
         return (img, th)        
 
@@ -47,6 +47,7 @@ def contourDistance(cont1, cont2):
     cont1 = np.squeeze(cont1)
     cont2 = np.squeeze(cont2)
     D = dist.cdist(cont1, cont2)
+    #print np.amin(D)
     return np.amin(D)
 
 
@@ -59,40 +60,43 @@ def measureArea(origImg, threshImg, minArea, minDistanceToCenter, minDistance):
         if cv2.contourArea(cnt) > maxArea:
             maxArea = cv2.contourArea(cnt)   
             maxCnt = cnt
+            print maxArea
 
     mainTrack = getCenter(maxCnt)    
 
     mask = np.zeros(threshImg.shape,np.uint8) #for counting contour area
-    cntIndex = 0    
+
     for cnt in contours:
         if cv2.contourArea(cnt) > minArea:
             D = dist.euclidean(mainTrack, getCenter(cnt))
             if D < minDistanceToCenter:
                 if D == 0:
-                    cv2.drawContours(mask,contours,cntIndex,255,-1)
-                    #print cntIndex
-                elif contourDistance(maxCnt, cnt) < minDistance:
+                    cv2.drawContours(mask,[cnt],0,255,-1)
+
+                elif contourDistance(cnt, maxCnt) < minDistance:
+                    print "close enough: %d" % contourDistance(maxCnt, cnt)
                     #cv2.drawContours(img, cnt, -1, (0,0,255), 1)
                     #drawContours with option -1 draws the interiors without the outline itself
-                    cv2.drawContours(mask,contours,cntIndex,255,-1)
-        cntIndex += 1
+                    cv2.drawContours(mask,[cnt],0,255,-1)
+
     
+
 
     #do a secod thresholding on the image and apply the mask to exclude holes etc.
     th = cv2.adaptiveThreshold(origImg,255,cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV,15,2)
-    maskedImg = cv2.bitwise_and(origImg,th,mask=mask)    
+    maskedImg = cv2.bitwise_and(th,th,mask=mask)    
     contours, hierarchy = cv2.findContours(maskedImg,cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)
     mask = np.zeros(threshImg.shape,np.uint8)
     #draw contours bigger than minArea
-    cntIndex = 0
     for cnt in contours:
         if cv2.contourArea(cnt) > minArea:
-            cv2.drawContours(mask,contours,cntIndex,255,-1)
-        cntIndex +=1
-    
-    #cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
-    #cv2.imshow("Image", mask)
-    #cv2.waitKey(0)
+            cv2.drawContours(mask,[cnt],0,255,-1)
+ 
+
+#    cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
+#    cv2.imshow("Image", mask)
+#    cv2.waitKey(0)
+
     return (cv2.countNonZero(mask), mask)
 
 
@@ -117,6 +121,7 @@ def analyseTrack(parentDir, description):
                 img = cv2.imread(imgPath)
                 cv2.drawContours(img, contours, -1, (0,0,255), 1)
                 cv2.putText(img, str(area), (100,2200), cv2.FONT_HERSHEY_SIMPLEX, 5, (0,0,255), 10)
+                cv2.putText(img, str(version), (2700,2200), cv2.FONT_HERSHEY_SIMPLEX, 5, (0,0,255), 10)
                 cv2.imwrite(imgPath+"_tracklength.jpg", img)            
         return area     
     
