@@ -74,7 +74,7 @@ def measureArea(origImg, threshImg, minArea, minDistanceToCenter, minDistance):
                     cv2.drawContours(mask,[cnt],0,255,-1)
 
                 elif contourDistance(cnt, maxCnt) < minDistance:
-                    print "close enough: %d" % contourDistance(maxCnt, cnt)
+                    #print "close enough: %d" % contourDistance(maxCnt, cnt)
                     #cv2.drawContours(img, cnt, -1, (0,0,255), 1)
                     #drawContours with option -1 draws the interiors without the outline itself
                     cv2.drawContours(mask,[cnt],0,255,-1)
