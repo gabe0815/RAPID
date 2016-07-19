@@ -92,7 +92,7 @@ def measureArea(origImg, threshImg, minArea, minDistanceToCenter, minDistance):
                 rightEdge = np.amax(cnt[:,:,0])
                 topEdge = np.amin(cnt[:,:,1])
                 bottomEdge = np.amax(cnt[:,:,1])
-                if leftEdge <= 5  or rightEdge >= (origImg.shape[1] - 5) or topEdgde <= 5 or bottomEdge >= (origImg.shape[1] - 5):
+                if leftEdge <= 5  or rightEdge >= (origImg.shape[1] - 5) or topEdgde <= 5 or bottomEdge >= (origImg.shape[0] - 5):
                     onEdge = True
                 
 
