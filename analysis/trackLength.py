@@ -15,9 +15,7 @@ def threshold(imgPath):
   
     img = cv2.imread(imgPath,0)
     img = cv2.medianBlur(img,17)
-    cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
-    cv2.imshow("Image", img)
-    cv2.waitKey(0)
+
     #adaptive threshold goes crazy if there is just noise, so we filter out images with no tracks and return an empty image
     minVal, maxVal, minLoc, maxLoc = cv2.minMaxLoc(img)
     if minVal > 220:
