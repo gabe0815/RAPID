@@ -20,7 +20,6 @@ def threshold(imgPath):
     cv2.waitKey(0)
     #adaptive threshold goes crazy if there is just noise, so we filter out images with no tracks and return an empty image
     minVal, maxVal, minLoc, maxLoc = cv2.minMaxLoc(img)
-    print minVal
     if minVal > 220:
         return (img, cv2.bitwise_not(np.zeros(img.shape,np.uint8)))
     
@@ -70,7 +69,7 @@ def measureArea(origImg, threshImg, minArea, minDistanceToCenter, minDistance):
 
     mask = np.zeros(threshImg.shape,np.uint8) #for counting contour area
     cntCounter = 0 #tracks number of contours as a measure for noisy tracks
-    onEndge = False
+    onEdge = 0
     for cnt in contours:
         if cv2.contourArea(cnt) > minArea:
             cntCounter += 1
@@ -92,8 +91,8 @@ def measureArea(origImg, threshImg, minArea, minDistanceToCenter, minDistance):
                 rightEdge = np.amax(cnt[:,:,0])
                 topEdge = np.amin(cnt[:,:,1])
                 bottomEdge = np.amax(cnt[:,:,1])
-                if leftEdge <= 5  or rightEdge >= (origImg.shape[1] - 5) or topEdgde <= 5 or bottomEdge >= (origImg.shape[0] - 5):
-                    onEdge = True
+                if leftEdge <= 5  or rightEdge >= (origImg.shape[1] - 5) or topEdge <= 5 or bottomEdge >= (origImg.shape[0] - 5):
+                    onEdge = 1
                 
 
 
@@ -119,14 +118,14 @@ def measureArea(origImg, threshImg, minArea, minDistanceToCenter, minDistance):
 def analyseTrack(parentDir, description):
     imgPath = findImage(parentDir, description)
     if imgPath == -1:
-        return -1, False
+        return -1, 0
     else:
         img, th = threshold(imgPath)
 
         #check what we've got back, we do not need to analyse a empty image and return 0
         minVal, maxVal, minLoc, maxLoc = cv2.minMaxLoc(th)
         if minVal == maxVal:
-            return 0, False
+            return 0, 0
         
         area, mask, onEdge = measureArea(img, th, 50, 500, 20) #chose 20px as max distance ~2x width of adult
       
@@ -164,6 +163,6 @@ trackFile.write("trackVersion." + str(version) + "\tlength\tarea\tedge")
 
 for descr in descriptions:
     area, onEdge = analyseTrack(src, descr)
-    trackFile.write("\n"+descr+"\t"+str(0)+"\t"+str(area)+"\t"+int(onEdge == True))
+    trackFile.write("\n"+descr+"\t"+str(0)+"\t"+str(area)+"\t"+str(onEdge)) 
 
 trackFile.close()
