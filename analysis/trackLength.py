@@ -15,9 +15,13 @@ def threshold(imgPath):
   
     img = cv2.imread(imgPath,0)
     img = cv2.medianBlur(img,17)
+    cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
+    cv2.imshow("Image", img)
+    cv2.waitKey(0)
     #adaptive threshold goes crazy if there is just noise, so we filter out images with no tracks and return an empty image
     minVal, maxVal, minLoc, maxLoc = cv2.minMaxLoc(img)
-    if minVal > 200:
+    print minVal
+    if minVal > 220:
         return (img, cv2.bitwise_not(np.zeros(img.shape,np.uint8)))
     
     else:
@@ -66,7 +70,7 @@ def measureArea(origImg, threshImg, minArea, minDistanceToCenter, minDistance):
 
     mask = np.zeros(threshImg.shape,np.uint8) #for counting contour area
     cntCounter = 0 #tracks number of contours as a measure for noisy tracks
-
+    onEndge = False
     for cnt in contours:
         if cv2.contourArea(cnt) > minArea:
             cntCounter += 1
@@ -84,15 +88,14 @@ def measureArea(origImg, threshImg, minArea, minDistanceToCenter, minDistance):
                     continue
 
                 #check distance to edges                    
-                leftEdge = np.amin(cnt[:,:,:])
+                leftEdge = np.amin(cnt[:,:,0])
                 rightEdge = np.amax(cnt[:,:,0])
                 topEdge = np.amin(cnt[:,:,1])
                 bottomEdge = np.amax(cnt[:,:,1])
-                print "left: %d, right: %d, top: %d, bottom: %d" % (leftEdge, rightEdge, topEdge, bottomEdge)
+                if leftEdge <= 5  or rightEdge >= (origImg.shape[1] - 5) or topEdgde <= 5 or bottomEdge >= (origImg.shape[1] - 5):
+                    onEdge = True
                 
-    cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
-    cv2.imshow("Image", mask)
-    cv2.waitKey(0)
+
 
 
     #do a secod thresholding on the image and apply the mask to exclude holes etc.
@@ -110,20 +113,26 @@ def measureArea(origImg, threshImg, minArea, minDistanceToCenter, minDistance):
 #    cv2.imshow("Image", mask)
 #    cv2.waitKey(0)
 
-    return (cv2.countNonZero(mask), mask)
+    return (cv2.countNonZero(mask), mask, onEdge)
 
 
 def analyseTrack(parentDir, description):
     imgPath = findImage(parentDir, description)
     if imgPath == -1:
-        return -1
+        return -1, False
     else:
         img, th = threshold(imgPath)
-        area, mask = measureArea(img, th, 50, 500, 20) #chose 20px as max distance ~2x width of adult
+
+        #check what we've got back, we do not need to analyse a empty image and return 0
+        minVal, maxVal, minLoc, maxLoc = cv2.minMaxLoc(th)
+        if minVal == maxVal:
+            return 0, False
         
+        area, mask, onEdge = measureArea(img, th, 50, 500, 20) #chose 20px as max distance ~2x width of adult
+      
         #exclude areas which are too big
         if area >= (mask.shape[0] * mask.shape[1] / 6):
-            return -1
+            return -1, onEdge
 
         #drawContour on overlay:
         if description == "after":
@@ -136,7 +145,7 @@ def analyseTrack(parentDir, description):
                 cv2.putText(img, str(area), (100,2200), cv2.FONT_HERSHEY_SIMPLEX, 5, (0,0,255), 10)
                 cv2.putText(img, str(version), (2700,2200), cv2.FONT_HERSHEY_SIMPLEX, 5, (0,0,255), 10)
                 cv2.imwrite(imgPath+"_tracklength.jpg", img)            
-        return area     
+        return area, onEdge  
     
 ################# main program starts here #################
 
@@ -150,10 +159,11 @@ except OSError:
     pass
 
 trackFile = open(src + "trackLength.tsv", "w")
-trackFile.write("trackVersion." + str(version) + "\tlength\tarea")
+trackFile.write("trackVersion." + str(version) + "\tlength\tarea\tedge")
+
 
 for descr in descriptions:
-    area = analyseTrack(src, descr)
-    trackFile.write("\n"+descr+"\t"+str(0)+"\t"+str(area))
+    area, onEdge = analyseTrack(src, descr)
+    trackFile.write("\n"+descr+"\t"+str(0)+"\t"+str(area)+"\t"+int(onEdge == True))
 
 trackFile.close()
