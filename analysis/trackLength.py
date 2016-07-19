@@ -66,11 +66,10 @@ def measureArea(origImg, threshImg, minArea, minDistanceToCenter, minDistance):
     mainTrack = getCenter(maxCnt)    
 
     mask = np.zeros(threshImg.shape,np.uint8) #for counting contour area
-    cntCounter = 0 #tracks number of contours as a measure for noisy tracks
+    contourCounter = 0 #tracks number of contours as a measure for noisy tracks
     onEdge = 0
     for cnt in contours:
         if cv2.contourArea(cnt) > minArea:
-            cntCounter += 1
             D = dist.euclidean(mainTrack, getCenter(cnt))
             if D < minDistanceToCenter:        
                 if D == 0:
@@ -84,6 +83,7 @@ def measureArea(origImg, threshImg, minArea, minDistanceToCenter, minDistance):
                 else:
                     continue
 
+                contourCounter += 1
                 #check distance to edges                    
                 leftEdge = np.amin(cnt[:,:,0])
                 rightEdge = np.amax(cnt[:,:,0])
@@ -110,26 +110,26 @@ def measureArea(origImg, threshImg, minArea, minDistanceToCenter, minDistance):
 #    cv2.imshow("Image", mask)
 #    cv2.waitKey(0)
 
-    return (cv2.countNonZero(mask), mask, onEdge)
+    return (cv2.countNonZero(mask), mask, onEdge, contourCounter)
 
 
 def analyseTrack(parentDir, description):
     imgPath = findImage(parentDir, description)
     if imgPath == -1:
-        return -1, 0
+        return -1, 0, 0
     else:
         img, th = threshold(imgPath)
 
         #check what we've got back, we do not need to analyse a empty image and return 0
         minVal, maxVal, minLoc, maxLoc = cv2.minMaxLoc(th)
         if minVal == maxVal:
-            return 0, 0
+            return 0, 0, 0
         
-        area, mask, onEdge = measureArea(img, th, 50, 500, 20) #chose 20px as max distance ~2x width of adult
+        area, mask, onEdge, contourCounter = measureArea(img, th, 50, 500, 20) #chose 20px as max distance ~2x width of adult
       
         #exclude areas which are too big
         if area >= (mask.shape[0] * mask.shape[1] / 6):
-            return -1, onEdge
+            return -1, onEdge, contourCounter
 
         #drawContour on overlay:
         if description == "after":
@@ -142,7 +142,7 @@ def analyseTrack(parentDir, description):
                 cv2.putText(img, str(area), (100,2200), cv2.FONT_HERSHEY_SIMPLEX, 5, (0,0,255), 10)
                 cv2.putText(img, str(version), (2700,2200), cv2.FONT_HERSHEY_SIMPLEX, 5, (0,0,255), 10)
                 cv2.imwrite(imgPath+"_tracklength.jpg", img)            
-        return area, onEdge  
+        return area, onEdge, contourCounter  
     
 ################# main program starts here #################
 
@@ -156,11 +156,11 @@ except OSError:
     pass
 
 trackFile = open(src + "trackLength.tsv", "w")
-trackFile.write("trackVersion." + str(version) + "\tlength\tarea\tedge")
+trackFile.write("trackVersion." + str(version) + "\tlength\tarea\tedge\tcontours")
 
 
 for descr in descriptions:
-    area, onEdge = analyseTrack(src, descr)
-    trackFile.write("\n"+descr+"\t"+str(0)+"\t"+str(area)+"\t"+str(onEdge)) 
+    area, onEdge, contourCounter = analyseTrack(src, descr)
+    trackFile.write("\n"+descr+"\t"+str(0)+"\t"+str(area)+"\t"+str(onEdge)+"\t" + str(contourCounter)) 
 
 trackFile.close()
