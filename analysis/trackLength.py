@@ -26,9 +26,9 @@ def threshold(imgPath):
         th = cv2.adaptiveThreshold(img,255,cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY,15,2)
         th = cv2.morphologyEx(th, cv2.MORPH_OPEN, kernel, iterations = 1)
         th = cv2.bitwise_not(th)
-        cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
-        cv2.imshow("Image", th)
-        cv2.waitKey(0)
+        #cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
+        #cv2.imshow("Image", th)
+        #cv2.waitKey(0)
         return (img, th)        
 
 
