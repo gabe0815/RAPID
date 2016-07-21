@@ -19,7 +19,7 @@ def threshold(imgPath):
     #adaptive threshold goes crazy if there is just noise, so we filter out images with no tracks and return an empty image
     minVal, maxVal, minLoc, maxLoc = cv2.minMaxLoc(img)
     if minVal > 220:
-        return (img, cv2.bitwise_not(np.zeros(img.shape,np.uint8)))
+        return (img, np.zeros(img.shape,np.uint8))
     
     else:
         #thresholding
@@ -56,11 +56,18 @@ def contourDistance(cont1, cont2):
 
 
 def measureArea(origImg, threshImg, minArea, minDistanceToCenter, minDistance):
-     
-    contours, hierarchy = cv2.findContours(threshImg.copy(),cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE) 
 
-    if len(contours) > 100: #discard noisy images
-         return (-1, np.zeros(threshImg.shape,np.uint8), 0, len(contours))
+#    cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
+#    cv2.imshow("Image", threshImg)
+#    cv2.waitKey(0)     
+
+    contours, hierarchy = cv2.findContours(threshImg.copy(),cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE) 
+        
+    numberOfContours = len(contours)
+    if numberOfContours == 0:
+        return (0, np.zeros(threshImg.shape,np.uint8), 0, numberOfContours)            
+    elif numberOfContours > 500: #discard noisy images
+        return (-1, np.zeros(threshImg,np.uint8), 0, numberOfContours)
 
     #find biggest contour        
     maxArea = 0        
@@ -114,17 +121,7 @@ def analyseTrack(parentDir, description):
         return -1, 0, 0
     else:
         img, th = threshold(imgPath)
-
-        #check what we've got back, we do not need to analyse a empty image and return 0
-        minVal, maxVal, minLoc, maxLoc = cv2.minMaxLoc(th)
-        if minVal == maxVal:
-            return 0, 0, 0
-        
         area, mask, onEdge, contourCounter = measureArea(img, th, 50, 500, 20) #chose 20px as max distance ~2x width of adult
-      
-        #exclude areas which are too big
-        if area >= (mask.shape[0] * mask.shape[1] / 6):
-            return -1, onEdge, contourCounter
 
         #drawContour on overlay:
         if description == "after":
@@ -135,9 +132,16 @@ def analyseTrack(parentDir, description):
                 img = cv2.imread(imgPath)
                 cv2.drawContours(img, contours, -1, (0,0,255), 1)
                 cv2.putText(img, str(area), (100,2200), cv2.FONT_HERSHEY_SIMPLEX, 5, (0,0,255), 10)
+                cv2.putText(img, str(onEdge), (1500,2200), cv2.FONT_HERSHEY_SIMPLEX, 5, (0,0,255), 10)
                 cv2.putText(img, str(version), (2700,2200), cv2.FONT_HERSHEY_SIMPLEX, 5, (0,0,255), 10)
+
                 cv2.imwrite(imgPath+"_tracklength.jpg", img)            
-        return area, onEdge, contourCounter  
+        
+        #exclude areas which are too big
+        if area >= (mask.shape[0] * mask.shape[1] / 6):
+            return -1, onEdge, contourCounter
+        else:
+            return area, onEdge, contourCounter  
     
 ################# main program starts here #################
 
