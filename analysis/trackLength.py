@@ -8,7 +8,7 @@ import sys
 import os
 
 
-version = "v9"
+version = "v0"
 
 def threshold(imgPath):
     kernel = np.ones((5,5),np.uint8)
@@ -24,7 +24,7 @@ def threshold(imgPath):
     else:
         #thresholding
         th = cv2.adaptiveThreshold(img,255,cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY,15,2)
-        th = cv2.morphologyEx(th, cv2.MORPH_OPEN, kernel, iterations = 1)
+        th = cv2.morphologyEx(th, cv2.MORPH_OPEN, kernel, iterations = 2)
         th = cv2.bitwise_not(th)
         #cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
         #cv2.imshow("Image", th)
@@ -56,7 +56,12 @@ def contourDistance(cont1, cont2):
 
 
 def measureArea(origImg, threshImg, minArea, minDistanceToCenter, minDistance):
+     
     contours, hierarchy = cv2.findContours(threshImg.copy(),cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE) 
+
+    if len(contours) > 100: #discard noisy images
+         return (-1, np.zeros(threshImg.shape,np.uint8), 0, len(contours))
+
     #find biggest contour        
     maxArea = 0        
     maxCnt = -1
@@ -99,10 +104,6 @@ def measureArea(origImg, threshImg, minArea, minDistanceToCenter, minDistance):
 
     #make sure to exclude the holes if countours are closed    
     maskedImg = cv2.bitwise_and(threshImg,threshImg,mask=mask)    
-
-    #cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
-    #cv2.imshow("Image", maskedImg)
-    #cv2.waitKey(0)
 
     return (cv2.countNonZero(maskedImg), maskedImg, onEdge, contourCounter)
 
