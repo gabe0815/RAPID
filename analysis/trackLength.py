@@ -64,10 +64,11 @@ def measureArea(origImg, threshImg, minArea, minDistanceToCenter, minDistance):
     contours, hierarchy = cv2.findContours(threshImg.copy(),cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE) 
         
     numberOfContours = len(contours)
+    print numberOfContours
     if numberOfContours == 0:
         return (0, np.zeros(threshImg.shape,np.uint8), 0, numberOfContours)            
-    elif numberOfContours > 500: #discard noisy images
-        return (-1, np.zeros(threshImg,np.uint8), 0, numberOfContours)
+    elif numberOfContours > 2000: #discard noisy images
+        return (-1, np.zeros(threshImg.shape,np.uint8), 0, numberOfContours)
 
     #find biggest contour        
     maxArea = 0        
