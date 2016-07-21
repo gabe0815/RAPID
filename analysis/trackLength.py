@@ -56,7 +56,7 @@ def contourDistance(cont1, cont2):
 
 
 def measureArea(origImg, threshImg, minArea, minDistanceToCenter, minDistance):
-    contours, hierarchy = cv2.findContours(threshImg,cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE) 
+    contours, hierarchy = cv2.findContours(threshImg.copy(),cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE) 
     #find biggest contour        
     maxArea = 0        
     maxCnt = -1
@@ -97,23 +97,14 @@ def measureArea(origImg, threshImg, minArea, minDistanceToCenter, minDistance):
                 
 
 
+    #make sure to exclude the holes if countours are closed    
+    maskedImg = cv2.bitwise_and(threshImg,threshImg,mask=mask)    
 
-    #do a secod thresholding on the image and apply the mask to exclude holes etc.
-    #th = cv2.adaptiveThreshold(origImg,255,cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV,15,2)
-    #maskedImg = cv2.bitwise_and(th,th,mask=mask)    
-    #contours, hierarchy = cv2.findContours(maskedImg,cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)
-    #mask = np.zeros(threshImg.shape,np.uint8)
-    #draw contours bigger than minArea
-    #for cnt in contours:
-    #    if cv2.contourArea(cnt) > minArea:
-    #        cv2.drawContours(mask,[cnt],0,255,-1)
- 
+    #cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
+    #cv2.imshow("Image", maskedImg)
+    #cv2.waitKey(0)
 
-#    cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
-#    cv2.imshow("Image", mask)
-#    cv2.waitKey(0)
-
-    return (cv2.countNonZero(mask), mask, onEdge, contourCounter)
+    return (cv2.countNonZero(maskedImg), maskedImg, onEdge, contourCounter)
 
 
 def analyseTrack(parentDir, description):
