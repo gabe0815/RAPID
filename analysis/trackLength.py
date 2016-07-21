@@ -60,15 +60,15 @@ def measureArea(origImg, threshImg, minArea, minDistanceToCenter, minDistance):
 #    cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
 #    cv2.imshow("Image", threshImg)
 #    cv2.waitKey(0)     
-
+    if cv2.countNonZero(threshImg) > threshImg.shape[0] * threshImg.shape[1] / 6:
+        return (-1, np.zeros(threshImg.shape,np.uint8), 0, 0)                    
+        
     contours, hierarchy = cv2.findContours(threshImg.copy(),cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE) 
         
     numberOfContours = len(contours)
-    print numberOfContours
+    #print numberOfContours
     if numberOfContours == 0:
         return (0, np.zeros(threshImg.shape,np.uint8), 0, numberOfContours)            
-    elif numberOfContours > 2000: #discard noisy images
-        return (-1, np.zeros(threshImg.shape,np.uint8), 0, numberOfContours)
 
     #find biggest contour        
     maxArea = 0        
@@ -78,7 +78,9 @@ def measureArea(origImg, threshImg, minArea, minDistanceToCenter, minDistance):
             maxArea = cv2.contourArea(cnt)   
             maxCnt = cnt
             #print maxArea
+    
 
+    
     mainTrack = getCenter(maxCnt)    
 
     mask = np.zeros(threshImg.shape,np.uint8) #for counting contour area
@@ -138,11 +140,7 @@ def analyseTrack(parentDir, description):
 
                 cv2.imwrite(imgPath+"_tracklength.jpg", img)            
         
-        #exclude areas which are too big
-        if area >= (mask.shape[0] * mask.shape[1] / 6):
-            return -1, onEdge, contourCounter
-        else:
-            return area, onEdge, contourCounter  
+        return area, onEdge, contourCounter  
     
 ################# main program starts here #################
 
