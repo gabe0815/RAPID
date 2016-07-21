@@ -3,7 +3,7 @@
 TESTSET=/media/imagesets04/20160311_vibassay_set5/IFP187_28_folders.txt
 TESTSETLIST=/media/imagesets04/20160311_vibassay_set5/IFP187_28_sorted.txt
 #run tracklength.py
-#cat $TESTSET | parallel --eta -j16 python /mnt/1TBraid01/homefolders/gschweighauser/RAPID/analysis/trackLength.py {}
+cat $TESTSET | parallel --eta -j16 python /mnt/1TBraid01/homefolders/gschweighauser/RAPID/analysis/trackLength.py {}
 
 #assemble mosaic:
 WIDTH=3072
