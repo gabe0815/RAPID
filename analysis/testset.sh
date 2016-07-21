@@ -29,7 +29,7 @@ function assembleMosaic {
 }
 
 #delete old file
-echo "" > $TESTSETLIST
+> $TESTSETLIST
 while read j; 
 	do 
 	find $j -name "*overlay.jpg_tracklength.jpg" >> $TESTSETLIST
