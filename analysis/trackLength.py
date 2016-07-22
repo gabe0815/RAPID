@@ -56,15 +56,23 @@ def contourDistance(cont1, cont2):
 
 
 def measureArea(origImg, threshImg, minArea, minDistanceToCenter, minDistance):
+    kernel = np.ones((5,5),np.uint8)
 
-#    cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
-#    cv2.imshow("Image", threshImg)
-#    cv2.waitKey(0)     
-    if cv2.countNonZero(threshImg) > threshImg.shape[0] * threshImg.shape[1] / 6:
+    #print cv2.countNonZero(threshImg)
+    
+    nonZeroPixels = cv2.countNonZero(threshImg)
+    #reject noisy images and try to improve medium noisy images. 
+    if nonZeroPixels > 500000:
         return (-1, np.zeros(threshImg.shape,np.uint8), 0, 0)                    
+    elif nonZeroPixels > 50000:
+        threshImgEroded = cv2.erode(threshImg, kernel, iterations=2)
+        contours, hierarchy = cv2.findContours(threshImgEroded,cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)
+    else: 
+        contours, hierarchy = cv2.findContours(threshImg.copy(),cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)        
         
-    contours, hierarchy = cv2.findContours(threshImg.copy(),cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE) 
-        
+    
+
+          
     numberOfContours = len(contours)
     #print numberOfContours
     if numberOfContours == 0:
@@ -78,7 +86,9 @@ def measureArea(origImg, threshImg, minArea, minDistanceToCenter, minDistance):
             maxArea = cv2.contourArea(cnt)   
             maxCnt = cnt
             #print maxArea
-    
+
+    if maxArea < 4*minArea:
+        return (0, np.zeros(threshImg.shape,np.uint8), 0, 0) 
 
     
     mainTrack = getCenter(maxCnt)    
@@ -90,17 +100,8 @@ def measureArea(origImg, threshImg, minArea, minDistanceToCenter, minDistance):
         if cv2.contourArea(cnt) > minArea:
             D = dist.euclidean(mainTrack, getCenter(cnt))
             if D < minDistanceToCenter:        
-                if D == 0:
-                    cv2.drawContours(mask,[cnt],0,255,-1)
-
-                elif contourDistance(cnt, maxCnt) < minDistance:
-                    #print "close enough: %d" % contourDistance(maxCnt, cnt)
-                    #cv2.drawContours(img, cnt, -1, (0,0,255), 1)
-                    #drawContours with option -1 draws the interiors without the outline itself
-                    cv2.drawContours(mask,[cnt],0,255,-1)
-                else:
-                    continue
-
+                cv2.drawContours(mask,[cnt],0,255,-1)
+                
                 contourCounter += 1
                 #check distance to edges                    
                 leftEdge = np.amin(cnt[:,:,0])
@@ -110,10 +111,14 @@ def measureArea(origImg, threshImg, minArea, minDistanceToCenter, minDistance):
                 if leftEdge <= 5  or rightEdge >= (origImg.shape[1] - 5) or topEdge <= 5 or bottomEdge >= (origImg.shape[0] - 5):
                     onEdge = 1
                 
-
-
-    #make sure to exclude the holes if countours are closed    
-    maskedImg = cv2.bitwise_and(threshImg,threshImg,mask=mask)    
+    if nonZeroPixels > 50000:
+        mask = cv2.dilate(mask, kernel, iterations=4) #reverse the erosion from earlier
+   
+ 
+    maskedImg = cv2.bitwise_and(threshImg,threshImg,mask=mask)
+    cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
+    cv2.imshow("Image", maskedImg)
+    cv2.waitKey(0)     
 
     return (cv2.countNonZero(maskedImg), maskedImg, onEdge, contourCounter)
 
