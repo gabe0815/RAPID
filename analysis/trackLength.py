@@ -8,7 +8,7 @@ import sys
 import os
 
 
-version = "v0"
+version = "v10"
 
 def threshold(imgPath):
     kernel = np.ones((5,5),np.uint8)
@@ -26,9 +26,6 @@ def threshold(imgPath):
         th = cv2.adaptiveThreshold(img,255,cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY,15,2)
         th = cv2.morphologyEx(th, cv2.MORPH_OPEN, kernel, iterations = 2)
         th = cv2.bitwise_not(th)
-        #cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
-        #cv2.imshow("Image", th)
-        #cv2.waitKey(0)
         return (img, th)        
 
 
@@ -47,14 +44,6 @@ def getCenter(cont):
     return (cX, cY)
 
 
-def contourDistance(cont1, cont2):
-    cont1 = np.squeeze(cont1)
-    cont2 = np.squeeze(cont2)
-    D = dist.cdist(cont1, cont2)
-    #print np.amin(D)
-    return np.amin(D)
-
-
 def measureArea(origImg, threshImg, minArea, minDistanceToCenter, minDistance):
     kernel = np.ones((5,5),np.uint8)
   
@@ -68,9 +57,7 @@ def measureArea(origImg, threshImg, minArea, minDistanceToCenter, minDistance):
     else: 
         contours, hierarchy = cv2.findContours(threshImg.copy(),cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)        
         
-    
-
-          
+      
     numberOfContours = len(contours)
     #print numberOfContours
     if numberOfContours == 0:
@@ -97,16 +84,12 @@ def measureArea(origImg, threshImg, minArea, minDistanceToCenter, minDistance):
     for cnt in contours:
         if cv2.contourArea(cnt) > minArea:
             D = dist.euclidean(mainTrack, getCenter(cnt))
-            if D < minDistanceToCenter:        
+            if D < minDistanceToCenter:  #maybe choose minDistanceToCenter proportional to the maxArea?
                 cv2.drawContours(mask,[cnt],0,255,-1)
                 
                 contourCounter += 1
                 #check distance to edges                    
-                leftEdge = np.amin(cnt[:,:,0])
-                rightEdge = np.amax(cnt[:,:,0])
-                topEdge = np.amin(cnt[:,:,1])
-                bottomEdge = np.amax(cnt[:,:,1])
-                if leftEdge <= 5  or rightEdge >= (origImg.shape[1] - 5) or topEdge <= 5 or bottomEdge >= (origImg.shape[0] - 5):
+                if np.amin(cnt[:,:,0]) <= 5  or np.amax(cnt[:,:,0]) >= (origImg.shape[1] - 5) or np.amin(cnt[:,:,1]) <= 5 or np.amax(cnt[:,:,1]) >= (origImg.shape[0] - 5):
                     onEdge = 1
                 
     if nonZeroPixels > 50000:
