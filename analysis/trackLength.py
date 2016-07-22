@@ -57,9 +57,7 @@ def contourDistance(cont1, cont2):
 
 def measureArea(origImg, threshImg, minArea, minDistanceToCenter, minDistance):
     kernel = np.ones((5,5),np.uint8)
-
-    #print cv2.countNonZero(threshImg)
-    
+  
     nonZeroPixels = cv2.countNonZero(threshImg)
     #reject noisy images and try to improve medium noisy images. 
     if nonZeroPixels > 500000:
@@ -116,9 +114,9 @@ def measureArea(origImg, threshImg, minArea, minDistanceToCenter, minDistance):
    
  
     maskedImg = cv2.bitwise_and(threshImg,threshImg,mask=mask)
-    cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
-    cv2.imshow("Image", maskedImg)
-    cv2.waitKey(0)     
+    #cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
+    #cv2.imshow("Image", maskedImg)
+    #cv2.waitKey(0)     
 
     return (cv2.countNonZero(maskedImg), maskedImg, onEdge, contourCounter)
 
