@@ -63,28 +63,27 @@ def measureArea(origImg, threshImg, minArea, minDistanceToCenter, minDistance):
     if numberOfContours == 0:
         return (0, np.zeros(threshImg.shape,np.uint8), 0, numberOfContours)            
 
-    #find biggest contour        
-    maxArea = 0        
-    maxCnt = -1
-    for cnt in contours:
-        if cv2.contourArea(cnt) > maxArea:
-            maxArea = cv2.contourArea(cnt)   
-            maxCnt = cnt
-            #print maxArea
+    # Find the index of the largest contour
+    areas = [cv2.contourArea(cnt) for cnt in contours]
+    maxArea = np.amax(areas)
+    maxAreaCenter = getCenter(contours[np.argmax(areas)]) 
+    
+    if nonZeroPixels > 50000 and np.std(areas) < 100:
+        return (0, np.zeros(threshImg.shape,np.uint8), 0, 0) 
 
     if maxArea < 4*minArea:
         return (0, np.zeros(threshImg.shape,np.uint8), 0, 0) 
 
     
-    mainTrack = getCenter(maxCnt)    
+   
 
     mask = np.zeros(threshImg.shape,np.uint8) #for counting contour area
     contourCounter = 0 #tracks number of contours as a measure for noisy tracks
     onEdge = 0
     for cnt in contours:
         if cv2.contourArea(cnt) > minArea:
-            D = dist.euclidean(mainTrack, getCenter(cnt))
-            if D < minDistanceToCenter:  #maybe choose minDistanceToCenter proportional to the maxArea?
+            D = dist.euclidean(maxAreaCenter, getCenter(cnt))
+            if D < minDistanceToCenter:  #maybe choose minDistanceToCenter proportional to the maxArea? Or check mean-distance between particles or their size
                 cv2.drawContours(mask,[cnt],0,255,-1)
                 
                 contourCounter += 1
