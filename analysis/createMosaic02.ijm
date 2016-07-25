@@ -13,8 +13,8 @@ macro "save annotations [s] "{
 	for (i=0; i<lengthOf(lines); i++){
 		//remove all censored flags first, then add them
 		path = split(lines[i], ",");
-		if (File.exists(path[0]+"censored.txt")){
-			File.delete(path[0]+"censored.txt");
+		if (File.exists(path[0]+"/"+ "censored.txt")){
+			File.delete(path[0]+"/"+"censored.txt");
 		}
 	}
 
@@ -26,7 +26,7 @@ macro "save annotations [s] "{
 			if (indexOf(lines[j], Roi.getName) != -1){
 				print(lines[j]);
 				print("censoring " + path[0]);
-				File.saveString("censored", path[0]+"censored.txt");
+				File.saveString("censored", path[0]+"/"+"censored.txt");
 				break;
 			}
 		}
@@ -50,7 +50,7 @@ macro "open annotations [o] "{
     lines=split(file,"\n");
 	for (i=0; i<lengthOf(lines); i++){
 		path = split(lines[i], ",");
-		if (File.exists(path[0]+"censored.txt")){
+		if (File.exists(path[0]+"/"+"censored.txt")){
 			makeRectangle(path[1]*width+50, path[2]*height + 50, width-100, height-100);
 			roiManager("Add");
 			roiManager("Select",roiManager("count")-1);
