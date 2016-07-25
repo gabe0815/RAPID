@@ -2,62 +2,13 @@
 //mosaic parameters
 var scaleFactor = 0.25;
 var columns = 4; 
-var height =  2304;
-var width = 3072;
+var height =  2304 * scaleFactor;
+var width = 3072 * scaleFactor;
 
-var fileList = "/media/imagesets04/20160217_vibassay_set4/sample_IFP213_52.txt";
-
-width *= scaleFactor;
-heigth *= scaleFactor;
-
-function createMosaic(fileList) {
-	//setBatchMode(true);
-	file = File.openAsString(fileList);
-	lines=split(file,"\n");
-	//for (i=0; i<lengthOf(lines); i++){
-	for (i=0; i<lengthOf(lines); i++){
-		tabs = split(lines[i], "\t");
-		path = substring(tabs[0], 0, lastIndexOf(tabs[0], "/") + 1);
-		//print("Path: " + path + " time: " + parseInt(tabs[2])/3600);
-	
-		imgTracklength = exec("find", path, "-name", "*_trackarea.jpg");
-		if (lengthOf(imgTracklength) == 0){
-			continue; 
-		}
-		
-		imgTracklength = substring(imgTracklength, 0, lengthOf(imgTracklength) -1);   
-		open(imgTracklength);
-		rename(parseInt(tabs[2])/3600);
-		if (i == 0){
-			//height =  getHeight() * scaleFactor;
-			//width =  getWidth()  * scaleFactor;
-			File.saveString(path +"," + i%columns + "," + floor(i/columns)+"\n" , fileList+"_mosaic_coordinates.txt"); 	
-			
-		} else {
-			File.append(path +"," + i%columns + "," + floor(i/columns) , fileList+"_mosaic_coordinates.txt");
-		}
-		print(path +"," + i%columns + "," + floor(i/columns));
-	}
-
-	run("Images to Stack", "name=mosaic title=[] use");
-	stack = getImageID();
-	run("Make Montage...", "columns="+columns+" rows="+round(nSlices/4)+" scale="+scaleFactor+" first=1 last="+nSlices+" increment=1 border=0 font=30 label");
-	/*
-	montage = getImageID();
-	saveAs("Jpeg",trackMosaic);
-	close();
-	selectImage(stack);
-	close();
-	setBatchMode(false);
-	*/
-}
-macro "create mosaic [m] "{
-	createMosaic("/media/imagesets04/20160217_vibassay_set4/sample_IFP213_52.txt");
-	
-}
-
+var file
 macro "save annotations [s] "{
-	file = File.openAsString(fileList+"_mosaic_coordinates.txt");
+	//file = File.openAsString(fileList+"_mosaic_coordinates.txt");
+	print(file);
 	lines=split(file,"\n");
 	for (i=0; i<lengthOf(lines); i++){
 		//remove all censored flags first, then add them
@@ -88,11 +39,15 @@ macro "save annotations [s] "{
 }
 
 macro "open annotations [o] "{
-	roiManager("Reset");
-	run("Remove Overlay");
-	
-	file = File.openAsRawString(fileList+"_mosaic_coordinates.txt");
-	lines=split(file,"\n");
+    roiManager("Reset");
+    run("Remove Overlay");
+    //filePath = "/media/imagesets04/20160311_vibassay_set5/IFP199_12_sorted";
+    filePath = getInfo("image.directory") + getInfo("image.filename");
+    filePath = substring(filePath, 0,  indexOf(filePath, "_montage"));
+    print(filePath);
+    file = File.openAsRawString(filePath+"_mosaic_coordinates.txt");
+    //print(file);	
+    lines=split(file,"\n");
 	for (i=0; i<lengthOf(lines); i++){
 		path = split(lines[i], ",");
 		if (File.exists(path[0]+"censored.txt")){
@@ -116,6 +71,7 @@ macro "annotate images [a] " {
 	getCursorLoc(x, y, z, flags);
 	xCoord = floor(x/width);
 	yCoord = floor(y/height);
+	print("xCoord: " +xCoord + " yCoord: " + yCoord);
 	makeRectangle(xCoord*width+50, yCoord*height + 50, width-100, height-100);
 	roiManager("Add");
 	roiManager("Select",roiManager("count")-1);
@@ -143,5 +99,5 @@ macro "remove annotation [r] "{
 		}
 		
 	}
-	r
+
 }
