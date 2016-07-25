@@ -22,13 +22,14 @@ function assembleMosaic {
     while read i;
 		do
             count=$(echo "$count +1" | bc)
-            img=$( echo "$i" | cut -f1); 
+            img=$( echo "$i" | cut -f1);
+            imgPath=$(echo $img | cut -d"/" -f1-5)
             imglist=$(echo $imglist $img)
             #calculate coorinates for censoring file
             xcoord=$(echo $count%$COLUMNS | bc)
             ycoord=$(echo $count/$COLUMNS | bc)
-            echo $img','$xcoord','$ycoord 
-            echo $img','$xcoord','$ycoord >> $filepath'_mosaic_coordinates.txt'
+            echo $imgPath','$xcoord','$ycoord 
+            echo $imgPath','$xcoord','$ycoord >> $filepath'_mosaic_coordinates.txt'
 
     done < $1
     montage $imglist -tile "$COLUMNS"x -geometry $(echo "$WIDTH"*"$SCALE"/1 | bc)x$(echo "$HEIGTH"*"$SCALE"/1 | bc) -title $sampleID $filepath'_montage_tracklength.jpg'
