@@ -27,8 +27,9 @@ function assembleMosaic {
             imglist=$(echo $imglist $img)
             xcoord=$(echo $count%$COLUMNS | bc)
             ycoord=$(echo $count/$COLUMNS | bc)
-            echo $img','$xcoord','$ycoord 
-            echo $img','$xcoord','$ycoord >> $filepath'_mosaic_coordinates.txt'
+            imgPath=$(echo $img | cut -d"/" -f1-5)
+            echo $imgPath','$xcoord','$ycoord 
+            echo $imgPath','$xcoord','$ycoord >> $filepath'_mosaic_coordinates.txt'
             count=$(echo "$count +1" | bc)
 
     
