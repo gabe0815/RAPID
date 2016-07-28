@@ -4,7 +4,9 @@
 #. ~/RAPID/analysis/config.sh
 
 #static variables
-IMAGEPATH=/media/imagesets04/20160311_vibassay_set5
+#IMAGEPATH=/media/imagesets04/20160311_vibassay_set5
+
+IMAGEPATH=$1
 
 WIDTH=3072
 HEIGHT=2304
@@ -18,7 +20,7 @@ function assembleMosaic {
   	filename=$(basename "$1")
 	sampleID="${filename%.*}"
     > $filepath'_mosaic_coordinates.txt'
-    counter=0 
+    count=0 
     while read i;
 		do
             count=$(echo "$count +1" | bc)
@@ -28,7 +30,7 @@ function assembleMosaic {
             #calculate coorinates for censoring file
             xcoord=$(echo $count%$COLUMNS | bc)
             ycoord=$(echo $count/$COLUMNS | bc)
-            echo $imgPath','$xcoord','$ycoord 
+            #echo $imgPath','$xcoord','$ycoord 
             echo $imgPath','$xcoord','$ycoord >> $filepath'_mosaic_coordinates.txt'
 
     done < $1
@@ -38,10 +40,8 @@ function assembleMosaic {
 }
 
 # main progam starts here
-if [ -f $IMAGEPATH/tracklength.txt ]; then
-    rm $IMAGEPATH/tracklength.txt
-fi
- 
+
+>$IMAGEPATH/tracklength.txt
 
 #compile list of all tracklength
 for i in $(find $IMAGEPATH -name "*overlay.jpg_tracklength.jpg"); 
