@@ -32,7 +32,6 @@ def threshold(imgPath):
 def findImage(parentDir, description):
     for f in os.listdir(parentDir):
         if f.endswith('_'+description+'.jpg'):
-            #print f
             return parentDir + f
 
     return -1
@@ -44,7 +43,7 @@ def getCenter(cont):
     return (cX, cY)
 
 
-def measureArea(origImg, threshImg, minArea, minDistanceToCenter, minDistance):
+def measureArea(origImg, threshImg, minArea, minDistance):
     kernel = np.ones((5,5),np.uint8)
   
     nonZeroPixels = cv2.countNonZero(threshImg)
@@ -70,7 +69,6 @@ def measureArea(origImg, threshImg, minArea, minDistanceToCenter, minDistance):
     
     #find radius of enclosing circle
     (x,y),radius = cv2.minEnclosingCircle(contours[np.argmax(areas)])
-    print radius
     radius = int(radius)
     
     if nonZeroPixels > 50000 and np.std(areas) < 100:
@@ -113,7 +111,7 @@ def analyseTrack(parentDir, description):
         return -1, 0, 0
     else:
         img, th = threshold(imgPath)
-        area, mask, onEdge, contourCounter = measureArea(img, th, 50, 500, 20) #chose 20px as max distance ~2x width of adult
+        area, mask, onEdge, contourCounter = measureArea(img, th, 50, 20) #chose 20px as max distance ~2x width of adult
 
         #drawContour on overlay:
         if description == "after":
@@ -149,5 +147,10 @@ trackFile.write("trackVersion." + str(version) + "\tlength\tarea\tedge\tcontours
 for descr in descriptions:
     area, onEdge, contourCounter = analyseTrack(src, descr)
     trackFile.write("\n"+descr+"\t"+str(0)+"\t"+str(area)+"\t"+str(onEdge)+"\t" + str(contourCounter)) 
+    #if descr == "after" and onEdge: #we don't want to censor tracks based on "before" image ...
+    #    censorFile = open(src + "censored.txt", "w")
+    #    censorFile.write("censored")
+    #    censorFile.close()
 
 trackFile.close()
+
