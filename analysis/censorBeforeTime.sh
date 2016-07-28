@@ -6,9 +6,10 @@ censor_bad_time(){
     time=$(head -n1 $1)
     if [ $time -lt $BADTIME ];
     then
-        filepath="${1%.*}"
+        filepath=$(echo $1 | cut -d "/" -f1-5)
+        echo $filepath
         echo "censored" > $filepath"/censored.txt"
-        echo "true"
+        #echo "true"
     else 
         echo "false"
     fi
@@ -16,6 +17,5 @@ censor_bad_time(){
 export -f censor_bad_time
 export BADTIME
 
-#find $1 -name "timestamp.txt" | parallel "if [ $(head -n1 {}) < $BADTIME ]; then echo true; fi" 
 find $1 -name "timestamp.txt" | parallel censor_bad_time {}
 
