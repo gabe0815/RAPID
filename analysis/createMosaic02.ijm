@@ -8,7 +8,7 @@ var width = 3072 * scaleFactor;
 var file
 macro "save annotations [s] "{
 	//file = File.openAsString(fileList+"_mosaic_coordinates.txt");
-	print(file);
+	//print(file);
 	lines=split(file,"\n");
 	for (i=0; i<lengthOf(lines); i++){
 		//remove all censored flags first, then add them
@@ -44,7 +44,7 @@ macro "open annotations [o] "{
     //filePath = "/media/imagesets04/20160311_vibassay_set5/IFP199_12_sorted";
     filePath = getInfo("image.directory") + getInfo("image.filename");
     filePath = substring(filePath, 0,  indexOf(filePath, "_montage"));
-    print(filePath);
+    //print(filePath);
     file = File.openAsRawString(filePath+"_mosaic_coordinates.txt");
     //print(file);	
     lines=split(file,"\n");
@@ -71,7 +71,7 @@ macro "annotate images [a] " {
 	getCursorLoc(x, y, z, flags);
 	xCoord = floor(x/width);
 	yCoord = floor(y/height);
-	print("xCoord: " +xCoord + " yCoord: " + yCoord);
+	//print("xCoord: " +xCoord + " yCoord: " + yCoord);
 	makeRectangle(xCoord*width+50, yCoord*height + 50, width-100, height-100);
 	roiManager("Add");
 	roiManager("Select",roiManager("count")-1);
