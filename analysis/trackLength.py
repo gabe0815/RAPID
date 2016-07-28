@@ -8,7 +8,7 @@ import sys
 import os
 
 
-version = "v10"
+version = "v11"
 
 def threshold(imgPath):
     kernel = np.ones((5,5),np.uint8)
@@ -68,6 +68,11 @@ def measureArea(origImg, threshImg, minArea, minDistanceToCenter, minDistance):
     maxArea = np.amax(areas)
     maxAreaCenter = getCenter(contours[np.argmax(areas)]) 
     
+    #find radius of enclosing circle
+    (x,y),radius = cv2.minEnclosingCircle(contours[np.argmax(areas)])
+    print radius
+    radius = int(radius)
+    
     if nonZeroPixels > 50000 and np.std(areas) < 100:
         return (0, np.zeros(threshImg.shape,np.uint8), 0, 0) 
 
@@ -83,9 +88,8 @@ def measureArea(origImg, threshImg, minArea, minDistanceToCenter, minDistance):
     for cnt in contours:
         if cv2.contourArea(cnt) > minArea:
             D = dist.euclidean(maxAreaCenter, getCenter(cnt))
-            if D < minDistanceToCenter:  #maybe choose minDistanceToCenter proportional to the maxArea? Or check mean-distance between particles or their size
+            if D < 2*radius:  
                 cv2.drawContours(mask,[cnt],0,255,-1)
-                
                 contourCounter += 1
                 #check distance to edges                    
                 if np.amin(cnt[:,:,0]) <= 5  or np.amax(cnt[:,:,0]) >= (origImg.shape[1] - 5) or np.amin(cnt[:,:,1]) <= 5 or np.amax(cnt[:,:,1]) >= (origImg.shape[0] - 5):
