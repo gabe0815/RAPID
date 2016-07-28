@@ -3,10 +3,7 @@
 
 import numpy as np
 import cv2
-import cv2.cv as cv
-import time
 import sys
-import os, os.path
 
 afterTrackImg = cv2.imread(sys.argv[1],0)
 afterPhotoImg = cv2.imread(sys.argv[2])
