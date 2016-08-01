@@ -5,15 +5,11 @@ censor_onEdge(){
     if [ $(grep "after" $1 | cut -f4) -eq 1 ];
     then 
         filepath=$(echo $1 | cut -d "/" -f1-5)
-        echo "true"        
-        #echo $filepath
-        #echo "censored" > $filepath"/censored.txt"
-    else
-        echo "false"
+        echo "censored" > $filepath"/censored.txt"
     fi
 }
 
-export -f censor_onEdge()
+export -f censor_onEdge
 
-find $1 -name "trackLength.tsv" | parallel censor_bad_time {}
+find $1 -name "trackLength.tsv" | parallel censor_onEdge {}
 
