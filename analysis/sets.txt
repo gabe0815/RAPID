@@ -1,7 +1,3 @@
-/media/imagesets04/20151203_vibassay_set2
 /media/imagesets04/20160122_vibassay_set3
 /media/imagesets04/20160217_vibassay_set4
 /media/imagesets04/20160311_vibassay_set5
-/media/imagesets04/20160406_vibassay_set6
-/media/imagesets04/20160504_vibassay_set7
-/media/imagesets04/20160615_vibassay_set8
