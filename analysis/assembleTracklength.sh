@@ -23,7 +23,6 @@ function assembleMosaic {
     count=0 
     while read i;
 		do
-            count=$(echo "$count +1" | bc)
             img=$( echo "$i" | cut -f1);
             imgPath=$(echo $img | cut -d"/" -f1-5)
             imglist=$(echo $imglist $img)
@@ -32,7 +31,7 @@ function assembleMosaic {
             ycoord=$(echo $count/$COLUMNS | bc)
             #echo $imgPath','$xcoord','$ycoord 
             echo $imgPath','$xcoord','$ycoord >> $filepath'_mosaic_coordinates.txt'
-
+            count=$(echo "$count +1" | bc)
     done < $1
     montage $imglist -tile "$COLUMNS"x -geometry $(echo "$WIDTH"*"$SCALE"/1 | bc)x$(echo "$HEIGTH"*"$SCALE"/1 | bc) -title $sampleID $filepath'_montage_tracklength.jpg'
 
