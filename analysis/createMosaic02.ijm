@@ -23,7 +23,7 @@ macro "save annotations [s] "{
 		print(Roi.getName);
 		for (j=0; j<lengthOf(lines);j++){
 			path = split(lines[j], ",");
-			if (indexOf(lines[j], Roi.getName) != -1){
+			if (indexOf(lines[j], ","+Roi.getName) != -1){ //otherwise we find 1_2_3,0,0 if we look for 3,0
 				print(lines[j]);
 				print("censoring " + path[0]);
 				File.saveString("censored", path[0]+"/"+"censored.txt");
