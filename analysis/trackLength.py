@@ -8,7 +8,7 @@ import sys
 import os
 
 
-version = "v10"
+version = "v11"
 
 def threshold(imgPath):
     kernel = np.ones((5,5),np.uint8)
@@ -32,7 +32,6 @@ def threshold(imgPath):
 def findImage(parentDir, description):
     for f in os.listdir(parentDir):
         if f.endswith('_'+description+'.jpg'):
-            #print f
             return parentDir + f
 
     return -1
@@ -44,7 +43,7 @@ def getCenter(cont):
     return (cX, cY)
 
 
-def measureArea(origImg, threshImg, minArea, minDistanceToCenter, minDistance):
+def measureArea(origImg, threshImg, minArea, minDistance):
     kernel = np.ones((5,5),np.uint8)
   
     nonZeroPixels = cv2.countNonZero(threshImg)
@@ -68,6 +67,10 @@ def measureArea(origImg, threshImg, minArea, minDistanceToCenter, minDistance):
     maxArea = np.amax(areas)
     maxAreaCenter = getCenter(contours[np.argmax(areas)]) 
     
+    #find radius of enclosing circle
+    (x,y),radius = cv2.minEnclosingCircle(contours[np.argmax(areas)])
+    radius = int(radius)
+    
     if nonZeroPixels > 50000 and np.std(areas) < 100:
         return (0, np.zeros(threshImg.shape,np.uint8), 0, 0) 
 
@@ -83,9 +86,8 @@ def measureArea(origImg, threshImg, minArea, minDistanceToCenter, minDistance):
     for cnt in contours:
         if cv2.contourArea(cnt) > minArea:
             D = dist.euclidean(maxAreaCenter, getCenter(cnt))
-            if D < minDistanceToCenter:  #maybe choose minDistanceToCenter proportional to the maxArea? Or check mean-distance between particles or their size
+            if D < 2*radius:  
                 cv2.drawContours(mask,[cnt],0,255,-1)
-                
                 contourCounter += 1
                 #check distance to edges                    
                 if np.amin(cnt[:,:,0]) <= 5  or np.amax(cnt[:,:,0]) >= (origImg.shape[1] - 5) or np.amin(cnt[:,:,1]) <= 5 or np.amax(cnt[:,:,1]) >= (origImg.shape[0] - 5):
@@ -109,7 +111,7 @@ def analyseTrack(parentDir, description):
         return -1, 0, 0
     else:
         img, th = threshold(imgPath)
-        area, mask, onEdge, contourCounter = measureArea(img, th, 50, 500, 20) #chose 20px as max distance ~2x width of adult
+        area, mask, onEdge, contourCounter = measureArea(img, th, 50, 20) #chose 20px as max distance ~2x width of adult
 
         #drawContour on overlay:
         if description == "after":
@@ -145,5 +147,10 @@ trackFile.write("trackVersion." + str(version) + "\tlength\tarea\tedge\tcontours
 for descr in descriptions:
     area, onEdge, contourCounter = analyseTrack(src, descr)
     trackFile.write("\n"+descr+"\t"+str(0)+"\t"+str(area)+"\t"+str(onEdge)+"\t" + str(contourCounter)) 
+    #if descr == "after" and onEdge: #we don't want to censor tracks based on "before" image ...
+    #    censorFile = open(src + "censored.txt", "w")
+    #    censorFile.write("censored")
+    #    censorFile.close()
 
 trackFile.close()
+
