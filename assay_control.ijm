@@ -15,6 +15,7 @@ var KARELchangeRegVal="/home/user/applications/RAPID/robot/KARELchangeRegVal.sh"
 var P_TO_A=1;
 var P_FROM_A=2;
 var RESET = 5;
+var PUMP_ON = 6;
 
 //robot numeric registers
 var X_PLATE=2;
@@ -26,28 +27,29 @@ var TODO=11;
 
 
 //camera variables
-var CAMSERIALS=newArray('0971C5B47AA949D7A4FD6038C1AD2B62','B53A9EACCA6A4DAEAFE6E7CD227FC887','1955DD886CB34783993370E6B572FDBA','860869D768724772A766819D1BAD8411');
+var CAMSERIALS=newArray('0971C5B47AA949D7A4FD6038C1AD2B62','EBF3860AA5DF4791B466A9AF39503D26','1955DD886CB34783993370E6B572FDBA','860869D768724772A766819D1BAD8411');
+//var CAMSERIALS=newArray('0971C5B47AA949D7A4FD6038C1AD2B62','B53A9EACCA6A4DAEAFE6E7CD227FC887','1955DD886CB34783993370E6B572FDBA','860869D768724772A766819D1BAD8411');
 var CAMBUS=newArray(CAMSERIALS.length);
 var CAMSER; //camera serial number which recorded the set, is written to camera.txt through psmag01.sh
 var CAMPOS; //position on which the plate was recorded
 var PTPCAM="/home/user/applications/RAPID/ptpcam/ptpcam";
 var CMD; //used to execute non blocking shell scripts
 var CAM;
-var DOWNDIR = "/mnt/4TBraid02/20160504_vibassay_set7/dl";
+var DOWNDIR = "/mnt/4TBraid02/20160810_vibassay_set10/dl";
 
 var TARGETDIR;
 var SAMPLEID;
 var TIMESTAMP=0;
 
 //assay variables
-var TABLEFILENAME="/home/user/applications/RAPID/sampleTable_20160504.csv";
+var TABLEFILENAME="/home/user/applications/RAPID/sampleTable_20160810.csv";
 var CURRENTSAMPLEID;
 var CURRENTSAMPLEZEROTIME;
 var MAXY=7; //for test purposes, set x,y limits to 2,2 default: Y=7, X=10
 var MAXX=10;
 var MAXZ=4; 
 var STACKREVERSED = true;
-var STACKDURATION = 225; //at 15% speed, measured over a 2 day period
+var STACKDURATION = 317; //at 10% speed, measured for set 9
 
 macro "upload psmag01.lua [u] "{
 	initCameras();
@@ -351,7 +353,8 @@ function processStack(x,y){
 
 		
 	} else {
-		print("waiting "+STACKDURATION+"s.");
+		print("waiting "+STACKDURATION+"s and switching pump on");
+		robotSetRegister(TODO,PUMP_ON);
 		wait(STACKDURATION*1000);
 		 	
 	}
