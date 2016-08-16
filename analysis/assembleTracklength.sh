@@ -3,13 +3,14 @@
 #IMAGEPATH is stored in config.sh to make it accessible to all scripts
 . ~/applications/RAPID/analysis/config.sh
 
-WIDTH=3072
-HEIGHT=2304
-COLUMNS=4
-SCALE=0.25
 
 #functions
 function assembleMosaic {
+	WIDTH=3072
+	HEIGHT=2304
+	COLUMNS=4
+	SCALE=0.25
+
     imglist=""
     filepath="${1%.*}"
   	filename=$(basename "$1")
@@ -33,12 +34,14 @@ function assembleMosaic {
     
 }
 
+export -f assembleMosaic
 # main progam starts here
 
 >$IMAGEPATH/tracklength.txt
+>$IMAGEPATH/mosaicList.txt
 
 #compile list of all tracklength
-for i in $(find $IMAGEPATH -name "*overlay.jpg_tracklength.jpg"); 
+for i in $(find $IMAGEPATH -name "*overlay.jpg_tracklength.jpg")
 do 
     sampleID=$(head -n1 $(dirname $i)/sampleID.txt)
     timestamp=$(head -n1 $(dirname $i)/timestamp.txt)
@@ -48,12 +51,16 @@ done
 #get unique sampleID
 cut -f3 $IMAGEPATH"/tracklength.txt" | sort -V | uniq >> $IMAGEPATH"/sampleIDs_unique.txt"
 
+#compile list so that we can process sets in parallel
 while read j; 
 	do 
-	grep "\<$j\>" $IMAGEPATH"/tracklength.txt" > $IMAGEPATH"/sample_$j.txt"; 
-	sort -k2 -n $IMAGEPATH"/sample_$j.txt" > $IMAGEPATH"/sample_"$j"_sorted.txt"; 
-	assembleMosaic $IMAGEPATH"/sample_"$j"_sorted.txt"; 
-	#remove all temp files	
-	rm $IMAGEPATH"/sample_"$j"_sorted.txt" $IMAGEPATH"/sample_$j.txt"; 
+	grep "\<$j\>" $IMAGEPATH"/tracklength.txt" > $IMAGEPATH"/sample_$j.txt"
+	sort -k2 -n $IMAGEPATH"/sample_$j.txt" > $IMAGEPATH"/sample_"$j"_sorted.txt" 
+	echo $IMAGEPATH"/sample_"$j"_sorted.txt" >> $IMAGEPATH"/mosaicList.txt"
 done < $IMAGEPATH"/sampleIDs_unique.txt"
+
+parallel -P 4 -a $IMAGEPATH"/mosaicList.txt" assembleMosaic  
+
+#remove all temp files	
+rm $IMAGEPATH"/*_sorted.txt" $IMAGEPATH"/sample_*.txt"; 
 
