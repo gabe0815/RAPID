@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #IMAGEPATH is stored in config.sh to make it accessible to all scripts
-. ~/applications/RAPID/analysis/config.sh
+. ~/RAPID/analysis/config.sh
 
 
 #functions
@@ -10,17 +10,23 @@ function assembleMosaic {
 	HEIGHT=2304
 	COLUMNS=4
 	SCALE=0.25
-
+    
     imglist=""
     filepath="${1%.*}"
   	filename=$(basename "$1")
 	sampleID="${filename%.*}"
     > $filepath'_mosaic_coordinates.txt'
-    count=0 
+    count=0
     while read i;
 		do
             img=$( echo "$i" | cut -f1);
-            imgPath=$(echo $img | cut -d"/" -f1-5)
+            if [[ $i == *"imagesets04"* ]] # we're on the analysis computer
+            then
+                imgPath=$(echo $img | cut -d"/" -f1-6)
+            else
+                imgPath=$(echo $img | cut -d"/" -f1-5)
+            fi
+
             imglist=$(echo $imglist $img)
             #calculate coorinates for censoring file
             xcoord=$(echo $count%$COLUMNS | bc)
@@ -84,6 +90,7 @@ export -f assembleMosaic
 
 >$IMAGEPATH/tracklength.txt
 >$IMAGEPATH/mosaicList.txt
+>$IMAGEPATH/sampleIDs_unique.txt
 
 #compile list of all tracklength
 for i in $(find $IMAGEPATH -name "*overlay.jpg_tracklength.jpg")
