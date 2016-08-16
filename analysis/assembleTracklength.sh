@@ -1,20 +1,16 @@
 #!/bin/bash
 
 #IMAGEPATH is stored in config.sh to make it accessible to all scripts
-#. ~/RAPID/analysis/config.sh
+. ~/applications/RAPID/analysis/config.sh
 
-#static variables
-#IMAGEPATH=/media/imagesets04/20160311_vibassay_set5
-
-IMAGEPATH=$1
-
-WIDTH=3072
-HEIGHT=2304
-COLUMNS=4
-SCALE=0.25
 
 #functions
 function assembleMosaic {
+	WIDTH=3072
+	HEIGHT=2304
+	COLUMNS=4
+	SCALE=0.25
+
     imglist=""
     filepath="${1%.*}"
   	filename=$(basename "$1")
@@ -38,12 +34,59 @@ function assembleMosaic {
     
 }
 
-# main progam starts here
+function createHTML {
+	
+	#variables within functions are global, as long as the function has been called
+	
+	HTML=$IMAGEPATH"/tracklength_overview.html"
+
+	#write header to the file
+	echo "<!doctype html public \"-//w3c//dtd html 4.0 transitional//en\">
+	<html><head>
+	<meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">
+	<meta name=\"Author\" content=\"J. Hench, G. Schweighauser\">
+	<title>image viewer</title>
+	<base target=\"imageFrame\">
+	<script>
+	if(window == window.top)
+	{
+	var address=window.location;
+	var s='<html><head><title>image viewer</title></head>'+
+	'<frameset cols=\"15%,85%\" frameborder=\"4\" onload=\"return true;\" onunload=\"return true;\">' +
+	'<frame src=\"'+address+'?\" name=\"indexframe\">'+
+	'<frame src=\"file:///\" name=\"imageFrame\">'+
+	'</frameset>'+
+	'</html>';
+	document.write(s)    
+	}
+	</script>
+	</head>
+	<body text=\"#000000\" bgcolor=\"#C0C0C0\" link=\"#0000FF\" vlink=\"#8154D1\" alink=\"#ED181E\">" > $HTML 
+
+	#go through sampleIDs unique list and find montage images.
+	while read i; 
+		do 
+		FILE=$(find $IMAGEPATH -name "*_"$i"_*tracklength.jpg")
+		#echo $FILE	
+		echo "<a href=\"$FILE\">$i</a><br>" >> $HTML
+	done < $IMAGEPATH"/sampleIDs_unique.txt"
+
+	#write footer to the file
+	echo "
+	</body>
+	</html>" >> $HTML
+
+}
+
+###################### main program starts here ###########################
+
+export -f assembleMosaic
 
 >$IMAGEPATH/tracklength.txt
+>$IMAGEPATH/mosaicList.txt
 
 #compile list of all tracklength
-for i in $(find $IMAGEPATH -name "*overlay.jpg_tracklength.jpg"); 
+for i in $(find $IMAGEPATH -name "*overlay.jpg_tracklength.jpg")
 do 
     sampleID=$(head -n1 $(dirname $i)/sampleID.txt)
     timestamp=$(head -n1 $(dirname $i)/timestamp.txt)
@@ -53,12 +96,20 @@ done
 #get unique sampleID
 cut -f3 $IMAGEPATH"/tracklength.txt" | sort -V | uniq >> $IMAGEPATH"/sampleIDs_unique.txt"
 
+#compile list so that we can process sets in parallel
 while read j; 
 	do 
-	grep "\<$j\>" $IMAGEPATH"/tracklength.txt" > $IMAGEPATH"/sample_$j.txt"; 
-	sort -k2 -n $IMAGEPATH"/sample_$j.txt" > $IMAGEPATH"/sample_"$j"_sorted.txt"; 
-	assembleMosaic $IMAGEPATH"/sample_"$j"_sorted.txt"; 
-	#remove all temp files	
-	rm $IMAGEPATH"/sample_"$j"_sorted.txt" $IMAGEPATH"/sample_$j.txt"; 
+	grep "\<$j\>" $IMAGEPATH"/tracklength.txt" > $IMAGEPATH"/sample_$j.txt"
+	sort -k2 -n $IMAGEPATH"/sample_$j.txt" > $IMAGEPATH"/sample_"$j"_sorted.txt" 
+	echo $IMAGEPATH"/sample_"$j"_sorted.txt" >> $IMAGEPATH"/mosaicList.txt"
 done < $IMAGEPATH"/sampleIDs_unique.txt"
+
+parallel -j 4 -a $IMAGEPATH"/mosaicList.txt" assembleMosaic
+
+createHTML
+
+#remove all temp files	
+rm $IMAGEPATH/sample_*[0-9].txt
+rm $IMAGEPATH/*sorted.txt
+
 
