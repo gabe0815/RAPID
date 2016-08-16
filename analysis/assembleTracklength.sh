@@ -1,12 +1,7 @@
 #!/bin/bash
 
 #IMAGEPATH is stored in config.sh to make it accessible to all scripts
-#. ~/RAPID/analysis/config.sh
-
-#static variables
-#IMAGEPATH=/media/imagesets04/20160311_vibassay_set5
-
-IMAGEPATH=$1
+. ~/applications/RAPID/analysis/config.sh
 
 WIDTH=3072
 HEIGHT=2304
