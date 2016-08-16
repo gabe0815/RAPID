@@ -34,8 +34,53 @@ function assembleMosaic {
     
 }
 
+function createHTML {
+	
+	#variables within functions are global, as long as the function has been called
+	
+	HTML=$IMAGEPATH"/tracklength_overview.html"
+
+	#write header to the file
+	echo "<!doctype html public \"-//w3c//dtd html 4.0 transitional//en\">
+	<html><head>
+	<meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">
+	<meta name=\"Author\" content=\"J. Hench, G. Schweighauser\">
+	<title>image viewer</title>
+	<base target=\"imageFrame\">
+	<script>
+	if(window == window.top)
+	{
+	var address=window.location;
+	var s='<html><head><title>image viewer</title></head>'+
+	'<frameset cols=\"15%,85%\" frameborder=\"4\" onload=\"return true;\" onunload=\"return true;\">' +
+	'<frame src=\"'+address+'?\" name=\"indexframe\">'+
+	'<frame src=\"file:///\" name=\"imageFrame\">'+
+	'</frameset>'+
+	'</html>';
+	document.write(s)    
+	}
+	</script>
+	</head>
+	<body text=\"#000000\" bgcolor=\"#C0C0C0\" link=\"#0000FF\" vlink=\"#8154D1\" alink=\"#ED181E\">" > $HTML 
+
+	#go through sampleIDs unique list and find montage images.
+	while read i; 
+		do 
+		FILE=$(find $IMAGEPATH -name "*_"$i"_*tracklength.jpg")
+		#echo $FILE	
+		echo "<a href=\"$FILE\">$i</a><br>" >> $HTML
+	done < $IMAGEPATH"/sampleIDs_unique.txt"
+
+	#write footer to the file
+	echo "
+	</body>
+	</html>" >> $HTML
+
+}
+
+###################### main program starts here ###########################
+
 export -f assembleMosaic
-# main progam starts here
 
 >$IMAGEPATH/tracklength.txt
 >$IMAGEPATH/mosaicList.txt
@@ -59,8 +104,12 @@ while read j;
 	echo $IMAGEPATH"/sample_"$j"_sorted.txt" >> $IMAGEPATH"/mosaicList.txt"
 done < $IMAGEPATH"/sampleIDs_unique.txt"
 
-parallel -P 4 -a $IMAGEPATH"/mosaicList.txt" assembleMosaic  
+parallel -j 4 -a $IMAGEPATH"/mosaicList.txt" assembleMosaic
+
+createHTML
 
 #remove all temp files	
-rm $IMAGEPATH"/*_sorted.txt" $IMAGEPATH"/sample_*.txt"; 
+rm $IMAGEPATH/sample_*[0-9].txt
+rm $IMAGEPATH/*sorted.txt
+
 
