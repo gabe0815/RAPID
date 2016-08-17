@@ -27,14 +27,17 @@ var TODO=11;
 
 
 //camera variables
+
 var CAMSERIALS=newArray('0971C5B47AA949D7A4FD6038C1AD2B62','EBF3860AA5DF4791B466A9AF39503D26','1955DD886CB34783993370E6B572FDBA','860869D768724772A766819D1BAD8411');
 //var CAMSERIALS=newArray('0971C5B47AA949D7A4FD6038C1AD2B62','B53A9EACCA6A4DAEAFE6E7CD227FC887','1955DD886CB34783993370E6B572FDBA','860869D768724772A766819D1BAD8411');
+
 var CAMBUS=newArray(CAMSERIALS.length);
 var CAMSER; //camera serial number which recorded the set, is written to camera.txt through psmag01.sh
 var CAMPOS; //position on which the plate was recorded
 var PTPCAM="/home/user/applications/RAPID/ptpcam/ptpcam";
 var CMD; //used to execute non blocking shell scripts
 var CAM;
+
 var DOWNDIR = "/mnt/4TBraid02/20160810_vibassay_set10/dl";
 
 var TARGETDIR;
@@ -81,6 +84,17 @@ macro "reboot [r]"{
 	
 }
 macro "start recording [s] "{
+    //delete all busy_*.lck files in /tmp/
+    files = getFileList("/tmp/");
+		for (i=0; i<files.length; i++){
+			if (indexOf("/tmp/"+files[i], "busy_") != -1){
+				File.delete("/tmp/"+files[i]);
+            } 
+        }
+
+    
+
+    //start of macro
     Dialog.create("Setup");
     Dialog.addMessage("Please enter x and y coordinates \n indicating the start position of the assay");
     Dialog.addNumber("x-coordinate", 1);
@@ -91,8 +105,8 @@ macro "start recording [s] "{
     startX = Dialog.getNumber();
     startY = Dialog.getNumber();
     STACKREVERSED = Dialog.getCheckbox();
-
     
+
 	initCameras();
 	//set ZMAX on robot
 	robotSetRegister(NUM_LAYERS, MAXZ);
@@ -116,7 +130,7 @@ macro "start recording [s] "{
 		        	processStack(x,y);
 			}
             		    //reset startX to 1 in case the recording was resumed
-                        	startX = 1;
+                        startX = 1;
             			rebootCameras(); //reboot every MAXX round
             			initCameras(); 
 			
@@ -253,7 +267,7 @@ function rebootCameras(){
 		r = exec("/home/user/applications/RAPID/ptpcam/rebootCam_arg01.sh", CAMBUS[i]);
 		print(r);
 	}
-    wait(5000); 
+    wait(10000); 
 }
 
 function hardResetCameras(){
