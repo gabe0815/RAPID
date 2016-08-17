@@ -26,8 +26,10 @@ function assembleMosaic {
             else
                 imgPath=$(echo $img | cut -d"/" -f1-5)
             fi
-
-            imglist=$(echo $imglist $img)
+			time=$(echo "$i"|cut -f2); 
+			hours=$(echo "scale=2; $time/3600" | bc -l ); 
+			#echo $hours
+            imglist=$(echo $imglist "-label" $hours"h" $img)
             #calculate coorinates for censoring file
             xcoord=$(echo $count%$COLUMNS | bc)
             ycoord=$(echo $count/$COLUMNS | bc)
@@ -35,7 +37,7 @@ function assembleMosaic {
             echo $imgPath','$xcoord','$ycoord >> $filepath'_mosaic_coordinates.txt'
             count=$(echo "$count +1" | bc)
     done < $1
-    montage $imglist -tile "$COLUMNS"x -geometry $(echo "$WIDTH"*"$SCALE"/1 | bc)x$(echo "$HEIGTH"*"$SCALE"/1 | bc) -title $sampleID $filepath'_montage_tracklength.jpg'
+    montage -pointsize 35 $imglist -tile "$COLUMNS"x -geometry $(echo "$WIDTH"*"$SCALE"/1 | bc)x$(echo "$HEIGTH"*"$SCALE"/1 | bc) -title $sampleID $filepath'_montage_tracklength.jpg'
 
     
 }
@@ -96,8 +98,10 @@ export -f assembleMosaic
 for i in $(find $IMAGEPATH -name "*overlay.jpg_tracklength.jpg")
 do 
     sampleID=$(head -n1 $(dirname $i)/sampleID.txt)
+	timeOfBirth=$(tail -n1 $(dirname $i)/sampleID.txt)
     timestamp=$(head -n1 $(dirname $i)/timestamp.txt)
-    printf  "$i\t$timestamp\t$sampleID\n" >> $IMAGEPATH"/tracklength.txt"
+
+    printf  "$i\t$((timestamp-timeOfBirth))\t$sampleID\n" >> $IMAGEPATH"/tracklength.txt"
 done 
 
 #get unique sampleID
