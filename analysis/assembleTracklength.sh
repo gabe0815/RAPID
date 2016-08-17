@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #IMAGEPATH is stored in config.sh to make it accessible to all scripts
-. ~/RAPID/analysis/config.sh
+. ~/applications/RAPID/analysis/config.sh
 
 
 #functions
