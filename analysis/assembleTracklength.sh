@@ -117,7 +117,7 @@ while read j;
 	echo $IMAGEPATH"/sample_"$j"_sorted.txt" >> $IMAGEPATH"/mosaicList.txt"
 done < $IMAGEPATH"/sampleIDs_unique.txt"
 
-parallel -j 1 -a $IMAGEPATH"/mosaicList.txt" assembleMosaic
+parallel -j 4 -a $IMAGEPATH"/mosaicList.txt" assembleMosaic
 
 createHTML
 
