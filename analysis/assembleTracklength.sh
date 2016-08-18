@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #IMAGEPATH is stored in config.sh to make it accessible to all scripts
-. ~/RAPID/analysis/config.sh
+. ~/applications/RAPID/analysis/config.sh
 
 
 #functions
@@ -10,7 +10,9 @@ function assembleMosaic {
 	HEIGHT=2304
 	COLUMNS=4
 	SCALE=0.25
-    
+	tileWidth=$(echo "$WIDTH * $SCALE / 1" | bc)    
+	tileHeight=$(echo "$HEIGHT * $SCALE /1" | bc)
+
     imglist=""
     filepath="${1%.*}"
   	filename=$(basename "$1")
@@ -26,8 +28,9 @@ function assembleMosaic {
             else
                 imgPath=$(echo $img | cut -d"/" -f1-5)
             fi
-
-            imglist=$(echo $imglist $img)
+			time=$(echo "$i"|cut -f2); 
+			hours=$(echo "scale=2; $time/3600" | bc -l ); 
+            imglist=$(echo $imglist "-label" $hours"h" $img)
             #calculate coorinates for censoring file
             xcoord=$(echo $count%$COLUMNS | bc)
             ycoord=$(echo $count/$COLUMNS | bc)
@@ -35,7 +38,8 @@ function assembleMosaic {
             echo $imgPath','$xcoord','$ycoord >> $filepath'_mosaic_coordinates.txt'
             count=$(echo "$count +1" | bc)
     done < $1
-    montage $imglist -tile "$COLUMNS"x -geometry $(echo "$WIDTH"*"$SCALE"/1 | bc)x$(echo "$HEIGTH"*"$SCALE"/1 | bc) -title $sampleID $filepath'_montage_tracklength.jpg'
+	#echo "assembling $1..."
+    montage -pointsize 35 $imglist -tile "$COLUMNS"x -geometry $tileWidth"x"$tileHeight"+0+0" -title $sampleID $filepath'_montage_tracklength.jpg'
 
     
 }
@@ -96,8 +100,10 @@ export -f assembleMosaic
 for i in $(find $IMAGEPATH -name "*overlay.jpg_tracklength.jpg")
 do 
     sampleID=$(head -n1 $(dirname $i)/sampleID.txt)
+	timeOfBirth=$(tail -n1 $(dirname $i)/sampleID.txt)
     timestamp=$(head -n1 $(dirname $i)/timestamp.txt)
-    printf  "$i\t$timestamp\t$sampleID\n" >> $IMAGEPATH"/tracklength.txt"
+
+    printf  "$i\t$((timestamp-timeOfBirth))\t$sampleID\n" >> $IMAGEPATH"/tracklength.txt"
 done 
 
 #get unique sampleID
