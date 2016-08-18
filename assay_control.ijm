@@ -372,7 +372,7 @@ function processStack(x,y){
 		wait(STACKDURATION*1000);
 		 	
 	}
-	print("done with "+CURRENTSAMPLEID);
+	//print("done with "+CURRENTSAMPLEID);
 	print("------------------");
 }
 
