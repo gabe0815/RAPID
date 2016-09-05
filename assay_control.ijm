@@ -38,7 +38,7 @@ var PTPCAM="/home/user/applications/RAPID/ptpcam/ptpcam";
 var CMD; //used to execute non blocking shell scripts
 var CAM;
 
-var DOWNDIR = "/mnt/4TBraid02/20160810_vibassay_set10/dl";
+var DOWNDIR = "/mnt/4TBraid02/20160902_vibassay_set11/dl";
 
 var TARGETDIR;
 var SAMPLEID;
@@ -367,8 +367,9 @@ function processStack(x,y){
 
 		
 	} else {
-		print("waiting "+STACKDURATION+"s and switching pump on");
-		robotSetRegister(TODO,PUMP_ON);
+		//print("waiting "+STACKDURATION+"s and switching pump on");
+		print("waiting "+STACKDURATION+"s");
+		//robotSetRegister(TODO,PUMP_ON);
 		wait(STACKDURATION*1000);
 		 	
 	}
