@@ -5,7 +5,47 @@ var columns = 4;
 var height =  2304 * scaleFactor;
 var width = 3072 * scaleFactor;
 
-var file
+var file;
+var lines;
+var counter = 0;
+
+macro "load from list [l] "{
+	list = File.openAsString("/mnt/4TBraid04/imagesets04/20160810_vibassay_set10/list.txt");
+	lines=split(list,"\n");
+		
+}
+
+macro "open next [n]" {
+    open(lines[counter]);
+    roiManager("Reset");
+    run("Remove Overlay");
+    //filePath = "/media/imagesets04/20160311_vibassay_set5/IFP199_12_sorted";
+    filePath = getInfo("image.directory") + getInfo("image.filename");
+    filePath = substring(filePath, 0,  indexOf(filePath, "_montage"));
+    //print(filePath);
+    file = File.openAsRawString(filePath+"_mosaic_coordinates.txt");
+    //print(file);	
+    lines=split(file,"\n");
+	for (i=0; i<lengthOf(lines); i++){
+		path = split(lines[i], ",");
+		if (File.exists(path[0]+"/"+"censored.txt")){
+			makeRectangle(path[1]*width+50, path[2]*height + 50, width-100, height-100);
+			roiManager("Add");
+			roiManager("Select",roiManager("count")-1);
+			roiManager("Rename",path[1]+","+path[2]);
+		}
+	}
+	if (roiManager("Count")!=0){
+		run("From ROI Manager");
+		run("Show Overlay");
+		run("Overlay Options...", "stroke=none width=10 fill=#660000ff apply");
+	}
+    run("Select None");
+    counter++;
+		
+}
+
+
 macro "save annotations [s] "{
 	//file = File.openAsString(fileList+"_mosaic_coordinates.txt");
 	//print(file);
@@ -38,32 +78,6 @@ macro "save annotations [s] "{
 	
 }
 
-macro "open annotations [o] "{
-    roiManager("Reset");
-    run("Remove Overlay");
-    //filePath = "/media/imagesets04/20160311_vibassay_set5/IFP199_12_sorted";
-    filePath = getInfo("image.directory") + getInfo("image.filename");
-    filePath = substring(filePath, 0,  indexOf(filePath, "_montage"));
-    //print(filePath);
-    file = File.openAsRawString(filePath+"_mosaic_coordinates.txt");
-    //print(file);	
-    lines=split(file,"\n");
-	for (i=0; i<lengthOf(lines); i++){
-		path = split(lines[i], ",");
-		if (File.exists(path[0]+"/"+"censored.txt")){
-			makeRectangle(path[1]*width+50, path[2]*height + 50, width-100, height-100);
-			roiManager("Add");
-			roiManager("Select",roiManager("count")-1);
-			roiManager("Rename",path[1]+","+path[2]);
-		}
-	}
-	if (roiManager("Count")!=0){
-		run("From ROI Manager");
-		run("Show Overlay");
-		run("Overlay Options...", "stroke=none width=10 fill=#660000ff apply");
-	}
-	run("Select None");
-}
 macro "annotate images [a] " {
 	
 	run("Select None");
