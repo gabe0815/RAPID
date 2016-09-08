@@ -7,7 +7,7 @@ var width = 3072 * scaleFactor;
 var file;
 var lines;
 var mosaic_lines;
-var counter = -1; //we increment firtst
+var counter = -2 +1* 28 + 19 ; //we increment firtst
 var yOffset = 70;
 macro "load from list [l] "{
 	list = File.openAsString("/mnt/4TBraid04/imagesets04/20160810_vibassay_set10/list.txt");
