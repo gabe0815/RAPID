@@ -120,7 +120,7 @@ def analyseTrack(parentDir, description):
                 ret, dst = cv2.threshold(mask, 127, 255, cv2.THRESH_BINARY)
                 contours, hierarchy = cv2.findContours(dst,cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)
                 img = cv2.imread(imgPath)
-                cv2.drawContours(img, contours, -1, (0,0,255), 1)
+                cv2.drawContours(img, contours, -1, (0,255,0), 1)
                 cv2.putText(img, str(area), (100,2200), cv2.FONT_HERSHEY_SIMPLEX, 5, (0,0,255), 10)
                 cv2.putText(img, str(onEdge), (1500,2200), cv2.FONT_HERSHEY_SIMPLEX, 5, (0,0,255), 10)
                 cv2.putText(img, str(version), (2700,2200), cv2.FONT_HERSHEY_SIMPLEX, 5, (0,0,255), 10)
