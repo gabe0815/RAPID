@@ -39,7 +39,6 @@ contours,hier = cv2.findContours(thresh.copy(),cv2.RETR_LIST,cv2.CHAIN_APPROX_NO
 
 mask = np.zeros(thresh.shape,np.uint8) #for counting contour area
 
-onEdge = 0
 for cnt in contours:
     if cv2.contourArea(cnt) > 100 and cv2.contourArea(cnt) < 10000:
         cv2.drawContours(mask,[cnt],0,255,-1)
