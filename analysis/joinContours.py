@@ -29,10 +29,10 @@ def find_if_close(cnt1,cnt2):
 #gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
 img,thresh = threshold("/home/user/applications/RAPID/analysis/after.jpg")
 contours,hier = cv2.findContours(thresh.copy(),cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)
-cv2.waitKey(0)    
-cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
-cv2.imshow("Image", thresh)
-cv2.waitKey(0)  
+ 
+#cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
+#cv2.imshow("Image", thresh)
+#cv2.waitKey(0)  
 
 LENGTH = len(contours)
 status = np.zeros((LENGTH,1))
@@ -64,7 +64,14 @@ for i in xrange(maximum):
     cv2.drawContours(mask,unified,-1,255,-1)
     
 
-maskedImg = cv2.bitwise_and(img,img,mask=cv2.bitwise_not(mask))
+maskArea = np.zeros(thresh.shape,np.uint8)
+contours,hier = cv2.findContours(mask.copy(),cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)
+areas = [cv2.contourArea(cnt) for cnt in contours]
+cv2.drawContours(maskArea, contours, np.argmax(areas), 255,-1)
+print len(areas)
+  
+
+maskedImg = cv2.bitwise_and(img,img,mask=cv2.bitwise_not(maskArea))
 
 cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
 cv2.imshow("Image", maskedImg)
