@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #run this script like this: 
-#ls -d /media/imagesets04/20160311_vibassay_set5/*/ |  parallel --eta -j16 "/mnt/1TBraid01/homefolders/gschweighauser/RAPID/analysis/trackLength.py {}"
+#ls -d /media/imagesets04/20160311_vibassay_set5/*/ |  parallel --eta -j16 "/mnt/1TBraid01/homefolders/gschweighauser/RAPID/analysis/tracklength.py {}"
 from scipy.spatial import distance as dist
 import cv2
 import numpy as np
@@ -8,8 +8,80 @@ import sys
 import os
 
 
-version = "v11"
+version = "v12"
 
+def getCenter(cont):
+    M = cv2.moments(cont)
+    cX = int(M["m10"] / M["m00"])
+    cY = int(M["m01"] / M["m00"])
+    return (cX, cY)
+
+def find_if_close(cnt1, cnt2, minDistance):
+#http://dsp.stackexchange.com/questions/2564/opencv-c-connect-nearby-contours-based-on-distance-between-them
+    D = dist.cdist(np.squeeze(cnt1), np.squeeze(cnt2))
+    if np.amin(D) < minDistance:
+        return True
+    else:
+        return False
+
+def createMask(contours, threshImg, minDistance):
+    
+    mask = np.zeros(threshImg.shape,np.uint8) #for counting contour area
+
+    #find center of biggest contour
+    for cnt in contours:
+        if cv2.contourArea(cnt) > 100 and cv2.contourArea(cnt) < 10000:
+            cv2.drawContours(mask,[cnt],0,255,-1)
+
+    contours,hier = cv2.findContours(mask,cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)
+    areas = [cv2.contourArea(cnt) for cnt in contours]
+    maxArea = np.amax(areas)
+    maxAreaCenter = getCenter(contours[np.argmax(areas)]) 
+
+    #combine contours that are closer to minDistance, then select the hull which contains the biggest contour
+    length = len(contours)
+    if length < 2:
+        return (True, np.zeros(threshImg.shape,np.uint8))
+    
+    status = np.zeros((length,1))
+    for i,cnt1 in enumerate(contours):
+        x = i
+        if i != length-1:
+            for j,cnt2 in enumerate(contours[i+1:]):
+                x = x+1
+                close = find_if_close(cnt1,cnt2,minDistance)
+                if close == True:
+                    val = min(status[i],status[x])
+                    status[x] = status[i] = val
+                else:
+                    if status[x]==status[i]:
+                        status[x] = i+1
+
+    unified = []
+    maximum = int(status.max())+1
+    for i in xrange(maximum):
+        pos = np.where(status==i)[0]
+        if pos.size != 0:
+            cont = np.vstack(contours[i] for i in pos)
+            hull = cv2.convexHull(cont)
+            unified.append(hull)
+
+
+        mask = np.zeros(threshImg.shape,np.uint8)
+        cv2.drawContours(mask,unified,-1,255,-1)
+        
+
+    maskArea = np.zeros(threshImg.shape,np.uint8)
+    contours,hier = cv2.findContours(cv2.bitwise_not(mask.copy()),cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)
+
+    for cnt in contours:
+        if cv2.pointPolygonTest(cnt, maxAreaCenter, measureDist=False) == 1:
+            cv2.drawContours(maskArea, [cnt], 0, 255,-1)
+            break
+
+    return (False, maskArea)
+
+    
 def threshold(imgPath):
     kernel = np.ones((5,5),np.uint8)
   
@@ -36,73 +108,42 @@ def findImage(parentDir, description):
 
     return -1
 
-def getCenter(cont):
-    M = cv2.moments(cont)
-    cX = int(M["m10"] / M["m00"])
-    cY = int(M["m01"] / M["m00"])
-    return (cX, cY)
-
-
-def measureArea(origImg, threshImg, minArea, minDistance):
+def measureArea(origImg, threshImg, minDistance):
     kernel = np.ones((5,5),np.uint8)
   
     nonZeroPixels = cv2.countNonZero(threshImg)
     #reject noisy images and try to improve medium noisy images. 
     if nonZeroPixels > 500000:
-        return (-1, np.zeros(threshImg.shape,np.uint8), 0, 0)                    
-    elif nonZeroPixels > 50000:
-        threshImgEroded = cv2.erode(threshImg, kernel, iterations=2)
-        contours, hierarchy = cv2.findContours(threshImgEroded,cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)
+        return (-1, np.zeros(threshImg.shape,np.uint8), 0)                    
+
     else: 
-        contours, hierarchy = cv2.findContours(threshImg.copy(),cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)        
-        
-      
-    numberOfContours = len(contours)
-    #print numberOfContours
-    if numberOfContours == 0:
-        return (0, np.zeros(threshImg.shape,np.uint8), 0, numberOfContours)            
+        contours, hierarchy = cv2.findContours(threshImg.copy(),cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)
 
-    # Find the index of the largest contour
-    areas = [cv2.contourArea(cnt) for cnt in contours]
-    maxArea = np.amax(areas)
-    maxAreaCenter = getCenter(contours[np.argmax(areas)]) 
+    #apply mask   
+    empty, mask = createMask(contours, threshImg, minDistance)
+
+    if empty:
+        return (0, np.zeros(threshImg.shape,np.uint8), 0) 
     
-    #find radius of enclosing circle
-    (x,y),radius = cv2.minEnclosingCircle(contours[np.argmax(areas)])
-    radius = int(radius)
-    
-    if nonZeroPixels > 50000 and np.std(areas) < 100:
-        return (0, np.zeros(threshImg.shape,np.uint8), 0, 0) 
-
-    if maxArea < 4*minArea:
-        return (0, np.zeros(threshImg.shape,np.uint8), 0, 0) 
-
-    
-   
-
-    mask = np.zeros(threshImg.shape,np.uint8) #for counting contour area
-    contourCounter = 0 #tracks number of contours as a measure for noisy tracks
+    maskedImg = cv2.bitwise_and(threshImg,threshImg,mask=mask)
+    contours, hierarchy = cv2.findContours(maskedImg.copy(),cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)
+    #check if on edge
     onEdge = 0
     for cnt in contours:
-        if cv2.contourArea(cnt) > minArea:
-            D = dist.euclidean(maxAreaCenter, getCenter(cnt))
-            if D < 2*radius:  
-                cv2.drawContours(mask,[cnt],0,255,-1)
-                contourCounter += 1
-                #check distance to edges                    
-                if np.amin(cnt[:,:,0]) <= 5  or np.amax(cnt[:,:,0]) >= (origImg.shape[1] - 5) or np.amin(cnt[:,:,1]) <= 5 or np.amax(cnt[:,:,1]) >= (origImg.shape[0] - 5):
-                    onEdge = 1
-                
-    if nonZeroPixels > 50000:
-        mask = cv2.dilate(mask, kernel, iterations=4) #reverse the erosion from earlier
-   
- 
-    maskedImg = cv2.bitwise_and(threshImg,threshImg,mask=mask)
-    #cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
-    #cv2.imshow("Image", maskedImg)
-    #cv2.waitKey(0)     
+        #check distance to edges                    
+        if np.amin(cnt[:,:,0]) <= 5  or np.amax(cnt[:,:,0]) >= (origImg.shape[1] - 5) or np.amin(cnt[:,:,1]) <= 5 or np.amax(cnt[:,:,1]) >= (origImg.shape[0] - 5):
+            onEdge = 1
 
-    return (cv2.countNonZero(maskedImg), maskedImg, onEdge, contourCounter)
+    #draw contours to measure area
+    maskArea = np.zeros(threshImg.shape,np.uint8)
+    cv2.drawContours(maskArea,contours,-1,255,-1)
+    
+    
+#    cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
+#    cv2.imshow("Image", maskedImg)
+#    cv2.waitKey(0)     
+
+    return (cv2.countNonZero(maskArea), maskedImg, onEdge)
 
 
 def analyseTrack(parentDir, description):
@@ -111,7 +152,7 @@ def analyseTrack(parentDir, description):
         return -1, 0, 0
     else:
         img, th = threshold(imgPath)
-        area, mask, onEdge, contourCounter = measureArea(img, th, 50, 20) #chose 20px as max distance ~2x width of adult
+        area, mask, onEdge = measureArea(img, th, 50) #chose 50px as max distance
 
         #drawContour on overlay:
         if description == "after":
@@ -125,9 +166,9 @@ def analyseTrack(parentDir, description):
                 cv2.putText(img, str(onEdge), (1500,2200), cv2.FONT_HERSHEY_SIMPLEX, 5, (0,0,255), 10)
                 cv2.putText(img, str(version), (2700,2200), cv2.FONT_HERSHEY_SIMPLEX, 5, (0,0,255), 10)
 
-                cv2.imwrite(imgPath+"_tracklength.jpg", img)            
+                cv2.imwrite(imgPath+"_tracklength_new.jpg", img)            
         
-        return area, onEdge, contourCounter  
+        return area, onEdge  
     
 ################# main program starts here #################
 
@@ -136,17 +177,17 @@ src = sys.argv[1]
 descriptions = ("before", "after")
 
 try:
-    os.remove(src + "trackLength.tsv")
+    os.remove(src + "tracklength.tsv")
 except OSError:
     pass
 
-trackFile = open(src + "trackLength.tsv", "w")
-trackFile.write("trackVersion." + str(version) + "\tlength\tarea\tedge\tcontours")
+trackFile = open(src + "tracklength.tsv", "w")
+trackFile.write("trackVersion." + str(version) + "\tlength\tarea\tedge")
 
 
 for descr in descriptions:
-    area, onEdge, contourCounter = analyseTrack(src, descr)
-    trackFile.write("\n"+descr+"\t"+str(0)+"\t"+str(area)+"\t"+str(onEdge)+"\t" + str(contourCounter)) 
+    area, onEdge = analyseTrack(src, descr)
+    trackFile.write("\n"+descr+"\t"+str(0)+"\t"+str(area)+"\t"+str(onEdge)+"\t") 
     #if descr == "after" and onEdge: #we don't want to censor tracks based on "before" image ...
     #    censorFile = open(src + "censored.txt", "w")
     #    censorFile.write("censored")
