@@ -30,7 +30,7 @@ def createMask(contours, threshImg, minDistance):
 
     #find center of biggest contour
     for cnt in contours:
-        if cv2.contourArea(cnt) > 100 and cv2.contourArea(cnt) < 10000:
+        if cv2.contourArea(cnt) > 100 and cv2.contourArea(cnt) < 100000:
             cv2.drawContours(mask,[cnt],0,255,-1)
 
     contours,hier = cv2.findContours(mask,cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)
@@ -41,7 +41,9 @@ def createMask(contours, threshImg, minDistance):
     #combine contours that are closer to minDistance, then select the hull which contains the biggest contour
     length = len(contours)
     if length < 2:
-        return (True, np.zeros(threshImg.shape,np.uint8))
+        mask = np.zeros(threshImg.shape,np.uint8)
+        cv2.drawContours(mask,contours,-1,255,-1)
+        return mask
     
     status = np.zeros((length,1))
     for i,cnt1 in enumerate(contours):
@@ -79,7 +81,11 @@ def createMask(contours, threshImg, minDistance):
             cv2.drawContours(maskArea, [cnt], 0, 255,-1)
             break
 
-    return (False, maskArea)
+    cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
+    cv2.imshow("Image", maskArea)
+    cv2.waitKey(0)     
+
+    return maskArea
 
     
 def threshold(imgPath):
@@ -119,12 +125,12 @@ def measureArea(origImg, threshImg, minDistance):
     else: 
         contours, hierarchy = cv2.findContours(threshImg.copy(),cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)
 
-    #apply mask   
-    empty, mask = createMask(contours, threshImg, minDistance)
-
-    if empty:
+    numberOfContours = len(contours)
+    if numberOfContours == 0:
         return (0, np.zeros(threshImg.shape,np.uint8), 0) 
-    
+
+    #apply mask   
+    mask = createMask(contours, threshImg, minDistance)  
     maskedImg = cv2.bitwise_and(threshImg,threshImg,mask=mask)
     contours, hierarchy = cv2.findContours(maskedImg.copy(),cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)
     #check if on edge
