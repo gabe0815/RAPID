@@ -59,11 +59,15 @@ for i in xrange(maximum):
         hull = cv2.convexHull(cont)
         unified.append(hull)
 
-cv2.drawContours(img,unified,-1,(0,255,0),2)
-cv2.drawContours(thresh,unified,-1,255,-1)
+
+    mask = np.zeros(thresh.shape,np.uint8)
+    cv2.drawContours(mask,unified,-1,255,-1)
+    
+
+maskedImg = cv2.bitwise_and(img,img,mask=mask)
 
 cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
-cv2.imshow("Image", img)
+cv2.imshow("Image", maskedImg)
 cv2.waitKey(0)    
 #cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
 #cv2.imshow("Image", thresh)
