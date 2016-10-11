@@ -36,7 +36,6 @@ contours,hier = cv2.findContours(thresh.copy(),cv2.RETR_LIST,cv2.CHAIN_APPROX_NO
 
 LENGTH = len(contours)
 status = np.zeros((LENGTH,1))
-print "Length: %d" % LENGTH
 for i,cnt1 in enumerate(contours):
     x = i    
     if i != LENGTH-1:
@@ -65,13 +64,14 @@ for i in xrange(maximum):
     
 
 maskArea = np.zeros(thresh.shape,np.uint8)
-contours,hier = cv2.findContours(mask.copy(),cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)
+contours,hier = cv2.findContours(cv2.bitwise_not(mask.copy()),cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)
 areas = [cv2.contourArea(cnt) for cnt in contours]
+#print "maxArea: %d" % np.amax(areas)
 cv2.drawContours(maskArea, contours, np.argmax(areas), 255,-1)
-print len(areas)
+
   
 
-maskedImg = cv2.bitwise_and(img,img,mask=cv2.bitwise_not(maskArea))
+maskedImg = cv2.bitwise_and(img,img,mask=maskArea)
 
 cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
 cv2.imshow("Image", maskedImg)
