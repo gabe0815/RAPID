@@ -64,7 +64,7 @@ for i in xrange(maximum):
     cv2.drawContours(mask,unified,-1,255,-1)
     
 
-maskedImg = cv2.bitwise_and(img,img,mask=mask)
+maskedImg = cv2.bitwise_and(img,img,mask=cv2.bitwise_not(mask))
 
 cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
 cv2.imshow("Image", maskedImg)
