@@ -2,6 +2,12 @@ import cv2
 import numpy as np
 from scipy.spatial import distance as dist
 
+def getCenter(cont):
+    M = cv2.moments(cont)
+    cX = int(M["m10"] / M["m00"])
+    cY = int(M["m01"] / M["m00"])
+    return (cX, cY)
+
 def threshold(imgPath):
     kernel = np.ones((5,5),np.uint8)
   
@@ -9,7 +15,7 @@ def threshold(imgPath):
     img = cv2.medianBlur(img,17)
     #img = cv2.bitwise_not(img)
     th = cv2.adaptiveThreshold(img,255,cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY,15,2)
-    th = cv2.morphologyEx(th, cv2.MORPH_OPEN, kernel, iterations = 4)
+    th = cv2.morphologyEx(th, cv2.MORPH_OPEN, kernel, iterations = 2)
 #    th = cv2.bitwise_not(th)
     return (img, th)        
 
@@ -27,17 +33,28 @@ def find_if_close(cnt1,cnt2):
 
 #img = cv2.imread('/home/gabe/Pictures/RoKEh.jpg')
 #gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-img,thresh = threshold("/home/user/applications/RAPID/analysis/after.jpg")
+img,thresh = threshold("/home/user/Pictures/dl1472969895_6_5_0/imgseries_h264.AVI_2fps.AVI_0_25_before.jpg")
+
 contours,hier = cv2.findContours(thresh.copy(),cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)
- 
-#cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
-#cv2.imshow("Image", thresh)
-#cv2.waitKey(0)  
+
+mask = np.zeros(thresh.shape,np.uint8) #for counting contour area
+
+onEdge = 0
+for cnt in contours:
+    if cv2.contourArea(cnt) > 100 and cv2.contourArea(cnt) < 10000:
+        cv2.drawContours(mask,[cnt],0,255,-1)
+
+
+contours,hier = cv2.findContours(mask,cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)
+areas = [cv2.contourArea(cnt) for cnt in contours]
+maxArea = np.amax(areas)
+maxAreaCenter = getCenter(contours[np.argmax(areas)]) 
 
 LENGTH = len(contours)
+
 status = np.zeros((LENGTH,1))
 for i,cnt1 in enumerate(contours):
-    x = i    
+    x = i
     if i != LENGTH-1:
         for j,cnt2 in enumerate(contours[i+1:]):
             x = x+1
@@ -65,11 +82,11 @@ for i in xrange(maximum):
 
 maskArea = np.zeros(thresh.shape,np.uint8)
 contours,hier = cv2.findContours(cv2.bitwise_not(mask.copy()),cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)
-areas = [cv2.contourArea(cnt) for cnt in contours]
-#print "maxArea: %d" % np.amax(areas)
-cv2.drawContours(maskArea, contours, np.argmax(areas), 255,-1)
 
-  
+for cnt in contours:
+    if cv2.pointPolygonTest(cnt, maxAreaCenter, measureDist=False) == 1:
+        cv2.drawContours(maskArea, [cnt], 0, 255,-1)
+        break
 
 maskedImg = cv2.bitwise_and(img,img,mask=maskArea)
 
