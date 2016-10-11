@@ -166,7 +166,7 @@ def analyseTrack(parentDir, description):
                 cv2.putText(img, str(onEdge), (1500,2200), cv2.FONT_HERSHEY_SIMPLEX, 5, (0,0,255), 10)
                 cv2.putText(img, str(version), (2700,2200), cv2.FONT_HERSHEY_SIMPLEX, 5, (0,0,255), 10)
 
-                cv2.imwrite(imgPath+"_tracklength_new.jpg", img)            
+                cv2.imwrite(imgPath+"_tracklength.jpg", img)            
         
         return area, onEdge  
     
