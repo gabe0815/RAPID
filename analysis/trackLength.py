@@ -34,17 +34,19 @@ def createMask(contours, threshImg, minDistance):
             cv2.drawContours(mask,[cnt],0,255,-1)
 
     contours,hier = cv2.findContours(mask,cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)
-    areas = [cv2.contourArea(cnt) for cnt in contours]
-    maxArea = np.amax(areas)
-    maxAreaCenter = getCenter(contours[np.argmax(areas)]) 
-
-    #combine contours that are closer to minDistance, then select the hull which contains the biggest contour
     length = len(contours)
     if length < 2:
         mask = np.zeros(threshImg.shape,np.uint8)
         cv2.drawContours(mask,contours,-1,255,-1)
         return mask
-    
+
+
+    areas = [cv2.contourArea(cnt) for cnt in contours]
+    maxArea = np.amax(areas)
+    maxAreaCenter = getCenter(contours[np.argmax(areas)]) 
+
+    #combine contours that are closer to minDistance, then select the hull which contains the biggest contour
+  
     status = np.zeros((length,1))
     for i,cnt1 in enumerate(contours):
         x = i
@@ -81,9 +83,9 @@ def createMask(contours, threshImg, minDistance):
             cv2.drawContours(maskArea, [cnt], 0, 255,-1)
             break
 
-    cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
-    cv2.imshow("Image", maskArea)
-    cv2.waitKey(0)     
+#    cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
+#    cv2.imshow("Image", maskArea)
+#    cv2.waitKey(0)     
 
     return maskArea
 
