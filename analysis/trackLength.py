@@ -8,7 +8,7 @@ import sys
 import os
 
 
-version = "v12"
+version = "v13"
 
 def getCenter(cont):
     M = cv2.moments(cont)
@@ -118,8 +118,8 @@ def measureArea(origImg, threshImg, minArea, minDistance):
     kernel = np.ones((5,5),np.uint8)
   
     nonZeroPixels = cv2.countNonZero(threshImg)
-    #reject noisy images and try to improve medium noisy images. 
-    if nonZeroPixels > 500000:
+    #reject noisy images
+    if nonZeroPixels > 100000:
         return (-1, np.zeros(threshImg.shape,np.uint8), 0)                    
 
     else: 
@@ -133,6 +133,7 @@ def measureArea(origImg, threshImg, minArea, minDistance):
     mask = createMask(contours, threshImg, minDistance)  
     maskedImg = cv2.bitwise_and(threshImg,threshImg,mask=mask)
     contours, hierarchy = cv2.findContours(maskedImg.copy(),cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)
+    
     #check if on edge
     onEdge = 0
     maskArea = np.zeros(threshImg.shape,np.uint8)
@@ -144,16 +145,16 @@ def measureArea(origImg, threshImg, minArea, minDistance):
         if cv2.contourArea(cnt) > minArea:
             #print "area: %d" % cv2.contourArea(cnt)
             cv2.drawContours(maskArea, [cnt], 0, 255, -1) 
-    
+            #cv2.drawContours(maskArea, contours, -1, 255,-1)
 
 
     
-    
+    maskedImg = cv2.bitwise_and(threshImg,threshImg,mask=maskArea)
 #    cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
 #    cv2.imshow("Image", maskedImg)
 #    cv2.waitKey(0)     
 
-    return (cv2.countNonZero(maskArea), maskArea, onEdge)
+    return (cv2.countNonZero(maskedImg), maskedImg, onEdge)
 
 
 def analyseTrack(parentDir, description):
@@ -162,7 +163,7 @@ def analyseTrack(parentDir, description):
         return -1, 0
     else:
         img, th = threshold(imgPath)
-        area, mask, onEdge = measureArea(img, th, 200, 50) #chose 50px as max distance
+        area, mask, onEdge = measureArea(img, th, 50, 50) #chose 50px as max distance
 
         #drawContour on overlay:
         if description == "after":
