@@ -33,9 +33,9 @@ def createMask(contours, threshImg, minDistance):
         if cv2.contourArea(cnt) > 100 and cv2.contourArea(cnt) < 100000:
             cv2.drawContours(mask,[cnt],0,255,-1)
 
-    contours,hier = cv2.findContours(mask,cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)
+    contours,hier = cv2.findContours(mask,cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)  
     length = len(contours)
-    if length < 2:
+    if length < 3:
         mask = np.zeros(threshImg.shape,np.uint8)
         cv2.drawContours(mask,contours,-1,255,-1)
         return mask
@@ -71,13 +71,11 @@ def createMask(contours, threshImg, minDistance):
             unified.append(hull)
 
 
-        mask = np.zeros(threshImg.shape,np.uint8)
-        cv2.drawContours(mask,unified,-1,255,-1)
-        
+    mask = np.zeros(threshImg.shape,np.uint8)
+    cv2.drawContours(mask,unified,-1,255,-1)
 
     maskArea = np.zeros(threshImg.shape,np.uint8)
-    contours,hier = cv2.findContours(cv2.bitwise_not(mask.copy()),cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)
-
+    contours,hier = cv2.findContours(mask.copy(),cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE) 
     for cnt in contours:
         if cv2.pointPolygonTest(cnt, maxAreaCenter, measureDist=False) == 1:
             cv2.drawContours(maskArea, [cnt], 0, 255,-1)
@@ -157,7 +155,7 @@ def measureArea(origImg, threshImg, minDistance):
 def analyseTrack(parentDir, description):
     imgPath = findImage(parentDir, description)
     if imgPath == -1:
-        return -1, 0, 0
+        return -1, 0
     else:
         img, th = threshold(imgPath)
         area, mask, onEdge = measureArea(img, th, 50) #chose 50px as max distance
@@ -195,7 +193,7 @@ trackFile.write("trackVersion." + str(version) + "\tlength\tarea\tedge")
 
 for descr in descriptions:
     area, onEdge = analyseTrack(src, descr)
-    trackFile.write("\n"+descr+"\t"+str(0)+"\t"+str(area)+"\t"+str(onEdge)+"\t") 
+    trackFile.write("\n"+descr+"\t"+str(0)+"\t"+str(area)+"\t"+str(onEdge)) 
     #if descr == "after" and onEdge: #we don't want to censor tracks based on "before" image ...
     #    censorFile = open(src + "censored.txt", "w")
     #    censorFile.write("censored")
