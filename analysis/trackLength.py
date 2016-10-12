@@ -142,7 +142,7 @@ def measureArea(origImg, threshImg, minArea, minDistance):
             onEdge = 1
         #check area and draw on mask
         if cv2.contourArea(cnt) > minArea:
-            print "area: %d" % cv2.contourArea(cnt)
+            #print "area: %d" % cv2.contourArea(cnt)
             cv2.drawContours(maskArea, [cnt], 0, 255, -1) 
     
 
