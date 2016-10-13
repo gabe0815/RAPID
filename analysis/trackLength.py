@@ -192,7 +192,7 @@ try:
 except OSError:
     pass
 
-trackFile = open(src + "tracklength.tsv", "w")
+trackFile = open(src + "trackLength.tsv", "w")
 trackFile.write("trackVersion." + str(version) + "\tlength\tarea\tedge")
 
 
