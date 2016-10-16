@@ -19,7 +19,7 @@ colorAfterTrackImg.fill(255)
 colorAfterTrackImg[:,:,1] = afterTrackImg
 weight=0.5
 combinedImg = cv2.addWeighted( colorAfterTrackImg, weight, afterPhotoImg, 1-weight, 0 )
-cv2.imwrite( afterFile[0:afterFile.index("2fps.AVI")+8] +"_overlay.jpg", combinedImg)
+cv2.imwrite( afterFile[0:afterFile.index("2fps.AVI")+8] +"_before_overlay.jpg", combinedImg)
 
 #cv2.namedWindow('color', cv.CV_WINDOW_NORMAL)
 #cv2.imshow('color', combinedImg)
