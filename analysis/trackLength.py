@@ -109,7 +109,7 @@ def threshold(imgPath):
 
 def findImage(parentDir, description):
     for f in os.listdir(parentDir):
-        if f.endswith('_'+description+'.jpg'):
+        if f.endswith(description):
             return parentDir + f
 
     return -1
@@ -158,27 +158,27 @@ def measureArea(origImg, threshImg, minArea, minDistance):
 
 
 def analyseTrack(parentDir, description):
-    imgPath = findImage(parentDir, description)
+    imgPath = findImage(parentDir, description+".jpg")
     if imgPath == -1:
         return -1, 0
     else:
         img, th = threshold(imgPath)
         area, mask, onEdge = measureArea(img, th, 50, 50) #chose 50px as max distance
 
-        #drawContour on overlay:
-        if description == "after":
-            imgPath = findImage(parentDir, "overlay")
-            if imgPath != -1:
-                ret, dst = cv2.threshold(mask, 127, 255, cv2.THRESH_BINARY)
-                contours, hierarchy = cv2.findContours(dst,cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)
-                img = cv2.imread(imgPath)
-                cv2.drawContours(img, contours, -1, (0,0,255), 3)
-                cv2.putText(img, str(area), (100,2200), cv2.FONT_HERSHEY_SIMPLEX, 5, (0,0,255), 10)
-                cv2.putText(img, str(onEdge), (1500,2200), cv2.FONT_HERSHEY_SIMPLEX, 5, (0,0,255), 10)
-                cv2.putText(img, str(version), (2700,2200), cv2.FONT_HERSHEY_SIMPLEX, 5, (0,0,255), 10)
+        imgPath = findImage(parentDir, description+"_overlay.jpg")        
 
-                cv2.imwrite(imgPath+"_tracklength.jpg", img)            
-        
+        print "imagepath: %s %s" % (imgPath, description)
+        if imgPath != -1:
+            ret, dst = cv2.threshold(mask, 127, 255, cv2.THRESH_BINARY)
+            contours, hierarchy = cv2.findContours(dst,cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)
+            img = cv2.imread(imgPath)
+            cv2.drawContours(img, contours, -1, (0,0,255), 3)
+            cv2.putText(img, str(area), (100,2200), cv2.FONT_HERSHEY_SIMPLEX, 5, (0,0,255), 10)
+            cv2.putText(img, str(onEdge), (1500,2200), cv2.FONT_HERSHEY_SIMPLEX, 5, (0,0,255), 10)
+            cv2.putText(img, str(version), (2700,2200), cv2.FONT_HERSHEY_SIMPLEX, 5, (0,0,255), 10)
+
+            cv2.imwrite(imgPath+"_tracklength.jpg", img)            
+    
         return area, onEdge  
     
 ################# main program starts here #################
