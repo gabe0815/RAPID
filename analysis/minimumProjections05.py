@@ -37,7 +37,7 @@ def createOverlay(description):
 
 
     cv2.imwrite(path, projection)
-    cv2.imwrite(vidPath + "_2fps.AVI_overlay_"+description+".jpg", combinedTrackAndPhoto)
+    cv2.imwrite(vidPath + "_2fps.AVI_"+description+"_overlay.jpg", combinedTrackAndPhoto)
 
 
 startTime = time.time()
