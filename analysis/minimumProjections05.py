@@ -11,6 +11,35 @@ import sys
 import os, os.path
 
 
+def createOverlay(description):
+    if description == "before":
+        image = first_before
+        projection = cv2.cvtColor(cv2.absdiff(before_projection, first_before), cv2.COLOR_BGR2GRAY)
+        #invert        
+        projection = cv2.bitwise_not(before_projection)
+        path = vidPath + "_2fps.AVI_"+str(before_start)+"_"+str(before_end) + "_before.jpg"
+
+    else if description == "after":
+        image = first_after
+        projection = cv2.cvtColor(cv2.absdiff(after_projection, first_after), cv2.COLOR_BGR2GRAY)
+        #invert        
+        projection = cv2.bitwise_not(after_projection)
+        path = vidPath + "_2fps.AVI_"+str(after_start)+"_"+str(after_end) + "_after.jpg"
+    
+
+    colorTrackImg = np.zeros(image.shape, np.uint8)
+    colorTrackImg.fill(255)
+    
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    weight=0.5
+    colorTrackImg[:,:,1] = projection[:]
+    combinedTrackAndPhoto = cv2.addWeighted( colorTrackImg, weight, image, 1-weight, 0 )
+
+
+    cv2.imwrite(path, projection)
+    cv2.imwrite(vidPath + "_2fps.AVI_overlay_"+description+".jpg", combinedTrackAndPhoto)
+
+
 startTime = time.time()
 
 vidPath = sys.argv[1]
@@ -92,46 +121,16 @@ for f in xrange( nFrames ):
             last_image = after_projection
 
 
-
-
-#subtract first image, invert and convert to gray
-before_projection= cv2.absdiff(before_projection, first_before)
-after_projection = cv2.absdiff(after_projection, first_after)
-
-
-before_projection = cv2.cvtColor(before_projection, cv2.COLOR_BGR2GRAY)
-after_projection = cv2.cvtColor(after_projection, cv2.COLOR_BGR2GRAY)
-
-#create colored tracks from before and after and combine to one image
-height, width = before_projection.shape[:2]
-
-colorBefore = np.zeros((height,width,3), np.uint8)
-colorAfter = np.zeros((height,width,3), np.uint8)
-
-colorBefore[:,:,0] = before_projection[:]
-colorAfter[:,:,2] = after_projection[:]
-
-weight=0.5
-combinedImg = cv2.addWeighted( colorBefore, weight, colorAfter, 1-weight, 0 )
-
-before_projection = cv2.bitwise_not(before_projection)
-after_projection = cv2.bitwise_not(after_projection)
-
-#combine colour track with photo
-colorAfterTrackImg = np.zeros((height,width,3), np.uint8)
-colorAfterTrackImg.fill(255)
-
-weight=0.5
-colorAfterTrackImg[:,:,1] = after_projection[:]
-combinedTrackAndPhoto = cv2.addWeighted( colorAfterTrackImg, weight, afterPhotoImg, 1-weight, 0 )
-
-
-cv2.imwrite(imgBefore, before_projection)
-cv2.imwrite(imgAfter, after_projection)
-cv2.imwrite(vidPath + "_2fps.AVI_combined.jpg", combinedImg)
-cv2.imwrite(vidPath + "_2fps.AVI_overlay.jpg", combinedTrackAndPhoto)
-
-
 vidFile.release()
+
+#create track and overlay images
+descriptions = ("before", "after")
+
+for descr in descriptions:
+    createOverlay(descr)
+
+
+
+
 
 #print "finished in %d seconds" % (time.time() - startTime)
