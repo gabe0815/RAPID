@@ -136,7 +136,7 @@ parallel -j 8 -a $IMAGEPATH"/mosaicList.txt" assembleMosaic
 #createHTML
 
 #remove all temp files	
-#rm $IMAGEPATH/sample_*[0-9].txt
-#rm $IMAGEPATH/*sorted.txt
+rm $IMAGEPATH/sample_*[0-9].txt
+rm $IMAGEPATH/*sorted.txt
 
 
