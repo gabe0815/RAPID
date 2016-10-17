@@ -1,7 +1,8 @@
 #!/bin/bash
 
 #IMAGEPATH is stored in config.sh to make it accessible to all scripts
-. ~/applications/RAPID/analysis/config.sh
+#. ~/applications/RAPID/analysis/config.sh
+IMAGEPATH=/mnt/4TBraid04/imagesets04/20161012_testset_V12
 
 
 #functions
@@ -17,29 +18,42 @@ function assembleMosaic {
     filepath="${1%.*}"
   	filename=$(basename "$1")
 	sampleID="${filename%.*}"
-    > $filepath'_mosaic_coordinates.txt'
-    count=0
-    while read i;
-		do
-            img=$( echo "$i" | cut -f1);
-            if [[ $i == *"imagesets04"* ]] # we're on the analysis computer
-            then
-                imgPath=$(echo $img | cut -d"/" -f1-6)
-            else
-                imgPath=$(echo $img | cut -d"/" -f1-5)
-            fi
-			time=$(echo "$i"|cut -f2); 
-			hours=$(echo "scale=2; $time/3600" | bc -l ); 
-            imglist=$(echo $imglist "-label" $hours"h" $img)
-            #calculate coorinates for censoring file
-            xcoord=$(echo $count%$COLUMNS | bc)
-            ycoord=$(echo $count/$COLUMNS | bc)
-            #echo $imgPath','$xcoord','$ycoord 
-            echo $imgPath','$xcoord','$ycoord >> $filepath'_mosaic_coordinates.txt'
-            count=$(echo "$count +1" | bc)
-    done < $1
-	#echo "assembling $1..."
-    montage -pointsize 35 $imglist -tile "$COLUMNS"x -geometry $tileWidth"x"$tileHeight"+0+0" -title $sampleID $filepath'_montage_tracklength.jpg'
+
+    searchStrings=("before" "after") 	# is used in "find" command
+	sets=("before" "after") 			#will used in path name of output
+	
+	#loop through array with index, so we can refer to both array's elements
+	len=${#sets[@]}
+	for (( k=0; k<${len}; k++ ));
+	do
+        > $filepath'_'${sets[$k]}'_mosaic_coordinates.txt'
+        count=0
+        imglist=""
+        while read i;
+		    do
+                #echo ${searchStrings[$k]}
+                imgPath=$(find $(dirname $i) -maxdepth 2 -name "imgseries_h264.AVI_2fps.AVI_${searchStrings[$k]}_overlay.jpg_tracklength.jpg") #imgseries_h264.AVI_2fps.AVI_before_overlay.jpg_tracklength.jpg
+                if [ ! -f "$imgPath" ]
+                then
+                    echo "couldn't find image" 
+                    continue
+                else 
+                    echo "found $imgPath"
+                fi
+
+			    time=$(echo "$i"|cut -f2); 
+			    hours=$(echo "scale=2; $time/3600" | bc -l ); 
+                imglist=$(echo $imglist "-label" $hours"h" $imgPath)
+                #calculate coorinates for censoring file
+                xcoord=$(echo $count%$COLUMNS | bc)
+                ycoord=$(echo $count/$COLUMNS | bc)
+                #echo $imgPath','$xcoord','$ycoord 
+                echo $imgPath','$xcoord','$ycoord >> $filepath'_'${sets[$k]}'_mosaic_coordinates.txt'
+                count=$(echo "$count +1" | bc)
+        done < $1
+	    #echo "assembling $1..."
+        montage -pointsize 35 $imglist -tile "$COLUMNS"x -geometry $tileWidth"x"$tileHeight"+0+0" -title $sampleID $filepath'_montage_'${sets[$k]}'_tracklength.jpg'
+    done
 
     
 }
@@ -48,7 +62,7 @@ function createHTML {
 	
 	#variables within functions are global, as long as the function has been called
 	
-	HTML=$IMAGEPATH"/tracklength_overview.html"
+	HTML=$IMAGEPATH"/after_tracklength_overview.html"
 
 	#write header to the file
 	echo "<!doctype html public \"-//w3c//dtd html 4.0 transitional//en\">
@@ -76,7 +90,7 @@ function createHTML {
 	#go through sampleIDs unique list and find montage images.
 	while read i; 
 		do 
-		FILE=$(find $IMAGEPATH -name "*_"$i"_*tracklength.jpg")
+		FILE=$(find $IMAGEPATH -name "*_"$i"_*after_tracklength.jpg")
 		#echo $FILE	
 		echo "<a href=\"$FILE\">$i</a><br>" >> $HTML
 	done < $IMAGEPATH"/sampleIDs_unique.txt"
@@ -97,12 +111,12 @@ export -f assembleMosaic
 >$IMAGEPATH/sampleIDs_unique.txt
 
 #compile list of all tracklength
-for i in $(find $IMAGEPATH -name "*overlay.jpg_tracklength.jpg")
+for i in $(find $IMAGEPATH -name "sampleID.txt")
 do 
-    sampleID=$(head -n1 $(dirname $i)/sampleID.txt)
-	timeOfBirth=$(tail -n1 $(dirname $i)/sampleID.txt)
-    timestamp=$(head -n1 $(dirname $i)/timestamp.txt)
-
+    dirName=$(dirname $i)
+	timestamp=$(cat $dirName"/timestamp.txt")
+	timeOfBirth=$(tail -n1 $i)
+	sampleID=$(head -n1 $i)
     printf  "$i\t$((timestamp-timeOfBirth))\t$sampleID\n" >> $IMAGEPATH"/tracklength.txt"
 done 
 
@@ -119,10 +133,10 @@ done < $IMAGEPATH"/sampleIDs_unique.txt"
 
 parallel -j 8 -a $IMAGEPATH"/mosaicList.txt" assembleMosaic
 
-createHTML
+#createHTML
 
 #remove all temp files	
-rm $IMAGEPATH/sample_*[0-9].txt
-rm $IMAGEPATH/*sorted.txt
+#rm $IMAGEPATH/sample_*[0-9].txt
+#rm $IMAGEPATH/*sorted.txt
 
 
