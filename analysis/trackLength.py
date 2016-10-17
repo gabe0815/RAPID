@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #run this script like this: 
-#ls -d /media/imagesets04/20160311_vibassay_set5/*/ |  parallel --eta -j16 "/mnt/1TBraid01/homefolders/gschweighauser/RAPID/analysis/tracklength.py {}"
+#ls -d /mnt/4TBraid04/imagesets04/20161012_testset_V12/*/ | parallel --eta -j16 "~/applications/RAPID/analysis/trackLength.py {}"
 from scipy.spatial import distance as dist
 import cv2
 import numpy as np
@@ -167,12 +167,13 @@ def analyseTrack(parentDir, description):
 
         imgPath = findImage(parentDir, description+"_overlay.jpg")        
 
-        print "imagepath: %s %s" % (imgPath, description)
+        #print "imagepath: %s %s" % (imgPath, description)
         if imgPath != -1:
             ret, dst = cv2.threshold(mask, 127, 255, cv2.THRESH_BINARY)
             contours, hierarchy = cv2.findContours(dst,cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)
             img = cv2.imread(imgPath)
             cv2.drawContours(img, contours, -1, (0,0,255), 3)
+            cv2.putText(img, str(description), (100,150), cv2.FONT_HERSHEY_SIMPLEX, 5, (0,0,255), 10)
             cv2.putText(img, str(area), (100,2200), cv2.FONT_HERSHEY_SIMPLEX, 5, (0,0,255), 10)
             cv2.putText(img, str(onEdge), (1500,2200), cv2.FONT_HERSHEY_SIMPLEX, 5, (0,0,255), 10)
             cv2.putText(img, str(version), (2700,2200), cv2.FONT_HERSHEY_SIMPLEX, 5, (0,0,255), 10)
