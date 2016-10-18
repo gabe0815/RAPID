@@ -120,14 +120,14 @@ def measureArea(origImg, threshImg, minArea, minDistance):
     nonZeroPixels = cv2.countNonZero(threshImg)
     #reject noisy images
     if nonZeroPixels > 100000:
-        return (-1, np.zeros(threshImg.shape,np.uint8), 0)                    
+        return (-1, np.zeros(threshImg.shape,np.uint8), 0, 0)                    
 
     else: 
         contours, hierarchy = cv2.findContours(threshImg.copy(),cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)
 
     numberOfContours = len(contours)
     if numberOfContours == 0:
-        return (0, np.zeros(threshImg.shape,np.uint8), 0) 
+        return (0, np.zeros(threshImg.shape,np.uint8), 0, 0) 
 
     #apply mask   
     mask = createMask(contours, threshImg, minDistance)  
@@ -154,16 +154,16 @@ def measureArea(origImg, threshImg, minArea, minDistance):
 #    cv2.imshow("Image", maskedImg)
 #    cv2.waitKey(0)     
 
-    return (cv2.countNonZero(maskedImg), maskedImg, onEdge)
+    return (cv2.countNonZero(maskedImg), maskedImg, onEdge, numberOfContours)
 
 
 def analyseTrack(parentDir, description):
     imgPath = findImage(parentDir, description+".jpg")
     if imgPath == -1:
-        return -1, 0
+        return -1, 0, 0
     else:
         img, th = threshold(imgPath)
-        area, mask, onEdge = measureArea(img, th, 50, 50) #chose 50px as max distance
+        area, mask, onEdge, numberOfContours = measureArea(img, th, 50, 50) #chose 50px as max distance
 
         imgPath = findImage(parentDir, description+"_overlay.jpg")        
 
@@ -180,7 +180,7 @@ def analyseTrack(parentDir, description):
 
             cv2.imwrite(imgPath+"_tracklength.jpg", img)            
     
-        return area, onEdge  
+        return area, onEdge, numberOfContours 
     
 ################# main program starts here #################
 
@@ -189,17 +189,17 @@ src = sys.argv[1]
 descriptions = ("before", "after")
 
 try:
-    os.remove(src + "tracklength.tsv")
+    os.remove(src + "trackLength.tsv")
 except OSError:
     pass
 
 trackFile = open(src + "trackLength.tsv", "w")
-trackFile.write("trackVersion." + str(version) + "\tlength\tarea\tedge")
+trackFile.write("trackVersion." + str(version) + "\tlength\tarea\tedge\tcontours")
 
 
 for descr in descriptions:
-    area, onEdge = analyseTrack(src, descr)
-    trackFile.write("\n"+descr+"\t"+str(0)+"\t"+str(area)+"\t"+str(onEdge)) 
+    area, onEdge, numberOfContours = analyseTrack(src, descr)
+    trackFile.write("\n"+descr+"\t"+str(0)+"\t"+str(area)+"\t"+str(onEdge)+"\t"+str(numberOfContours)) 
     #if descr == "after" and onEdge: #we don't want to censor tracks based on "before" image ...
     #    censorFile = open(src + "censored.txt", "w")
     #    censorFile.write("censored")
