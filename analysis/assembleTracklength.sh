@@ -1,8 +1,8 @@
 #!/bin/bash
 
 #IMAGEPATH is stored in config.sh to make it accessible to all scripts
-#. ~/applications/RAPID/analysis/config.sh
-IMAGEPATH=/mnt/4TBraid04/imagesets04/20161012_testset_V12
+. ~/applications/RAPID/analysis/config.sh
+#IMAGEPATH=/mnt/4TBraid04/imagesets04/20161012_testset_V12
 
 
 #functions
