@@ -52,7 +52,7 @@ function assembleMosaic {
                 count=$(echo "$count +1" | bc)
         done < $1
 	    #echo "assembling $1..."
-        montage -pointsize 35 $imglist -tile "$COLUMNS"x -geometry $tileWidth"x"$tileHeight"+0+0" -title $sampleID $filepath'_montage_'${sets[$k]}'_tracklength.jpg'
+        montage -pointsize 35 $imglist -tile "$COLUMNS"x -geometry $tileWidth"x"$tileHeight"+0+0" -title $sampleID $filepath'_'${sets[$k]}'_montage_tracklength.jpg'
     done
 
     
@@ -138,5 +138,3 @@ parallel -j 8 -a $IMAGEPATH"/mosaicList.txt" assembleMosaic
 #remove all temp files	
 rm $IMAGEPATH/sample_*[0-9].txt
 rm $IMAGEPATH/*sorted.txt
-
-
