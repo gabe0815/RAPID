@@ -52,7 +52,7 @@ function assembleMosaic {
                 count=$(echo "$count +1" | bc)
         done < $1
 	    #echo "assembling $1..."
-        montage -pointsize 35 $imglist -tile "$COLUMNS"x -geometry $tileWidth"x"$tileHeight"+0+0" -title $sampleID $filepath'_'${sets[$k]}'_montage_tracklength.jpg'
+        montage -pointsize 35 $imglist -tile "$COLUMNS"x -geometry $tileWidth"x"$tileHeight"+0+0" -title $sampleID" "${sets[$k]} $filepath'_'${sets[$k]}'_montage_tracklength.jpg'
     done
 
     
