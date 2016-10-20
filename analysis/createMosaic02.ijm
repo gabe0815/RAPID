@@ -7,56 +7,109 @@ var width = 3072 * scaleFactor;
 var file;
 var lines;
 var mosaic_lines;
-var counter = -2 +1* 28 + 19 ; //we increment firtst
+var counter = -2+1; //we increment firtst 195_39
+//var counter = -1; //we increment firtst
+//var counter = -1;
 var yOffset = 70;
-macro "load from list [l] "{
-	list = File.openAsString("/mnt/4TBraid04/imagesets04/20160810_vibassay_set10/list.txt");
-	lines=split(list,"\n");
-		
-}
+var description;
 
-macro "open next [n]" {
-     counter++;
+macro "set image number [i]"{
+	close();
+	Dialog.create("Set number");
+	Dialog.addNumber("Enter montage number:", 1) ;
+	Dialog.show();
+	counter = Dialog.getNumber();
+	counter -= 2;
+	openNext();
+}	
+
+function openNext(){
+    counter++;
+    print("opening " + lines[counter]);
     open(lines[counter]);
     //run("Set... ", "zoom=25");
     wait(1000);
-    setLocation(0, 0, 1500, 3000);
+    setLocation(0, 0, 2000, 4000);
     roiManager("Reset");
     run("Remove Overlay");
-    //filePath = "/media/imagesets04/20160311_vibassay_set5/IFP199_12_sorted";
-    filePath = getInfo("image.directory") + getInfo("image.filename");
-    filePath = substring(filePath, 0,  indexOf(filePath, "_montage"));
+    //imagePath = "/mnt/4TBraid04/imagesets04/20160810_vibassay_set10_censored/sample_N2.FUdR.10_15_sorted_after_montage_tracklength.jpg";
+    imagePath = getInfo("image.directory") + getInfo("image.filename");
+    prefix = substring(imagePath, 0,  indexOf(imagePath, "_montage"));
     //print(filePath);
-    file = File.openAsRawString(filePath+"_mosaic_coordinates.txt");
-    //print(file);	
+
+    file = File.openAsRawString(prefix+"_mosaic_coordinates.txt");
+    description = substring(imagePath, indexOf(imagePath,"sorted_") +7 ,  indexOf(imagePath, "_montage")) ; // /mnt/4TBraid04/imagesets04/20160810_vibassay_set10_censored/sample_N2.FUdR.40_7_sorted_before_montage_tracklength.jpg
+     //print(file);	
     mosaic_lines=split(file,"\n");
 	for (i=0; i<lengthOf(mosaic_lines); i++){
 		path = split(mosaic_lines[i], ",");
+		//print(path[0]);
+		
 		if (File.exists(path[0]+"/"+"censored.txt")){
-			makeRectangle(path[1]*width+50, path[2]*height + yOffset, width-100, height-100);
-			roiManager("Add");
-			roiManager("Select",roiManager("count")-1);
-			roiManager("Rename",path[1]+","+path[2]);
+			censoredFile =  File.openAsRawString(path[0] +"/censored.txt");
+			//print("censored");
+			if (indexOf(censoredFile, description)  != -1){
+				makeRectangle(path[1]*width+50, path[2]*height + yOffset, width-100, height-100);
+				roiManager("Add");
+				roiManager("Select",roiManager("count")-1);
+				roiManager("Rename",path[1]+","+path[2]);
+			}
 		}
+		
 	}
 	if (roiManager("Count")!=0){
 		run("From ROI Manager");
 		run("Show Overlay");
 		run("Overlay Options...", "stroke=none width=10 fill=#660000ff apply");
 	}
+	
     run("Select None");
+}
+
+macro "load from list [l] "{
+	list = File.openAsString("/mnt/4TBraid04/imagesets04/20160810_vibassay_set10_censored/list.txt");
+	lines=split(list,"\n");
+		
+}
+
+macro "close [e]" {
+	close();
+	openNext();
+}
+
+
+
+macro "open next [n]" {
+    openNext();
 		
 }
 
 
-macro "save annotations [s] "{
+macro "save annotations [a] "{
 	//file = File.openAsString(fileList+"_mosaic_coordinates.txt");
 	//print(file);
 	for (i=0; i<lengthOf(mosaic_lines); i++){
+        before = 0;
+        after = 0;
 		//remove all censored flags first, then add them
 		path = split(mosaic_lines[i], ",");
-		if (File.exists(path[0]+"/"+ "censored.txt")){
-			File.delete(path[0]+"/"+"censored.txt");
+		if (File.exists(path[0]+"/censored.txt")){
+			censoredFile = File.openAsRawString(path[0]+"/censored.txt");
+            File.delete(path[0]+"/"+ "censored.txt");
+            if ((indexOf(censoredFile, "before") != -1) && (description != "before")) {
+                before = 1;
+            }
+            if ((indexOf(censoredFile, "after") != -1) && (description != "after")) {
+                after = 1;            
+            }
+            
+            //write a new file with the remaining censor flag
+            if (before == 1){
+                File.saveString("before\t1\n", path[0]+"/censored.txt");
+            } else if (after == 1) {
+                File.saveString("after\t1\n", path[0]+"/censored.txt");
+            }
+			
 		}
 	}
 
@@ -66,9 +119,9 @@ macro "save annotations [s] "{
 		for (j=0; j<lengthOf(mosaic_lines);j++){
 			path = split(mosaic_lines[j], ",");
 			if (indexOf(mosaic_lines[j], ","+Roi.getName) != -1){ //otherwise we find 1_2_3,0,0 if we look for 3,0
-				print(mosaic_lines[j]);
-				print("censoring " + path[0]);
-				File.saveString("censored", path[0]+"/"+"censored.txt");
+				//print(mosaic_lines[j]);
+				//print("censoring " + path[0]);
+				File.append(description +"\t1", path[0]+"/"+"censored.txt");
 				break;
 			}
 		}
@@ -78,12 +131,12 @@ macro "save annotations [s] "{
 	run("Remove Overlay");
 	run("Select None");
 	close();
-	
+	openNext();
 }
 
 macro "print annotations [p]"{
 	if (File.exists(lines[counter]+"_wrongID.txt" )){
-		File.delete (lines[counter]+"_wrongID.txt" );
+		File.delete(lines[counter]+"_wrongID.txt" );
 	}
 	
 	for (i=0; i<roiManager("Count"); i++){
@@ -103,9 +156,10 @@ macro "print annotations [p]"{
 	run("Remove Overlay");
 	run("Select None");
 	close();
+	openNext();
 }
 
-macro "annotate images [a] " {
+macro "annotate images [d] " {
 	
 	run("Select None");
 	run("Overlay Options...", "stroke=none width=10 fill=#660000ff");
@@ -121,7 +175,7 @@ macro "annotate images [a] " {
 	//run("Select All");
 	run("Add Selection...");
 	run("Show Overlay");
-	print("selected image: " + xCoord + ", " + yCoord);
+	//print("selected image: " + xCoord + ", " + yCoord);
 
 	
 }
