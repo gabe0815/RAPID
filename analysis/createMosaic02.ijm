@@ -41,6 +41,7 @@ function openNext(){
     description = substring(imagePath, indexOf(imagePath,"sorted_") +7 ,  indexOf(imagePath, "_montage")) ; // /mnt/4TBraid04/imagesets04/20160810_vibassay_set10_censored/sample_N2.FUdR.40_7_sorted_before_montage_tracklength.jpg
      //print(file);	
     mosaic_lines=split(file,"\n");
+    
 	for (i=0; i<lengthOf(mosaic_lines); i++){
 		path = split(mosaic_lines[i], ",");
 		//print(path[0]);
@@ -67,7 +68,7 @@ function openNext(){
 }
 
 macro "load from list [l] "{
-	list = File.openAsString("/mnt/4TBraid04/imagesets04/20160810_vibassay_set10_censored/list.txt");
+	list = File.openAsString("/mnt/4TBraid04/imagesets04/20160919_vibassay_set12/list.txt");
 	lines=split(list,"\n");
 		
 }
