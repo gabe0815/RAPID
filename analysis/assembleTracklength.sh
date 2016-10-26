@@ -47,8 +47,9 @@ function assembleMosaic {
                 #calculate coorinates for censoring file
                 xcoord=$(echo $count%$COLUMNS | bc)
                 ycoord=$(echo $count/$COLUMNS | bc)
-                #echo $imgPath','$xcoord','$ycoord 
-                echo $imgPath','$xcoord','$ycoord >> $filepath'_'${sets[$k]}'_mosaic_coordinates.txt'
+                #echo $imgPath','$xcoord','$ycoord
+                parentDir=$(echo $imgPath | cut -d "/" -f1-6)
+                echo $parentDir','$xcoord','$ycoord >> $filepath'_'${sets[$k]}'_mosaic_coordinates.txt'
                 count=$(echo "$count +1" | bc)
         done < $1
 	    #echo "assembling $1..."
