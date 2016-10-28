@@ -6,9 +6,9 @@ var mosaicLines;
 var counter = 0;
 var mosaicCounter;
 
-macro "open mosaic [m]" {
+macro "open mosaic [e]" {
     if (counter == 0){
-        list = File.openAsString("/mnt/4TBraid04/imagesets04/20160919_vibassay_set12/list.txt");
+        list = File.openAsString("/mnt/4TBraid04/imagesets04/20160810_vibassay_set10_censored/list.txt");
         lines=split(list,"\n");
         nextMosaic();
     } else {
@@ -25,10 +25,31 @@ macro "open mosaic [m]" {
 	}	
 }
 
-macro "open next [n]"{
+macro "set tool zoom [d]"{
+    setTool("zoom");
+}
+
+macro "set tool line [s]"{
+    setTool("line");
+}
+
+macro "measure [a]"{
+    run("Measure");
+}
+
+macro "open next [c]"{
     openNext();
 }
 
+macro "set mosaic counter [i]"{
+
+    close();
+	Dialog.create("Set number");
+	Dialog.addNumber("Enter montage number:", 1) ;
+	Dialog.show();
+	counter = Dialog.getNumber();
+	nextMosaic();
+}
 function nextMosaic(){
     while (indexOf(lines[counter], "_after") == -1) {
         //print("not found, continue");        
