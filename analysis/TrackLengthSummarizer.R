@@ -127,7 +127,6 @@ createPlots <- function(trackDataCollector,ResultOutputPath){
   includedStrains <- uniqueGroups(trackDataCollector)
   strainNumber <- length(includedStrains)
   numberPlotRows <- ceiling(length(trackDataCollector) / strainNumber)
-  lastTimeAliveFrame <- data.frame(character(0), numeric(0), numeric(0), stringsAsFactors = FALSE)
   plotSortList <- NULL # reset the list
   for (i in 1:strainNumber){
     plotSortList<-lappend(plotSortList,NULL) #expand the list to number of strains
@@ -177,10 +176,6 @@ createPlots <- function(trackDataCollector,ResultOutputPath){
                   thisSampleSorted <- mat.sort(thisSampleFrame,3) #sort each sample by "currentTimestamp", i.e. column 3
                   thisSampleSorted <- removeCensored(thisSampleSorted) 
                   thisSampleSorted <- removeEmptyTimepoints(thisSampleSorted)
-                  lastTimeAlive <- checkTimePoints(thisSampleSorted)
-                  #lastTimeAliveFrame[nrow(lastTimeAliveFrame)+1,] <- c(as.character(thisSampleSorted[1,1]), as.numeric(lastTimeAlive), 1)
-                  lastTimeAliveFrame <- rbind(lastTimeAliveFrame, data.frame(as.character(thisSampleSorted[1,1]),lastTimeAlive,1,stringsAsFactors = FALSE))
-                  #save(thisSampleSorted, file="/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/thisSampleSorted.rda")
                   tryCatch({censoredUnzeroedRapidData[[sortedDataListCounter]] <- c(toString(thisSampleSorted[[1]][1]),approx(thisSampleSorted[,8],thisSampleSorted[,columToAnalyze],xout=seq(0,21,1/24)))},error=function(cond){print(paste0("faulty dataset in trackDataCollector[[",toString(s),"]] ",cond))})
                   par(mfg=c(o,i)) #define plotting location on muliple plot sheet http://stackoverflow.com/questions/4785657/r-how-to-draw-an-empty-plot
                   #try(plot(approx(thisSampleSorted[,8],thisSampleSorted[,6],xout=seq(0,16,1/24)),main=thisSampleSorted[[1]][1],xlab="time [days]", ylab="track length [px]",pch='.',type="l",ylim=c(0,1500))) # plotting limits!
@@ -194,9 +189,6 @@ createPlots <- function(trackDataCollector,ResultOutputPath){
           }
           setTxtProgressBar(progressBar,o)
         }
-        #rename columns:
-        colnames(lastTimeAliveFrame) <- c( "ID", "stop", "status")        
-        save(lastTimeAliveFrame, file="/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/lastTimeAliveFrame.rda")
 
         cat("... done.\n")
         cat("writing plots to file ...")
@@ -279,7 +271,8 @@ createMeanPlots <- function(censoredUnzeroedRapidData,ResultOutputPath){
 		
 	print(groupwiseDataCollector)
 	cat("\nThe data set contains these sample groups: ",sampleGroups,"\n")
-	for (i in 2:length(censoredUnzeroedRapidData)){
+    #This loop does nothing?	
+    for (i in 2:length(censoredUnzeroedRapidData)){
 		for (j in 1:length(sampleGroups)){
 			
 		}
@@ -565,8 +558,31 @@ checkTimePoints <- function(singleSampleFrame){
     return (-1)
 }
 
-plotSurvival <- function(groupwiseDataCollector_statData) {
+plotSurvival <- function(sortedFilteredCensoredRapidData) {
+    for (i in 1:length(sortedFilteredCensoredRapidData)){
+        for (j in length(sortedFilteredCensoredRapidData[[i]]$X7):1){
+           if ((sortedFilteredCensoredRapidData[[i]]$X7[j] != 0) && (sortedFilteredCensoredRapidData[[i]]$X7[j] != -1)){
+             cat("Hooray the latest timepoint is: ", sortedFilteredCensoredRapidData[[i]]$X7[j])
+             break 
+        }
+    } 
+#   	sampleGroups <- uniqueGroups(sortedFilteredCensoredRapidData)
+#    print(sampleGroups)
+#    
+#    #loop through sampleGroups
+#    for (i in 1:length(sampleGroups)){
+#        cat(i)
+#    }
 
+#    lastTimeAliveFrame <- data.frame(character(0), numeric(0), numeric(0), stringsAsFactors = FALSE)
+#    lastTimeAlive <- checkTimePoints(thisSampleSorted)
+#      #lastTimeAliveFrame[nrow(lastTimeAliveFrame)+1,] <- c(as.character(thisSampleSorted[1,1]), as.numeric(lastTimeAlive), 1)
+#      lastTimeAliveFrame <- rbind(lastTimeAliveFrame, data.frame(as.character(thisSampleSorted[1,1]),lastTimeAlive,1,stringsAsFactors = FALSE))
+#      #save(thisSampleSorted, file="/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/thisSampleSorted.rda")
+
+#        #rename columns:
+#    colnames(lastTimeAliveFrame) <- c( "ID", "stop", "status")        
+#        save(lastTimeAliveFrame, file="/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/lastTimeAliveFrame.rda")
 }
 
 
@@ -624,7 +640,7 @@ print("summarize_done")
 #trackDataCollector<-c(tracks2,tracks3,tracks4,tracks5,tracks6,tracks7,tracks8,tracks9)
 #trackDataCollector<-tracks10
 # trackDataCollector<-c(tracks2,tracks3,tracks5)
-load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_SS104_set2_analysisV13/trackDataCollector.rda")
+##load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_SS104_set2_analysisV13/trackDataCollector.rda")
 
 
       #print(trackDataCollector[[length(trackDataCollector)]])
@@ -632,7 +648,7 @@ load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_A
       #print(length(trackDataCollector))
       #print("------------------------")
 
-trackDataCollector<-censorData(trackDataCollector,"/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/censoringList.txt")
+##trackDataCollector<-censorData(trackDataCollector,"/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/censoringList.txt")
 
 
       #print(trackDataCollector[[length(trackDataCollector)]])
@@ -642,10 +658,14 @@ trackDataCollector<-censorData(trackDataCollector,"/home/jhench/mac/Documents/sy
       #load("trackDataCollector.rda")
       #createMeanPlots(trackDataCollector,"/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/")
 
-createPlots(trackDataCollector,"/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
+##createPlots(trackDataCollector,"/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
 
 # next 3 lines WORK!
-##load("/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/censoredUnzeroedRapidData.rda")
+#load("/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/censoredUnzeroedRapidData.rda")
+load("/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/sortedFilteredCensoredRapidData.rda")
+plotSurvival(sortedFilteredCensoredRapidData)
+
+
 ##groupwiseDataCollector_statData<-createMeanPlots(censoredUnzeroedRapidData,"/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
 
 ##save(groupwiseDataCollector_statData, file="/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/groupwiseDataCollector_statData.rda")
