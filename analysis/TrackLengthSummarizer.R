@@ -127,7 +127,7 @@ createPlots <- function(trackDataCollector,ResultOutputPath){
   includedStrains <- uniqueGroups(trackDataCollector)
   strainNumber <- length(includedStrains)
   numberPlotRows <- ceiling(length(trackDataCollector) / strainNumber)
-  
+  lastTimeAliveFrame <- data.frame(character(0), numeric(0), numeric(0), stringsAsFactors = FALSE)
   plotSortList <- NULL # reset the list
   for (i in 1:strainNumber){
     plotSortList<-lappend(plotSortList,NULL) #expand the list to number of strains
@@ -177,6 +177,10 @@ createPlots <- function(trackDataCollector,ResultOutputPath){
                   thisSampleSorted <- mat.sort(thisSampleFrame,3) #sort each sample by "currentTimestamp", i.e. column 3
                   thisSampleSorted <- removeCensored(thisSampleSorted) 
                   thisSampleSorted <- removeEmptyTimepoints(thisSampleSorted)
+                  lastTimeAlive <- checkTimePoints(thisSampleSorted)
+                  #lastTimeAliveFrame[nrow(lastTimeAliveFrame)+1,] <- c(as.character(thisSampleSorted[1,1]), as.numeric(lastTimeAlive), 1)
+                  lastTimeAliveFrame <- rbind(lastTimeAliveFrame, data.frame(as.character(thisSampleSorted[1,1]),lastTimeAlive,1,stringsAsFactors = FALSE))
+                  #save(thisSampleSorted, file="/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/thisSampleSorted.rda")
                   tryCatch({censoredUnzeroedRapidData[[sortedDataListCounter]] <- c(toString(thisSampleSorted[[1]][1]),approx(thisSampleSorted[,8],thisSampleSorted[,columToAnalyze],xout=seq(0,21,1/24)))},error=function(cond){print(paste0("faulty dataset in trackDataCollector[[",toString(s),"]] ",cond))})
                   par(mfg=c(o,i)) #define plotting location on muliple plot sheet http://stackoverflow.com/questions/4785657/r-how-to-draw-an-empty-plot
                   #try(plot(approx(thisSampleSorted[,8],thisSampleSorted[,6],xout=seq(0,16,1/24)),main=thisSampleSorted[[1]][1],xlab="time [days]", ylab="track length [px]",pch='.',type="l",ylim=c(0,1500))) # plotting limits!
@@ -190,6 +194,10 @@ createPlots <- function(trackDataCollector,ResultOutputPath){
           }
           setTxtProgressBar(progressBar,o)
         }
+        #rename columns:
+        colnames(lastTimeAliveFrame) <- c( "ID", "stop", "status")        
+        save(lastTimeAliveFrame, file="/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/lastTimeAliveFrame.rda")
+
         cat("... done.\n")
         cat("writing plots to file ...")
         dev.off()
@@ -394,12 +402,12 @@ plotMeanStDev <- function(groupwiseDataCollector_statData){
   stdevCollector <- meanCollector #duplicate the NA data frame
   
   cat("calculating Mean and StDev:\n")
-  cat("|0%.......................100%|\n")
-  progressBar <- txtProgressBar(min = 1, max = length(groupwiseDataCollector_statData[2][[1]][[1]]), initial = 1, char = "=",width = 30, title, label, style = 1, file = "")
+ # cat("|0%.......................100%|\n")
+ # progressBar <- txtProgressBar(min = 1, max = length(groupwiseDataCollector_statData[2][[1]][[1]]), initial = 1, char = "=",width = 30, title, label, style = 1, file = "")
   
   for (q in 1:length(groupwiseDataCollector_statData[[3]])){ #loop through all virtual time points
   #for (q in 190:193){
-    setTxtProgressBar(progressBar,q)
+    #setTxtProgressBar(progressBar,q)
     meanStdResult <- NULL
     try(meanStdResult<- calcMeanStd(groupwiseDataCollector_statData,q),silent = FALSE)
     if (is.null(meanStdResult) == FALSE){
@@ -420,35 +428,35 @@ plotMeanStDev <- function(groupwiseDataCollector_statData){
   par(mfrow=c(plotHeight,plotWidth),pty = "s") #define plotting location on muliple plot sheet http://stackoverflow.com/questions/4785657/r-how-to-draw-an-empty-plot
   plotX <- as.numeric(rownames(meanCollector))
   cat("plotting mean:\n")
-  cat("|0%.......................100%|\n")
-  progressBar <- txtProgressBar(min = 1, max = length(meanCollector), initial = 1, char = "=",width = 30, title, label, style = 1, file = "")
+#  cat("|0%.......................100%|\n")
+#  progressBar <- txtProgressBar(min = 1, max = length(meanCollector), initial = 1, char = "=",width = 30, title, label, style = 1, file = "")
   for (i in 1:length(colnames(meanCollector))){
     plotY <- meanCollector[,i] # entire colun of current strain over time
     plot(xy.coords(plotX[is.na(plotY)==FALSE], plotY[is.na(plotY)==FALSE]),main=colnames(meanCollector)[i],xlab="time [days]", ylab="mean [track]",pch='.',type="l",xlim=c(0,25),ylim=c(0,40000)) #plot needs to exlude NA rows
-    setTxtProgressBar(progressBar,i)
+#    setTxtProgressBar(progressBar,i)
   }
   cat("... done.\n")
   cat("writing plots to file ...")
   dev.off()
   
   cat("plotting stdev:\n")
-  cat("|0%.......................100%|\n")
-  progressBar <- txtProgressBar(min = 1, max = length(meanCollector), initial = 1, char = "=",width = 30, title, label, style = 1, file = "")
+#  cat("|0%.......................100%|\n")
+#  progressBar <- txtProgressBar(min = 1, max = length(meanCollector), initial = 1, char = "=",width = 30, title, label, style = 1, file = "")
   png(filename = paste0(ResultOutputPath,"STDEVplot001_",correctTrackVersionString,".png"), width = 400*plotWidth, height = 400*plotHeight, units = "px", pointsize = 14, bg = "white")
   par(mfrow=c(plotHeight,plotWidth),pty = "s") #define plotting location on muliple plot sheet http://stackoverflow.com/questions/4785657/r-how-to-draw-an-empty-plot
   plotX <- as.numeric(rownames(meanCollector))
   for (i in 1:length(colnames(meanCollector))){
     plotY <- stdevCollector[,i] # entire colun of current strain over time
     plot(xy.coords(plotX[is.na(plotY)==FALSE], plotY[is.na(plotY)==FALSE]),main=colnames(meanCollector)[i],xlab="time [days]", ylab="std.dev. [track]",pch='.',type="l",xlim=c(0,25),ylim=c(0,40000))
-    setTxtProgressBar(progressBar,i)
+#    setTxtProgressBar(progressBar,i)
   }
   cat("... done.\n")
   cat("writing plots to file ...")
   dev.off()
   
   cat("plotting mean and stdev:\n")
-  cat("|0%.......................100%|\n")
-  progressBar <- txtProgressBar(min = 1, max = length(meanCollector), initial = 1, char = "=",width = 30, title, label, style = 1, file = "")
+#  cat("|0%.......................100%|\n")
+#  progressBar <- txtProgressBar(min = 1, max = length(meanCollector), initial = 1, char = "=",width = 30, title, label, style = 1, file = "")
   png(filename = paste0(ResultOutputPath,"MEANandSTDEVplot001_",correctTrackVersionString,".png"), width = 400*plotWidth, height = 400*plotHeight, units = "px", pointsize = 14, bg = "white")
   par(mfrow=c(plotHeight,plotWidth),pty = "s") #define plotting location on muliple plot sheet http://stackoverflow.com/questions/4785657/r-how-to-draw-an-empty-plot
   plotX <- as.numeric(rownames(meanCollector))
@@ -458,7 +466,7 @@ plotMeanStDev <- function(groupwiseDataCollector_statData){
     plot(xy.coords(plotX[is.na(plotY1)==FALSE], plotY1[is.na(plotY1)==FALSE]),main=colnames(meanCollector)[i],xlab="time [days]", ylab="speed[a.U.] (black), std.dev.(gray)",pch='.',type="l",xlim=c(0,25),ylim=c(0,40000),col="black")
     lines(plotX[is.na(plotY2)==FALSE], plotY1[is.na(plotY1)==FALSE]-plotY2[is.na(plotY2)==FALSE],col="gray")
     lines(plotX[is.na(plotY2)==FALSE], plotY1[is.na(plotY1)==FALSE]+plotY2[is.na(plotY2)==FALSE],col="gray")
-    setTxtProgressBar(progressBar,i)
+#    setTxtProgressBar(progressBar,i)
   }
   cat("... done.\n")
   cat("writing plots to file ...")
@@ -545,6 +553,24 @@ mat.sort <- function(mat,n) # from http://www.r-bloggers.com/sorting-a-matrixdat
 	return(mat)
 }
 
+checkTimePoints <- function(singleSampleFrame){
+    #get the last timepoint, a worm was moving
+    for(i in nrow(singleSampleFrame):1){
+        if ((singleSampleFrame[i,columToAnalyze] != 0) && (singleSampleFrame[i,columToAnalyze] != -1)){
+            #cat("last timepoint: ", singleSampleFrame[i,8])
+            return (singleSampleFrame[i,8])
+            break
+        }
+    }
+    return (-1)
+}
+
+plotSurvival <- function(groupwiseDataCollector_statData) {
+
+}
+
+
+
 # global parameters (use <<- instead of <-)
 columToAnalyze <<- 7 # after track area
 #columToAnalyze <<- 5 # before track area
@@ -566,7 +592,7 @@ correctTrackVersionString <<- "trackVersion.v13"
 #summarizeTracks("/mnt/4TBraid04/imagesets04/20160810_vibassay_set10_censored","/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160810_vibassay_set10/")
 #summarizeTracks("/mnt/4TBraid04/imagesets04/20160902_vibassay_set11","/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160902_vibassay_set11/")
 #summarizeTracks("/mnt/4TBraid04/imagesets04/20160919_vibassay_set12","/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/")
-summarizeTracks("/mnt/4TBraid04/imagesets04/SS104_set2_analysisV13","/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_SS104_set2_analysisV13/")
+#summarizeTracks("/mnt/4TBraid04/imagesets04/SS104_set2_analysisV13","/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_SS104_set2_analysisV13/")
 
 
 print("summarize_done")
@@ -619,11 +645,11 @@ trackDataCollector<-censorData(trackDataCollector,"/home/jhench/mac/Documents/sy
 createPlots(trackDataCollector,"/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
 
 # next 3 lines WORK!
-load("/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/censoredUnzeroedRapidData.rda")
-groupwiseDataCollector_statData<-createMeanPlots(censoredUnzeroedRapidData,"/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
+##load("/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/censoredUnzeroedRapidData.rda")
+##groupwiseDataCollector_statData<-createMeanPlots(censoredUnzeroedRapidData,"/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
 
 ##save(groupwiseDataCollector_statData, file="/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/groupwiseDataCollector_statData.rda")
 ##load("/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/groupwiseDataCollector_statData.rda")
 
 ##plotAnova(groupwiseDataCollector_statData)
-plotMeanStDev(groupwiseDataCollector_statData)
+##plotMeanStDev(groupwiseDataCollector_statData)
