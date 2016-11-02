@@ -7,6 +7,9 @@
 #  R version 3.0.2 (2013-09-25) -- "Frisbee Sailing"
 #  Platform: x86_64-pc-linux-gnu (64-bit)
 
+library(survminer)
+library(survival)
+
 summarizeTracks <- function(RapidInputPath,ResultOutputPath){
 	print(RapidInputPath)
 	print(ResultOutputPath)
@@ -559,8 +562,6 @@ checkTimePoints <- function(singleSampleFrame){
 }
 
 plotSurvival <- function(sortedFilteredCensoredRapidData) {
-  library(survminer)
-  library(survival)
   # At the moment, the column to be checked is hardcoded (X7). This could be avoided if we proberly name columns.
   # All worms are collected in the same data frame. By having a group ID, they can be assigned during plotting.
   lastTimeAlive.df <- data.frame(ID = character(0), group = character(0), stop = numeric(0), status = numeric(0))  
@@ -585,7 +586,19 @@ plotSurvival <- function(sortedFilteredCensoredRapidData) {
 #      )
 
   fit<- survfit(Surv(stop, status) ~ group, data = lastTimeAlive.df)
-  ggsurvplot(fit)
+  ggsurvplot(fit, 
+          legend = c("right"), 
+    legend.title = "Strains", 
+     #legend.labs = c("N2", "CB120", "CB246", "CB306", "CL2355", "LS292", "TJ1052", "ZZ17", "MT2426", "CB1072"),
+     #legend.labs = c("N2, 10 µM FUdR", "N2, 20 µM FUdR", "N2, 40 µM FUdR"),
+     legend.labs = c("SS104, 10 µM FUdR", "SS104, 0 µM FUdR", "N2, 10 µM FUdR (old)", "N2, 10 µM FUdR"), 
+            main = "Lifespan",
+            xlab = "Days",
+            ylab = "Fraction surving",
+            xlim = c(0,30)
+   
+             )
+
   # need to find the right parameters to make it look nice
   ggsave("/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/survival.png") 
   save(lastTimeAlive.df, file="/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/lastTimeAliveFrame.rda")
