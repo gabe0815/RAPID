@@ -566,24 +566,26 @@ plotSurvival <- function(sortedFilteredCensoredRapidData) {
   # All worms are collected in the same data frame. By having a group ID, they can be assigned during plotting.
   lastTimeAlive.df <- data.frame(ID = character(0), group = character(0), stop = numeric(0), status = numeric(0))  
   for (i in 1:length(sortedFilteredCensoredRapidData)){
+    lastTimeAliveIndex <- -1
     for (j in length(sortedFilteredCensoredRapidData[[i]]$X7):1){
-       if ((sortedFilteredCensoredRapidData[[i]]$X7[j] != 0) && (sortedFilteredCensoredRapidData[[i]]$X7[j] != -1)){
-         lastTimeAlive.df <- rbind(lastTimeAlive.df, data.frame(ID = as.character(sortedFilteredCensoredRapidData[[i]]$X1[j]), 
-                                                             group = unlist(strsplit(as.character(sortedFilteredCensoredRapidData[[i]]$X1[j]), "_"))[1], 
-                                                              stop = sortedFilteredCensoredRapidData[[i]]$X8[j], 
-                                                            status = 1))
-         break
+       # there need to be two tracks within 3 time points for it to count
+       if (sortedFilteredCensoredRapidData[[i]]$X7[j] > 0){
+         if (lastTimeAliveIndex == -1){
+           lastTimeAliveIndex <- j
+
+         } else if ((lastTimeAliveIndex - j) <= 3){
+     
+           lastTimeAlive.df <- rbind(lastTimeAlive.df, data.frame(ID = as.character(sortedFilteredCensoredRapidData[[i]]$X1[lastTimeAliveIndex]), 
+                                                               group = unlist(strsplit(as.character(sortedFilteredCensoredRapidData[[i]]$X1[lastTimeAliveIndex]), "_"))[1], 
+                                                                stop = sortedFilteredCensoredRapidData[[i]]$X8[lastTimeAliveIndex], 
+                                                              status = 1))
+           break
+         } else { 
+            lastTimeAliveIndex <- j
+         }
        } 
     }
   } 
-
-#  png(filename = "/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/survival.png",
-#         width = 480, 
-#        height = 480, 
-#         units = "px", 
-#     pointsize = 12,
-#            bg = "white"
-#      )
 
   fit<- survfit(Surv(stop, status) ~ group, data = lastTimeAlive.df)
   ggsurvplot(fit, 
@@ -591,13 +593,14 @@ plotSurvival <- function(sortedFilteredCensoredRapidData) {
     legend.title = "Strains", 
      #legend.labs = c("N2", "CB120", "CB246", "CB306", "CL2355", "LS292", "TJ1052", "ZZ17", "MT2426", "CB1072"),
      #legend.labs = c("N2, 10 µM FUdR", "N2, 20 µM FUdR", "N2, 40 µM FUdR"),
-     legend.labs = c("SS104, 10 µM FUdR", "SS104, 0 µM FUdR", "N2, 10 µM FUdR (old)", "N2, 10 µM FUdR"), 
+     #legend.labs = c("SS104, 10 µM FUdR", "SS104, 0 µM FUdR", "N2, 10 µM FUdR (old)", "N2, 10 µM FUdR"), 
             main = "Lifespan",
             xlab = "Days",
             ylab = "Fraction surving",
-            xlim = c(0,30)
-   
-             )
+            xlim = c(0,30),
+   break.time.by = 5
+            )
+  # add more ticks           
 
   # need to find the right parameters to make it look nice
   ggsave("/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/survival.png") 
@@ -655,13 +658,13 @@ print("summarize_done")
 #load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160810_vibassay_set10/trackDataCollector.rda")
 #tracks10 <- trackDataCollector
 load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160902_vibassay_set11/trackDataCollector.rda")
-#tracks11 <- trackDataCollector
+tracks11 <- trackDataCollector
 #load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/trackDataCollector.rda")
 #trackDataCollector<-c(tracks2,tracks3,tracks4,tracks5,tracks6,tracks7,tracks8,tracks9)
 #trackDataCollector<-tracks10
-# trackDataCollector<-c(tracks2,tracks3,tracks5)
-##load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_SS104_set2_analysisV13/trackDataCollector.rda")
-
+load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_SS104_set2_analysisV13/trackDataCollector.rda")
+tracks2 <- trackDataCollector
+trackDataCollector<-c(tracks11,tracks2)
 
       #print(trackDataCollector[[length(trackDataCollector)]])
       #print(typeof(trackDataCollector))
@@ -677,19 +680,18 @@ trackDataCollector<-censorData(trackDataCollector,"/home/jhench/mac/Documents/sy
       #print("------------------------")
       #load("trackDataCollector.rda")
       #createMeanPlots(trackDataCollector,"/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/")
-
 createPlots(trackDataCollector,"/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
 
 # next 3 lines WORK!
-#load("/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/censoredUnzeroedRapidData.rda")
+load("/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/censoredUnzeroedRapidData.rda")
 load("/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/sortedFilteredCensoredRapidData.rda")
 plotSurvival(sortedFilteredCensoredRapidData)
 
 
-##groupwiseDataCollector_statData<-createMeanPlots(censoredUnzeroedRapidData,"/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
+groupwiseDataCollector_statData<-createMeanPlots(censoredUnzeroedRapidData,"/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
 
-##save(groupwiseDataCollector_statData, file="/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/groupwiseDataCollector_statData.rda")
-##load("/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/groupwiseDataCollector_statData.rda")
+save(groupwiseDataCollector_statData, file="/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/groupwiseDataCollector_statData.rda")
+load("/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/groupwiseDataCollector_statData.rda")
 
 ##plotAnova(groupwiseDataCollector_statData)
-##plotMeanStDev(groupwiseDataCollector_statData)
+plotMeanStDev(groupwiseDataCollector_statData)
