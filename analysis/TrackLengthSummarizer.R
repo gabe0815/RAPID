@@ -549,22 +549,10 @@ mat.sort <- function(mat,n) # from http://www.r-bloggers.com/sorting-a-matrixdat
 	return(mat)
 }
 
-checkTimePoints <- function(singleSampleFrame){
-    #get the last timepoint, a worm was moving
-    for(i in nrow(singleSampleFrame):1){
-        if ((singleSampleFrame[i,columToAnalyze] != 0) && (singleSampleFrame[i,columToAnalyze] != -1)){
-            #cat("last timepoint: ", singleSampleFrame[i,8])
-            return (singleSampleFrame[i,8])
-            break
-        }
-    }
-    return (-1)
-}
-
 plotSurvival <- function(sortedFilteredCensoredRapidData) {
   # At the moment, the column to be checked is hardcoded (X7). This could be avoided if we proberly name columns.
   # All worms are collected in the same data frame. By having a group ID, they can be assigned during plotting.
-  lastTimeAlive.df <- data.frame(ID = character(0), group = character(0), stop = numeric(0), status = numeric(0))  
+  lastTimeAlive.df <- data.frame(ID = character(0), group = character(0), idx = numeric(0), stop = numeric(0), status = numeric(0))  
   for (i in 1:length(sortedFilteredCensoredRapidData)){
     lastTimeAliveIndex <- -1
     for (j in length(sortedFilteredCensoredRapidData[[i]]$X7):1){
@@ -572,11 +560,12 @@ plotSurvival <- function(sortedFilteredCensoredRapidData) {
        if (sortedFilteredCensoredRapidData[[i]]$X7[j] > 0){
          if (lastTimeAliveIndex == -1){
            lastTimeAliveIndex <- j
-
+          # we found a second track within 3 timepoints, add to df and exit the inner loop
          } else if ((lastTimeAliveIndex - j) <= 3){
      
            lastTimeAlive.df <- rbind(lastTimeAlive.df, data.frame(ID = as.character(sortedFilteredCensoredRapidData[[i]]$X1[lastTimeAliveIndex]), 
                                                                group = unlist(strsplit(as.character(sortedFilteredCensoredRapidData[[i]]$X1[lastTimeAliveIndex]), "_"))[1], 
+                                                                 idx = as.numeric(unlist(strsplit(as.character(sortedFilteredCensoredRapidData[[i]]$X1[lastTimeAliveIndex]), "_"))[2]),
                                                                 stop = sortedFilteredCensoredRapidData[[i]]$X8[lastTimeAliveIndex], 
                                                               status = 1))
            break
@@ -586,7 +575,11 @@ plotSurvival <- function(sortedFilteredCensoredRapidData) {
        } 
     }
   } 
-
+  
+  #filter for certains groups (optional)
+  load("/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/lastTimeAliveFrame.rda")
+  #lastTimeAlive.df <- lastTimeAlive.df[grep("N2", lastTimeAlive.df$group), ]
+  
   fit<- survfit(Surv(stop, status) ~ group, data = lastTimeAlive.df)
   ggsurvplot(fit, 
           legend = c("right"), 
@@ -598,7 +591,10 @@ plotSurvival <- function(sortedFilteredCensoredRapidData) {
             xlab = "Days",
             ylab = "Fraction surving",
             xlim = c(0,30),
-   break.time.by = 5
+   break.time.by = 5,
+      risk.table = TRUE
+   
+ 
             )
   # add more ticks           
 
@@ -655,16 +651,17 @@ print("summarize_done")
 # tracks8 <- trackDataCollector
 # load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160720_vibassay_set9/trackDataCollector.rda")
 # tracks9 <- trackDataCollector
-#load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160810_vibassay_set10/trackDataCollector.rda")
-#tracks10 <- trackDataCollector
+load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160810_vibassay_set10/trackDataCollector.rda")
+tracks10 <- trackDataCollector
 load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160902_vibassay_set11/trackDataCollector.rda")
 tracks11 <- trackDataCollector
-#load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/trackDataCollector.rda")
+load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/trackDataCollector.rda")
+tracks12 <- trackDataCollector
 #trackDataCollector<-c(tracks2,tracks3,tracks4,tracks5,tracks6,tracks7,tracks8,tracks9)
 #trackDataCollector<-tracks10
-load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_SS104_set2_analysisV13/trackDataCollector.rda")
-tracks2 <- trackDataCollector
-trackDataCollector<-c(tracks11,tracks2)
+#load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_SS104_set2_analysisV13/trackDataCollector.rda")
+#tracks2 <- trackDataCollector
+trackDataCollector<-c(tracks10,tracks11,tracks12)
 
       #print(trackDataCollector[[length(trackDataCollector)]])
       #print(typeof(trackDataCollector))
@@ -685,7 +682,7 @@ createPlots(trackDataCollector,"/mnt/4TBraid04/imagesets04/20160321_FIJI_analysi
 # next 3 lines WORK!
 load("/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/censoredUnzeroedRapidData.rda")
 load("/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/sortedFilteredCensoredRapidData.rda")
-plotSurvival(sortedFilteredCensoredRapidData)
+#plotSurvival(sortedFilteredCensoredRapidData)
 
 
 groupwiseDataCollector_statData<-createMeanPlots(censoredUnzeroedRapidData,"/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
@@ -693,5 +690,5 @@ groupwiseDataCollector_statData<-createMeanPlots(censoredUnzeroedRapidData,"/mnt
 save(groupwiseDataCollector_statData, file="/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/groupwiseDataCollector_statData.rda")
 load("/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/groupwiseDataCollector_statData.rda")
 
-##plotAnova(groupwiseDataCollector_statData)
+plotAnova(groupwiseDataCollector_statData)
 plotMeanStDev(groupwiseDataCollector_statData)
