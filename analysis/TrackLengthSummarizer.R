@@ -120,7 +120,7 @@ summarizeTracks <- function(RapidInputPath,ResultOutputPath){
       #cat(trackDataStrings, ", ")
       trackDataCollector[nrow(trackDataCollector)+1,] <- trackDataStrings
 
-      save(trackDataCollector, file=paste0(ResultOutputPath,"trackDataCollector_temp.rda"))
+      #save(trackDataCollector, file=paste0(ResultOutputPath,"trackDataCollector_temp.rda"))
 #      appendLine <- 0
 #			for (l in 1:length(trackDataCollector)){ # determine whether strain ID exists (i.e. first element per "row" e.g. IFP140_212 => needs clipping after IFP140)
 #			  if ((length(trackDataCollector)>=1) && (is.na(trackDataCollector[[l]][1])==FALSE) && (trackDataCollector[[l]][1]==trackDataStrings[1])) {
