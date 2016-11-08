@@ -25,54 +25,69 @@ summarizeTracks <- function(RapidInputPath,ResultOutputPath){
 		datapointDir <- pathDirs[[1]][length(pathDirs[[1]])] # it's a list!
 		if (substring(datapointDir,1,2) == "dl"){ # prefix for datapoint directories	
 			inputFiles <- list.files(path = rapidDirectories[d], pattern = NULL, all.files = FALSE, full.names = FALSE, recursive = FALSE, ignore.case = FALSE, include.dirs = FALSE, no.. = FALSE)
-			hit <- 0
-			#censor <- 0
-			trackCensoredBefore <- NA # default: do not censor
+
+      sampleID <- NA
+      birthTimeStamp <- NA
+      currentTimestamp <- NA
+      trackVersion <- NA
+      before <- c(NA, NA, NA, NA)
+      after <- c(NA, NA, NA, NA)
+      trackCensoredBefore <- NA # default: do not censor
 			trackCensoredAfter <- NA # default: do not censor
+      cameraSerial <- NA
+      cameraVersion <- NA
+      device <- NA
+      temperatureAssay <- NA
+      temperatureTable <- NA
+  
+      # read all files and parse their content
 			if (length(inputFiles)>2){
 				for (f in 1:length(inputFiles)){
-					if (inputFiles[f] == "trackLength.tsv"){ #required files for analysis
-						trackFilePath <- paste0(rapidDirectories[d],"/",inputFiles[f], collapse = NULL)
-						hit<-hit+1
-					} else if(inputFiles[f] == "sampleID.txt"){ #required files for analysis
-						sampleIDFilePath <- paste0(rapidDirectories[d],"/",inputFiles[f], collapse = NULL)
-						hit<-hit+1
-					} else if(inputFiles[f] == "timestamp.txt"){ #required files for analysis
-						timestampFilePath <- paste0(rapidDirectories[d],"/",inputFiles[f], collapse = NULL)
-						hit<-hit+1
-					}else if (inputFiles[f] == "censored.txt"){ # presence of this file indicates that this timepoint has been manually censored. 
+					filePath <- paste0(rapidDirectories[d],"/",inputFiles[f], collapse = NULL)
+          if (inputFiles[f] == "trackLength.tsv"){ #required files for analysis
+            rawTrackLength <- read.delim(filePath,header = TRUE, sep = "\t")
+            trackVersion <- names(rawTrackLength)[1]
+            beforeIdx <- which(rawTrackLength[,1] == "before")
+            afterIdx <- which(rawTrackLength[,1] == "after")
+            before <- unlist(unname(rawTrackLength[beforeIdx,2:5])) # length area edge contours
+            after <- unlist(unname(rawTrackLength[afterIdx,2:5]))          
+						
+					} else if (inputFiles[f] == "sampleID.txt"){ #required files for analysis
+            rawSampleID <- readLines(filePath)
+            sampleID <- rawSampleID[1]
+            birthTimeStamp <- rawSampleID[2]
+						
+					} else if (inputFiles[f] == "timestamp.txt"){ #required files for analysis
+						currentTimestamp <- readLines(filePath)
+						
+					} else if (inputFiles[f] == "censored.txt"){ # presence of this file indicates that this timepoint has been manually censored. 
 				    #censor<-1 #read censored.txt for before and after and censor for both data sets
 					  #censoringFilePath <- paste0(rapidDirectories[d],"/",inputFiles[f], collapse = NULL)
-					  censoringParameters<-read.delim(paste0(rapidDirectories[d],"/",inputFiles[f], collapse = NULL), header=FALSE, row.names=1) # read tab-separated data
+					  censoringParameters<-read.delim(filePath, header=FALSE, row.names=1) # read tab-separated data
 					  trackCensoredBefore <- censoringParameters["before",]
 					  trackCensoredAfter <- censoringParameters["after",]
-				  }
+
+				  } else if (inputFiles[f] == "camera.txt"){
+            rawCamera <- readLines(filePath)
+            cameraSerial <- rawCamera[1]
+            device <- rawCamera[2]
+
+				  } else if (inputFiles[f] == "version.txt"){
+            cameraVersion <- readLines(filePath)
+
+				  } else if (inputFiles[f] == "temperature.txt"){
+            rawTemperature <- read.csv(filePath, header = FALSE, sep = ",", stringsAsFactors = FALSE)
+            temperatureAssay <- rawTemperature[1]
+            temperatureTable <- rawTemperature[2]
 				}
 			}
-			#if (hit == 3 && censor==0){
-			if (hit == 3){
-				trackDataStrings <- 0
-				trackDataStrings <- try(analyzeSingleTrack(sampleIDFilePath,trackFilePath,timestampFilePath),silent=TRUE) #some datasets are garbage
-					if (trackDataStrings != 0){
-					  trackDataStrings <- c(trackDataStrings, trackCensoredBefore, trackCensoredAfter)
-					  #print(trackDataStrings)
-					  appendLine <- 0
-					for (l in 1:length(trackDataCollector)){ # determine whether strain ID exists (i.e. first element per "row" e.g. IFP140_212 => needs clipping after IFP140)
-						if (length(trackDataCollector)>=1){
-							if(is.na(trackDataCollector[[l]][1])==FALSE){
-								if(trackDataCollector[[l]][1]==trackDataStrings[1]){ 
-									appendLine <- l
-								}
-							}
-						}
-					}
-					if (appendLine > 0){
-						trackDataCollector[[appendLine]]<-c(trackDataCollector[[appendLine]],trackDataStrings) # append to existing "row"
-					} else {
-						trackDataCollector<-lappend(trackDataCollector,trackDataStrings)
-					}
-				}				
-			}
+
+			
+			if (any(is.na(sampleID), is.na(birthTimeStamp), is.na(currentTimestamp), is.na(before), is.na(after)) == FALSE) {
+        # append all parameter from each measurement in one huge list
+          
+      }
+
 		}
 		setTxtProgressBar(progressBar,d)
 	}
@@ -81,48 +96,6 @@ summarizeTracks <- function(RapidInputPath,ResultOutputPath){
 	#createPlots(trackDataCollector,ResultOutputPath)
 }
 
-analyzeSingleTrack <- function(FsampleID,FtrackLength,Ftimestamp){ # this function reads the ASCII files for single timepoints that contain all data (as a tsv file)
-	rawTrackLength <- read.delim(FtrackLength,header = TRUE, sep = "\t")
-	rawSampleID <- readLines(FsampleID)
-	rawTimestamp <- readLines(Ftimestamp)
-	sampleID <- rawSampleID[1] # 1st line: sample ID
-	birthTimeStamp <- rawSampleID[2] # 2nd line: UNIX timestamp
-	currentTimestamp <- rawTimestamp[1] # 1st line: UNIX timestamp
-	
-
-	
-	trackLengthBefore <- -1
-	trackAreaBefore <- -1
-	trackEdgeBefore <- -1
-	trackContoursBefore <- -1
-	trackLengthAfter <- -1
-	trackAreaAfter <- -1
-	trackEdgeAfter <- -1
-	trackContoursAfter <- -1
-  trackVersion <- NA
-	
-  trackVersion <- names(rawTrackLength)[1]
-  if (trackVersion == correctTrackVersionString){ #only read files with the correct track version string (defined as global variable correctTrackVersionString)
-  	for (l in 1:2){
-  		if (is.na(rawTrackLength[[1]][l])==FALSE){
-  			if(rawTrackLength[[1]][l] == "before"){
-  				trackLengthBefore <- rawTrackLength[['length']][l]
-  				trackAreaBefore <- rawTrackLength[['area']][l]
-  				trackEdgeBefore <- rawTrackLength[['edge']][l]
-  				trackContoursBefore <- rawTrackLength[['contours']][l]
-  			} else if (rawTrackLength[[1]][l] == "after"){
-  				trackLengthAfter <- rawTrackLength[['length']][l]	
-  				trackAreaAfter <- rawTrackLength[['area']][l]
-  				trackEdgeAfter <- rawTrackLength[['edge']][l]
-  				trackContoursAfter <- rawTrackLength[['contours']][l]
-  			}
-  		}
-  	}
-    return (c(sampleID,birthTimeStamp,currentTimestamp,trackLengthBefore,trackAreaBefore,trackLengthAfter,trackAreaAfter,trackVersion,trackEdgeBefore,trackContoursBefore,trackEdgeAfter,trackContoursAfter))
-  }else{
-    return (0)
-  }
-}
 
 createPlots <- function(trackDataCollector,ResultOutputPath){
   sortedFilteredCensoredRapidData <- NULL # reset new data list / frame
