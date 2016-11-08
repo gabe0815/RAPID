@@ -14,7 +14,28 @@ summarizeTracks <- function(RapidInputPath,ResultOutputPath){
 	print(RapidInputPath)
 	print(ResultOutputPath)
 	cat("loading directory structure to RAM...")
-	trackDataCollector <- NULL # reset the list
+	trackDataCollector <- data.frame(sampleID = character(0), 
+                             birthTimeStamp = numeric(0),
+                              currentTimestamp = numeric(0),
+                              trackVersion = numeric(0),
+                              beforeLength = numeric(0),
+                              beforeArea = numeric(0),
+                              beforeEdge = numeric(0),
+                              beforeContours = numeric(0),
+                              afterLength = numeric(0),
+                              afterArea = numeric(0),
+                              afterEdge = numeric(0),
+                              afterContours = numeric(0), 
+                            trackCensoredBefore = numeric(0),
+                            trackCensoredAfter = numeric(0),
+                            cameraSerial = character(0),
+                            cameraVersion = numeric(0),
+                            device = numeric(0),
+                            temperatureAssay = numeric(0),
+                            temperatureTable = numeric(0), 
+                            stringsAsFactors = FALSE
+
+                     ) # reset the list
 	rapidDirectories <- list.dirs(RapidInputPath, recursive=FALSE)
 	cat(" done.\n")
 	cat("collecting data from RAPID datasets:\n")
@@ -23,77 +44,106 @@ summarizeTracks <- function(RapidInputPath,ResultOutputPath){
 	for (d in 1:length(rapidDirectories)){
 		pathDirs <- strsplit(rapidDirectories[d], "/", fixed = FALSE, perl = FALSE, useBytes = FALSE)	
 		datapointDir <- pathDirs[[1]][length(pathDirs[[1]])] # it's a list!
-		if (substring(datapointDir,1,2) == "dl"){ # prefix for datapoint directories	
-			inputFiles <- list.files(path = rapidDirectories[d], pattern = NULL, all.files = FALSE, full.names = FALSE, recursive = FALSE, ignore.case = FALSE, include.dirs = FALSE, no.. = FALSE)
+		
+    if (substring(datapointDir,1,2) != "dl"){ # prefix for datapoint directories	
+      next
+    }
+		inputFiles <- list.files(path = rapidDirectories[d], pattern = NULL, all.files = FALSE, full.names = FALSE, recursive = FALSE, ignore.case = FALSE, include.dirs = FALSE, no.. = FALSE)
 
-      sampleID <- NA
-      birthTimeStamp <- NA
-      currentTimestamp <- NA
-      trackVersion <- NA
-      before <- c(NA, NA, NA, NA)
-      after <- c(NA, NA, NA, NA)
-      trackCensoredBefore <- NA # default: do not censor
-			trackCensoredAfter <- NA # default: do not censor
-      cameraSerial <- NA
-      cameraVersion <- NA
-      device <- NA
-      temperatureAssay <- NA
-      temperatureTable <- NA
-  
-      # read all files and parse their content
-			if (length(inputFiles)>2){
-				for (f in 1:length(inputFiles)){
-					filePath <- paste0(rapidDirectories[d],"/",inputFiles[f], collapse = NULL)
-          if (inputFiles[f] == "trackLength.tsv"){ #required files for analysis
-            rawTrackLength <- read.delim(filePath,header = TRUE, sep = "\t")
-            trackVersion <- names(rawTrackLength)[1]
-            beforeIdx <- which(rawTrackLength[,1] == "before")
-            afterIdx <- which(rawTrackLength[,1] == "after")
-            before <- unlist(unname(rawTrackLength[beforeIdx,2:5])) # length area edge contours
-            after <- unlist(unname(rawTrackLength[afterIdx,2:5]))          
-						
-					} else if (inputFiles[f] == "sampleID.txt"){ #required files for analysis
-            rawSampleID <- readLines(filePath)
-            sampleID <- rawSampleID[1]
-            birthTimeStamp <- rawSampleID[2]
-						
-					} else if (inputFiles[f] == "timestamp.txt"){ #required files for analysis
-						currentTimestamp <- readLines(filePath)
-						
-					} else if (inputFiles[f] == "censored.txt"){ # presence of this file indicates that this timepoint has been manually censored. 
-				    #censor<-1 #read censored.txt for before and after and censor for both data sets
-					  #censoringFilePath <- paste0(rapidDirectories[d],"/",inputFiles[f], collapse = NULL)
-					  censoringParameters<-read.delim(filePath, header=FALSE, row.names=1) # read tab-separated data
-					  trackCensoredBefore <- censoringParameters["before",]
-					  trackCensoredAfter <- censoringParameters["after",]
+    sampleID <- NA
+    birthTimeStamp <- NA
+    currentTimestamp <- NA
+    trackVersion <- NA
+    before <- c(NA, NA, NA, NA) # length, area, edge, contours
+    after <- c(NA, NA, NA, NA) # length, area, edge, contours
+    trackCensoredBefore <- NA
+		trackCensoredAfter <- NA 
+    cameraSerial <- NA
+    cameraVersion <- NA
+    device <- NA
+    temperatureAssay <- NA
+    temperatureTable <- NA
 
-				  } else if (inputFiles[f] == "camera.txt"){
-            rawCamera <- readLines(filePath)
-            cameraSerial <- rawCamera[1]
-            device <- rawCamera[2]
+    # read all files and parse their content
+		if (length(inputFiles)<2){
+      next # skip to the next item in the for loop
+    } 
 
-				  } else if (inputFiles[f] == "version.txt"){
-            cameraVersion <- readLines(filePath)
+		for (f in 1:length(inputFiles)){
+			filePath <- paste0(rapidDirectories[d],"/",inputFiles[f], collapse = NULL)
+      #cat("reading from: ", filePath, "\n")
+      if (inputFiles[f] == "trackLength.tsv"){ #required files for analysis
+        rawTrackLength <- read.delim(filePath,header = TRUE, sep = "\t")
+        trackVersion <- names(rawTrackLength)[1]
+        beforeIdx <- which(rawTrackLength[,1] == "before")
+        afterIdx <- which(rawTrackLength[,1] == "after")
+        before <- unlist(unname(rawTrackLength[beforeIdx,2:5])) # length area edge contours
+        after <- unlist(unname(rawTrackLength[afterIdx,2:5]))          
+				
+			} else if (inputFiles[f] == "sampleID.txt"){ #required files for analysis
+        rawSampleID <- readLines(filePath)
+        sampleID <- rawSampleID[1]
+        birthTimeStamp <- rawSampleID[2]
+				
+			} else if (inputFiles[f] == "timestamp.txt"){ #required files for analysis
+				currentTimestamp <- readLines(filePath)
+				
+			} else if (inputFiles[f] == "censored.txt"){ # presence of this file indicates that this timepoint has been manually censored. 
+		    #censor<-1 #read censored.txt for before and after and censor for both data sets
+			  #censoringFilePath <- paste0(rapidDirectories[d],"/",inputFiles[f], collapse = NULL)
+			  censoringParameters<-read.delim(filePath, header=FALSE, row.names=1) # read tab-separated data
+			  trackCensoredBefore <- censoringParameters["before",]
+			  trackCensoredAfter <- censoringParameters["after",]
 
-				  } else if (inputFiles[f] == "temperature.txt"){
-            rawTemperature <- read.csv(filePath, header = FALSE, sep = ",", stringsAsFactors = FALSE)
-            temperatureAssay <- rawTemperature[1]
-            temperatureTable <- rawTemperature[2]
-				}
-			}
+		  } else if (inputFiles[f] == "camera.txt"){
+        rawCamera <- readLines(filePath)
+        cameraSerial <- rawCamera[1]
+        device <- rawCamera[2]
 
-			
-			if (any(is.na(sampleID), is.na(birthTimeStamp), is.na(currentTimestamp), is.na(before), is.na(after)) == FALSE) {
-        # append all parameter from each measurement in one huge list
-          
+		  } else if (inputFiles[f] == "version.txt"){
+        cameraVersion <- readLines(filePath)
+
+		  } else if (inputFiles[f] == "temperature.txt"){
+        rawTemperature <- try(read.csv(filePath, header = FALSE, sep = ",", stringsAsFactors = FALSE))
+          if(inherits(rawTemperature, "try-error")) {
+            cat("got empty file, skipping...","\n")
+          } else {
+            temperatureAssay <- rawTemperature[1,1]
+            temperatureTable <- rawTemperature[1,2]
+          }      
       }
-
 		}
+		
+    if (any(is.na(sampleID), is.na(birthTimeStamp), is.na(currentTimestamp), is.na(before), is.na(after)) == FALSE) {
+      # append all parameter from each measurement in one huge list
+      trackDataStrings <- c(sampleID, birthTimeStamp, currentTimestamp, trackVersion, before, after, trackCensoredBefore, trackCensoredAfter, cameraSerial, cameraVersion, device, temperatureAssay, temperatureTable)
+      #cat(trackDataStrings, ", ")
+      trackDataCollector[nrow(trackDataCollector)+1,] <- trackDataStrings
+
+      save(trackDataCollector, file=paste0(ResultOutputPath,"trackDataCollector_temp.rda"))
+#      appendLine <- 0
+#			for (l in 1:length(trackDataCollector)){ # determine whether strain ID exists (i.e. first element per "row" e.g. IFP140_212 => needs clipping after IFP140)
+#			  if ((length(trackDataCollector)>=1) && (is.na(trackDataCollector[[l]][1])==FALSE) && (trackDataCollector[[l]][1]==trackDataStrings[1])) {
+#						appendLine <- l
+#				}
+#      }
+#				
+#      if (appendLine > 0){
+#					trackDataCollector[[appendLine]]<-c(trackDataCollector[[appendLine]],trackDataStrings) # append to existing "row"
+#			} else {
+#					trackDataCollector<-lappend(trackDataCollector,trackDataStrings)
+#			}
+
+    }
+    #save(trackDataCollector, file="/home/jhench/mac/Documents/sync/lab_journal/2016/data201611/20161102_survival_plots/trackDataCollector.rda")
+    #cat("processing ", d,"\n")
 		setTxtProgressBar(progressBar,d)
-	}
+   
+  }
 	cat(" done.\n")
 	save(trackDataCollector, file=paste0(ResultOutputPath,"trackDataCollector.rda"))
 	#createPlots(trackDataCollector,ResultOutputPath)
+  
 }
 
 
@@ -144,7 +194,7 @@ createPlots <- function(trackDataCollector,ResultOutputPath){
             if(is.na(s)==FALSE){
               #cat("\ntrackDataCollector[[s]]",trackDataCollector[[s]])
               if (is.na(trackDataCollector[[s]])==FALSE){
-                numberColumns <- 14 # entries per data point: sampleID,birthTimeStamp,currentTimestamp,trackLengthBefore,trackAreaBefore,trackLengthAfter,trackAreaAfter,trackVersion,trackEdgeBefore,trackContoursBefore,trackEdgeAfter,trackContoursAfter, trackCensoredBefore, trackCensoredAfter
+                numberColumns <- 19 # entries per data point: sampleID,birthTimeStamp,currentTimestamp,trackLengthBefore,trackAreaBefore,trackLengthAfter,trackAreaAfter,trackVersion,trackEdgeBefore,trackContoursBefore,trackEdgeAfter,trackContoursAfter, trackCensoredBefore, trackCensoredAfter
                 numberRows<-length(trackDataCollector[[s]])/numberColumns
                 if (numberRows==round(numberRows)){
                   thisSample<- matrix(data=trackDataCollector[[s]],nrow=numberRows,ncol=numberColumns,byrow=TRUE,dimnames=NULL) 
@@ -600,7 +650,7 @@ correctTrackVersionString <<- "trackVersion.v13"
 #summarizeTracks("/mnt/4TBraid04/imagesets04/20160810_vibassay_set10_censored","/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160810_vibassay_set10/")
 #summarizeTracks("/mnt/4TBraid04/imagesets04/20160902_vibassay_set11","/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160902_vibassay_set11/")
 #summarizeTracks("/mnt/4TBraid04/imagesets04/20160919_vibassay_set12","/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/")
-#summarizeTracks("/mnt/4TBraid04/imagesets04/SS104_set2_analysisV13","/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_SS104_set2_analysisV13/")
+summarizeTracks("/mnt/4TBraid04/imagesets04/SS104_set2_analysisV13","/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_SS104_set2_analysisV13/")
 
 
 print("summarize_done")
@@ -624,24 +674,24 @@ print("summarize_done")
 # tracks8 <- trackDataCollector
 # load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160720_vibassay_set9/trackDataCollector.rda")
 # tracks9 <- trackDataCollector
-load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160810_vibassay_set10/trackDataCollector.rda")
-tracks10 <- trackDataCollector
-load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160902_vibassay_set11/trackDataCollector.rda")
-tracks11 <- trackDataCollector
-load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/trackDataCollector.rda")
-tracks12 <- trackDataCollector
+#load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160810_vibassay_set10/trackDataCollector.rda")
+#tracks10 <- trackDataCollector
+#load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160902_vibassay_set11/trackDataCollector.rda")
+#tracks11 <- trackDataCollector
+#load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/trackDataCollector.rda")
+#tracks12 <- trackDataCollector
 #trackDataCollector<-c(tracks2,tracks3,tracks4,tracks5,tracks6,tracks7,tracks8,tracks9)
 #trackDataCollector<-tracks10
 #load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_SS104_set2_analysisV13/trackDataCollector.rda")
 #tracks2 <- trackDataCollector
-trackDataCollector<-c(tracks10,tracks11,tracks12)
+#trackDataCollector<-c(tracks10,tracks11,tracks12)
 
       #print(trackDataCollector[[length(trackDataCollector)]])
       #print(typeof(trackDataCollector))
       #print(length(trackDataCollector))
       #print("------------------------")
 
-trackDataCollector<-censorData(trackDataCollector,"/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/censoringList.txt")
+#trackDataCollector<-censorData(trackDataCollector,"/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/censoringList.txt")
 
 
       #print(trackDataCollector[[length(trackDataCollector)]])
@@ -650,18 +700,18 @@ trackDataCollector<-censorData(trackDataCollector,"/home/jhench/mac/Documents/sy
       #print("------------------------")
       #load("trackDataCollector.rda")
       #createMeanPlots(trackDataCollector,"/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/")
-createPlots(trackDataCollector,"/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
+#createPlots(trackDataCollector,"/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
 
 # next 3 lines WORK!
-load("/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/censoredUnzeroedRapidData.rda")
-load("/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/sortedFilteredCensoredRapidData.rda")
+#load("/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/censoredUnzeroedRapidData.rda")
+#load("/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/sortedFilteredCensoredRapidData.rda")
 #plotSurvival(sortedFilteredCensoredRapidData)
 
 
-groupwiseDataCollector_statData<-createMeanPlots(censoredUnzeroedRapidData,"/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
+#groupwiseDataCollector_statData<-createMeanPlots(censoredUnzeroedRapidData,"/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
 
-save(groupwiseDataCollector_statData, file="/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/groupwiseDataCollector_statData.rda")
-load("/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/groupwiseDataCollector_statData.rda")
+#save(groupwiseDataCollector_statData, file="/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/groupwiseDataCollector_statData.rda")
+#load("/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/groupwiseDataCollector_statData.rda")
 
-plotAnova(groupwiseDataCollector_statData)
-plotMeanStDev(groupwiseDataCollector_statData)
+#plotAnova(groupwiseDataCollector_statData)
+#plotMeanStDev(groupwiseDataCollector_statData)
