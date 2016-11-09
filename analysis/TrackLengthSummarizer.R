@@ -126,40 +126,43 @@ summarizeTracks <- function(RapidInputPath,ResultOutputPath){
    
   }
 	cat(" done.\n")
-	save(trackDataCollector, file=paste0(ResultOutputPath,"trackDataCollector_test.rda"))  
+	save(trackDataCollector, file=paste0(ResultOutputPath,"trackDataCollector.rda"))  
 }
 
 
 createPlots <- function(trackDataCollector,ResultOutputPath){
   # calculate age of the worms in days
-  trackDataCollector$days <- ((as.numeric(trackDataCollector$currentTimestamp) - as.numeric(trackDataCollector$birthTimestamp))/(3600 * 24)  
+  trackDataCollector$days <- ((as.numeric(trackDataCollector$currentTimestamp) - as.numeric(trackDataCollector$birthTimestamp))/(3600 * 24))  
 
   # instead of deleting the censored data points, we can write them as NA and use na.omit to omit them during plotting.
-  censorBefore <- c(which(trackDataCollector$beforeEdge) == 1), which(trackDataCollector$censorBefore) == 1), which(trackDataCollector$beforeArea == -1))
-  trackDataCollector$beforeArea[censoreBefore] <- NA
-  censorAfter <- c(which(trackDataCollector$afterEdge) == 1), which(trackDataCollector$censorAfter) == 1), which(trackDataCollector$afterArea == -1))
-  trackDataCollector$afterArea[censoreBefore] <- NA
+  censorBefore <- c(which(trackDataCollector$beforeEdge == 1), which(trackDataCollector$censorBefore == 1), which(trackDataCollector$beforeArea == -1))
+  trackDataCollector$beforeArea[censorBefore] <- NA
+  censorAfter <- c(which(trackDataCollector$afterEdge == 1), which(trackDataCollector$censorAfter == 1), which(trackDataCollector$afterArea == -1))
+  trackDataCollector$afterArea[censorAfter] <- NA
 
   # figure out how big the plot will be  
   includedStrains <- uniqueGroups(trackDataCollector)
   strainNumber <- length(includedStrains)
 
   # figure out which group has the most individuals
-  numberPlotRows <- max(tabulate(factor(trackDataCollector$sampleID)))
+  for (i in includedStrains){
+    numberOfWorms <- c(numberOfWorms, unique(trackDataCollector[grep(i, trackDataCollector$sampleID), ]))
+  }
+  numberPlotRows <- max(numberOfWorms
   
-    
   # create an empty canvas with size unique groups x maximum number of individuals
-  try(png(filename = paste0(ResultOutputPath,"Rplot001_",correctTrackVersionString,".png"), width = 400*strainNumber, height = 400*numberPlotRows, units = "px", pointsize = 14, bg = "white"))
-  try(par(mfrow=c(numberPlotRows,strainNumber))) # from http://www.statmethods.net/advgraphs/layout.html
+ try(png(filename = paste0(ResultOutputPath,"Rplot001_",correctTrackVersionString,".png"), width = 200*strainNumber, height = 200*numberPlotRows, units = "px", pointsize = 14, bg  = "white"))
+ try(par(mfrow=c(numberPlotRows, strainNumber))) # from http://www.statmethods.net/advgraphs/layout.html
   
   # go through the unique groups
   for (x in 1:length(includedStrains)){
     wormsPerStrain <- trackDataCollector[grep(includedStrains[x], trackDataCollector$sampleID), ]
-    for (y in 1:length(unique(wormsPerStrain))){
+    for (y in 1:length(unique(wormsPerStrain$sampleID))){
+      singleWorm <- wormsPerStrain[grep(wormsPerStrain$sampleID[y], wormsPerStrain$sampleID),]
       # do the plot at x,y on canvas
 
-    par(mfg=c(x,y)) # define plotting location on muliple plot sheet http://stackoverflow.com/questions/4785657/r-how-to-draw-an-empty-plot
-    try(plot(trackDataCollector$days, na.omit(wormsPerStrain$afterArea),main=wormsPerStrain[y],xlab="time [days]", ylab="track length [px]",pch='.',type="l",ylim=c(0,40000))) # plotting limits!
+    par(mfg=c(y,x)) # define plotting location on muliple plot sheet http://stackoverflow.com/questions/4785657/r-how-to-draw-an-empty-plot
+    try(plot(singleWorm$days, singleWorm$afterArea,main=wormsPerStrain$sampleID[y],xlab="time [days]", ylab="track length [px]",pch='.',type="l",ylim=c(0,40000))) # plotting limits!
 
      } 
    }
@@ -570,7 +573,7 @@ correctTrackVersionString <<- "trackVersion.v13"
 #summarizeTracks("/mnt/4TBraid04/imagesets04/20160217_vibassay_set4","/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
 #summarizeTracks("/mnt/4TBraid04/imagesets04/20160810_vibassay_set10_censored","/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160810_vibassay_set10/")
 #summarizeTracks("/mnt/4TBraid04/imagesets04/20160902_vibassay_set11","/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160902_vibassay_set11/")
-summarizeTracks("/mnt/4TBraid04/imagesets04/20160919_vibassay_set12","/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/")
+#summarizeTracks("/mnt/4TBraid04/imagesets04/20160919_vibassay_set12","/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/")
 #summarizeTracks("/mnt/4TBraid04/imagesets04/SS104_set2_analysisV13","/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_SS104_set2_analysisV13/")
 
 
@@ -607,9 +610,10 @@ print("summarize_done")
 #tracks2 <- trackDataCollector
 #trackDataCollector<-c(tracks10,tracks11,tracks12)
 
-load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/trackDataCollector_test.rda")
+load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_SS104_set2_analysisV13/trackDataCollector.rda")
 trackDataCollectorCensored <- censorData(trackDataCollector,"/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/censoringList.txt")
 uniqueGroups(trackDataCollectorCensored)
+createPlots(trackDataCollectorCensored, "/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
 
 #trackDataCollector<-censorData(trackDataCollector,"/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/censoringList.txt")
 
