@@ -9,33 +9,34 @@
 
 library(survminer)
 library(survival)
+library(stringr)
 
 summarizeTracks <- function(RapidInputPath,ResultOutputPath){
 	print(RapidInputPath)
 	print(ResultOutputPath)
 	cat("loading directory structure to RAM...")
 	trackDataCollector <- data.frame(sampleID = character(0), 
-                             birthTimeStamp = numeric(0),
-                              currentTimestamp = numeric(0),
-                              trackVersion = numeric(0),
-                              beforeLength = numeric(0),
-                              beforeArea = numeric(0),
-                              beforeEdge = numeric(0),
-                              beforeContours = numeric(0),
-                              afterLength = numeric(0),
-                              afterArea = numeric(0),
-                              afterEdge = numeric(0),
+                             birthTimestamp = numeric(0),
+                           currentTimestamp = numeric(0),
+                               trackVersion = numeric(0),
+                               beforeLength = numeric(0),
+                                 beforeArea = numeric(0),
+                                 beforeEdge = numeric(0),
+                             beforeContours = numeric(0),
+                                afterLength = numeric(0),
+                                  afterArea = numeric(0),
+                                  afterEdge = numeric(0),
                               afterContours = numeric(0), 
-                            trackCensoredBefore = numeric(0),
-                            trackCensoredAfter = numeric(0),
-                            cameraSerial = character(0),
-                            cameraVersion = numeric(0),
-                            device = numeric(0),
-                            temperatureAssay = numeric(0),
-                            temperatureTable = numeric(0), 
-                            stringsAsFactors = FALSE
+                        trackCensoredBefore = numeric(0),
+                         trackCensoredAfter = numeric(0),
+                               cameraSerial = character(0),
+                              cameraVersion = numeric(0),
+                                     device = numeric(0),
+                           temperatureAssay = numeric(0),
+                           temperatureTable = numeric(0), 
+                           stringsAsFactors = FALSE
 
-                     ) # reset the list
+                     ) # initialize the data frame with proper column names
 	rapidDirectories <- list.dirs(RapidInputPath, recursive=FALSE)
 	cat(" done.\n")
 	cat("collecting data from RAPID datasets:\n")
@@ -51,7 +52,7 @@ summarizeTracks <- function(RapidInputPath,ResultOutputPath){
 		inputFiles <- list.files(path = rapidDirectories[d], pattern = NULL, all.files = FALSE, full.names = FALSE, recursive = FALSE, ignore.case = FALSE, include.dirs = FALSE, no.. = FALSE)
 
     sampleID <- NA
-    birthTimeStamp <- NA
+    birthTimestamp <- NA
     currentTimestamp <- NA
     trackVersion <- NA
     before <- c(NA, NA, NA, NA) # length, area, edge, contours
@@ -72,6 +73,7 @@ summarizeTracks <- function(RapidInputPath,ResultOutputPath){
 		for (f in 1:length(inputFiles)){
 			filePath <- paste0(rapidDirectories[d],"/",inputFiles[f], collapse = NULL)
       #cat("reading from: ", filePath, "\n")
+
       if (inputFiles[f] == "trackLength.tsv"){ #required files for analysis
         rawTrackLength <- read.delim(filePath,header = TRUE, sep = "\t")
         trackVersion <- names(rawTrackLength)[1]
@@ -83,15 +85,13 @@ summarizeTracks <- function(RapidInputPath,ResultOutputPath){
 			} else if (inputFiles[f] == "sampleID.txt"){ #required files for analysis
         rawSampleID <- readLines(filePath)
         sampleID <- rawSampleID[1]
-        birthTimeStamp <- rawSampleID[2]
+        birthTimestamp <- rawSampleID[2]
 				
 			} else if (inputFiles[f] == "timestamp.txt"){ #required files for analysis
 				currentTimestamp <- readLines(filePath)
 				
-			} else if (inputFiles[f] == "censored.txt"){ # presence of this file indicates that this timepoint has been manually censored. 
-		    #censor<-1 #read censored.txt for before and after and censor for both data sets
-			  #censoringFilePath <- paste0(rapidDirectories[d],"/",inputFiles[f], collapse = NULL)
-			  censoringParameters<-read.delim(filePath, header=FALSE, row.names=1) # read tab-separated data
+			} else if (inputFiles[f] == "censored.txt"){ 
+			  censoringParameters<-read.delim(filePath, header=FALSE, row.names=1) 
 			  trackCensoredBefore <- censoringParameters["before",]
 			  trackCensoredAfter <- censoringParameters["after",]
 
@@ -114,138 +114,68 @@ summarizeTracks <- function(RapidInputPath,ResultOutputPath){
       }
 		}
 		
-    if (any(is.na(sampleID), is.na(birthTimeStamp), is.na(currentTimestamp), is.na(before), is.na(after)) == FALSE) {
-      # append all parameter from each measurement in one huge list
-      trackDataStrings <- c(sampleID, birthTimeStamp, currentTimestamp, trackVersion, before, after, trackCensoredBefore, trackCensoredAfter, cameraSerial, cameraVersion, device, temperatureAssay, temperatureTable)
-      #cat(trackDataStrings, ", ")
+    if (any(is.na(sampleID), is.na(birthTimestamp), is.na(currentTimestamp), is.na(before), is.na(after)) == FALSE) {
+      # append all parameter from each measurement in one huge data frame
+      trackDataStrings <- c(sampleID, birthTimestamp, currentTimestamp, trackVersion, before, after, trackCensoredBefore, trackCensoredAfter, cameraSerial, cameraVersion, device, temperatureAssay, temperatureTable)
+
       trackDataCollector[nrow(trackDataCollector)+1,] <- trackDataStrings
 
-      #save(trackDataCollector, file=paste0(ResultOutputPath,"trackDataCollector_temp.rda"))
-#      appendLine <- 0
-#			for (l in 1:length(trackDataCollector)){ # determine whether strain ID exists (i.e. first element per "row" e.g. IFP140_212 => needs clipping after IFP140)
-#			  if ((length(trackDataCollector)>=1) && (is.na(trackDataCollector[[l]][1])==FALSE) && (trackDataCollector[[l]][1]==trackDataStrings[1])) {
-#						appendLine <- l
-#				}
-#      }
-#				
-#      if (appendLine > 0){
-#					trackDataCollector[[appendLine]]<-c(trackDataCollector[[appendLine]],trackDataStrings) # append to existing "row"
-#			} else {
-#					trackDataCollector<-lappend(trackDataCollector,trackDataStrings)
-#			}
-
     }
-    #save(trackDataCollector, file="/home/jhench/mac/Documents/sync/lab_journal/2016/data201611/20161102_survival_plots/trackDataCollector.rda")
-    #cat("processing ", d,"\n")
+
 		setTxtProgressBar(progressBar,d)
    
   }
 	cat(" done.\n")
-	save(trackDataCollector, file=paste0(ResultOutputPath,"trackDataCollector.rda"))
-	#createPlots(trackDataCollector,ResultOutputPath)
-  
+	save(trackDataCollector, file=paste0(ResultOutputPath,"trackDataCollector_test.rda"))  
 }
 
 
 createPlots <- function(trackDataCollector,ResultOutputPath){
-  sortedFilteredCensoredRapidData <- NULL # reset new data list / frame
-  censoredUnzeroedRapidData <- NULL # reset new data list / frame
+  # calculate age of the worms in days
+  trackDataCollector$days <- ((as.numeric(trackDataCollector$currentTimestamp) - as.numeric(trackDataCollector$birthTimestamp))/(3600 * 24)  
+
+  # instead of deleting the censored data points, we can write them as NA and use na.omit to omit them during plotting.
+  censorBefore <- c(which(trackDataCollector$beforeEdge) == 1), which(trackDataCollector$censorBefore) == 1), which(trackDataCollector$beforeArea == -1))
+  trackDataCollector$beforeArea[censoreBefore] <- NA
+  censorAfter <- c(which(trackDataCollector$afterEdge) == 1), which(trackDataCollector$censorAfter) == 1), which(trackDataCollector$afterArea == -1))
+  trackDataCollector$afterArea[censoreBefore] <- NA
+
+  # figure out how big the plot will be  
   includedStrains <- uniqueGroups(trackDataCollector)
   strainNumber <- length(includedStrains)
-  numberPlotRows <- ceiling(length(trackDataCollector) / strainNumber)
-  plotSortList <- NULL # reset the list
-  for (i in 1:strainNumber){
-    plotSortList<-lappend(plotSortList,NULL) #expand the list to number of strains
-  }
-  sampleIDs <- NULL
-  try(sampleIDs <- unlist(lapply(strsplit(unlist(lapply(trackDataCollector,"[[",1)),"_", fixed = FALSE, perl = FALSE, useBytes = FALSE),"[[",1))) # list of all sampleIDs in the same order as trackDataCollector
-  if (is.null(sampleIDs)==FALSE){
-    if(is.null(includedStrains)==FALSE){
-      if((length(trackDataCollector)>=1) && (strainNumber>0)){
-        for (s in 1:length(trackDataCollector)){ #create a plotting-suitable list, i.e. plot strain1-1, strain2-1, strain3-1, strain1-2, strain2-2, strain3-2, etc.
-          for (i in 1:strainNumber){
-            if (sampleIDs[s]==includedStrains[i]){
-              plotSortList[[i]]<-c(plotSortList[[i]],s)
-            }
-          }
-        }
-        maxRow <- 0
-        for (i in 1:strainNumber){ # get maximum length per row
-          thisLength <- length(plotSortList[[i]])
-          if (thisLength>maxRow){
-            maxRow <- thisLength
-          }
-        }
-        
-        try(png(filename = paste0(ResultOutputPath,"Rplot001_",correctTrackVersionString,".png"), width = 400*strainNumber, height = 400*numberPlotRows, units = "px", pointsize = 14, bg = "white"))
-        try(par(mfrow=c(maxRow,strainNumber))) # from http://www.statmethods.net/advgraphs/layout.html
-        
-        cat("creating <<per worm>> plots:\n")
-        cat("|0%.......................100%|\n")
-        progressBar <- txtProgressBar(min = 1, max = maxRow, initial = 1, char = "=",width = 30, title, label, style = 1, file = "")
-        
-        sortedDataListCounter <- 1 # reset counter
-        #cat("\nmaxRow",maxRow)
-        #cat("\nstrainNumber",strainNumber)
-        for (o in 1:maxRow){
-          for (i in 1:strainNumber){
-            #cat("\nplotSortList[[i]][o]",plotSortList[[i]][o])
-            s <- plotSortList[[i]][o]
-            if(is.na(s)==FALSE){
-              #cat("\ntrackDataCollector[[s]]",trackDataCollector[[s]])
-              if (is.na(trackDataCollector[[s]])==FALSE){
-                numberColumns <- 19 # entries per data point: sampleID,birthTimeStamp,currentTimestamp,trackLengthBefore,trackAreaBefore,trackLengthAfter,trackAreaAfter,trackVersion,trackEdgeBefore,trackContoursBefore,trackEdgeAfter,trackContoursAfter, trackCensoredBefore, trackCensoredAfter
-                numberRows<-length(trackDataCollector[[s]])/numberColumns
-                if (numberRows==round(numberRows)){
-                  thisSample<- matrix(data=trackDataCollector[[s]],nrow=numberRows,ncol=numberColumns,byrow=TRUE,dimnames=NULL) 
-                  thisSampleFrame<-transform(data.frame(thisSample), X2 = strtoi(X2), X3 = strtoi(X3), X4 = strtoi(X4), X5 = strtoi(X5), X6 = strtoi(X6), X7 = strtoi(X7), X8 = (strtoi(X3)-strtoi(X2))/3600/24) # convert numeric values to integers, i.e. columns 2-7
-                  thisSampleSorted <- mat.sort(thisSampleFrame,3) #sort each sample by "currentTimestamp", i.e. column 3
-                  thisSampleSorted <- removeCensored(thisSampleSorted) 
-                  thisSampleSorted <- removeEmptyTimepoints(thisSampleSorted)
-                  tryCatch({censoredUnzeroedRapidData[[sortedDataListCounter]] <- c(toString(thisSampleSorted[[1]][1]),approx(thisSampleSorted[,8],thisSampleSorted[,columToAnalyze],xout=seq(0,21,1/24)))},error=function(cond){print(paste0("faulty dataset in trackDataCollector[[",toString(s),"]] ",cond))})
-                  par(mfg=c(o,i)) #define plotting location on muliple plot sheet http://stackoverflow.com/questions/4785657/r-how-to-draw-an-empty-plot
-                  #try(plot(approx(thisSampleSorted[,8],thisSampleSorted[,6],xout=seq(0,16,1/24)),main=thisSampleSorted[[1]][1],xlab="time [days]", ylab="track length [px]",pch='.',type="l",ylim=c(0,1500))) # plotting limits!
-                  try(plot(censoredUnzeroedRapidData[[sortedDataListCounter]],main=thisSampleSorted[[1]][1],xlab="time [days]", ylab="track length [px]",pch='.',type="l",ylim=c(0,40000))) # plotting limits!
-                  #cat("\nplotting",censoredUnzeroedRapidData[[sortedDataListCounter]],main=thisSampleSorted[[1]][1])
-                  sortedFilteredCensoredRapidData[[sortedDataListCounter]] <- thisSampleSorted
-                  sortedDataListCounter <- sortedDataListCounter + 1
-                }
-              }
-            }
-          }
-          setTxtProgressBar(progressBar,o)
-        }
 
-        cat("... done.\n")
-        cat("writing plots to file ...")
-        dev.off()
-        cat(" done.\n")
-        cat("saving <<censoredUnzeroedRapidData>> to file ...")
-        #print(censoredUnzeroedRapidData)
-        save(censoredUnzeroedRapidData, file=paste0(ResultOutputPath,"censoredUnzeroedRapidData.rda"))
-        cat(" done.\n")
-        cat("saving <<sortedFilteredCensoredRapidData>> to file ...")
-        save(sortedFilteredCensoredRapidData, file=paste0(ResultOutputPath,"sortedFilteredCensoredRapidData.rda"))
-      } #end of error check
-    } #end of is.null clause
-  } #end of (another) is.null clause
-  cat(" done.\n")
+  # figure out which group has the most individuals
+  numberPlotRows <- max(tabulate(factor(trackDataCollector$sampleID)))
+  
+    
+  # create an empty canvas with size unique groups x maximum number of individuals
+  try(png(filename = paste0(ResultOutputPath,"Rplot001_",correctTrackVersionString,".png"), width = 400*strainNumber, height = 400*numberPlotRows, units = "px", pointsize = 14, bg = "white"))
+  try(par(mfrow=c(numberPlotRows,strainNumber))) # from http://www.statmethods.net/advgraphs/layout.html
+  
+  # go through the unique groups
+  for (x in 1:length(includedStrains)){
+    wormsPerStrain <- trackDataCollector[grep(includedStrains[x], trackDataCollector$sampleID), ]
+    for (y in 1:length(unique(wormsPerStrain))){
+      # do the plot at x,y on canvas
+
+    par(mfg=c(x,y)) # define plotting location on muliple plot sheet http://stackoverflow.com/questions/4785657/r-how-to-draw-an-empty-plot
+    try(plot(trackDataCollector$days, na.omit(wormsPerStrain$afterArea),main=wormsPerStrain[y],xlab="time [days]", ylab="track length [px]",pch='.',type="l",ylim=c(0,40000))) # plotting limits!
+
+     } 
+   }
+   cat("... done.\n")
+   cat("writing plots to file ...")
+   dev.off()
+   cat(" done.\n")
+
 }
 
 censorData <- function(trackDataCollector,censoringList){
 	cat("\ncensoring data...\n")
 	censNames <- readLines(censoringList)
-	cat("|0%.......................100%|\n")
-	newTrackDataCollector <- NULL
-	progressBar <- txtProgressBar(min = 1, max = length(trackDataCollector), initial = 1, char = "=",width = 30, title, label, style = 1, file = "")
-	for (i in 1:length(trackDataCollector)){
-		if ((trackDataCollector[[i]][1] %in% censNames) == FALSE){
-			newTrackDataCollector<-c(newTrackDataCollector,trackDataCollector[i])
-		}
-		setTxtProgressBar(progressBar,i)
-	}
+  trackDataCollectorCensored <- trackDataCollector[!trackDataCollector$sampleID %in% censNames, ]
 	cat(" done.\n")
-	return(newTrackDataCollector)	
+	return(trackDataCollectorCensored)	
 }
 
 createMeanPlots <- function(censoredUnzeroedRapidData,ResultOutputPath){
@@ -543,23 +473,14 @@ removeCensored <- function(singleSample){
 }
 
 uniqueGroups <- function(trackDataCollector){
-	strainNumber <- 0
-	sampleIDs <- NULL
-	try(sampleIDs<-unique(unlist(lapply(strsplit(unlist(lapply(trackDataCollector,"[[",1)),"_", fixed = FALSE, perl = FALSE, useBytes = FALSE),"[[",1)))) #sampleIDs<-unlist(lapply(trackDataCollector,"[[",1)) #sampleIDs<-strsplit(sampleIDs,"_", fixed = FALSE, perl = FALSE, useBytes = FALSE) #sampleIDs<-unlist(lapply(sampleIDs,"[[",1)) #sampleIDs<-unique(sampleIDs)
-	if (is.null(sampleIDs)==FALSE){
-  	censorList <- NULL
-  	for (i in 1:length(sampleIDs)){
-  		if (length(grep("Error",sampleIDs[i]))>0){ # Sometimes datasets throw an error during reading of the text files which results in the word "Error" in the string.
-  			censorList <- c(censorList,i)
-  		}
-  	}
-  	if (length(censorList)>0){
-  		sampleIDs<-sampleIDs[-censorList]
-  	}
-  	cat("The current data set contains",length(sampleIDs),"samples:",sampleIDs,"\n")
-	}
+	
+	sampleIDs <- unique(unlist(data.frame(str_split_fixed(trackDataCollector$sampleID, "_",2), stringsAsFactors=FALSE)[1]))
+
+  cat("found the following samples: \n")
+  cat(sampleIDs)
 	return(sampleIDs)
 }
+
 
 lappend <- function (lst, addVar){ # adapted from http://stackoverflow.com/questions/9031819/add-named-vector-to-a-list/12978667#12978667
 	lst <- c(lst, list(addVar))
@@ -649,8 +570,8 @@ correctTrackVersionString <<- "trackVersion.v13"
 #summarizeTracks("/mnt/4TBraid04/imagesets04/20160217_vibassay_set4","/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
 #summarizeTracks("/mnt/4TBraid04/imagesets04/20160810_vibassay_set10_censored","/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160810_vibassay_set10/")
 #summarizeTracks("/mnt/4TBraid04/imagesets04/20160902_vibassay_set11","/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160902_vibassay_set11/")
-#summarizeTracks("/mnt/4TBraid04/imagesets04/20160919_vibassay_set12","/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/")
-summarizeTracks("/mnt/4TBraid04/imagesets04/SS104_set2_analysisV13","/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_SS104_set2_analysisV13/")
+summarizeTracks("/mnt/4TBraid04/imagesets04/20160919_vibassay_set12","/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/")
+#summarizeTracks("/mnt/4TBraid04/imagesets04/SS104_set2_analysisV13","/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_SS104_set2_analysisV13/")
 
 
 print("summarize_done")
@@ -686,10 +607,9 @@ print("summarize_done")
 #tracks2 <- trackDataCollector
 #trackDataCollector<-c(tracks10,tracks11,tracks12)
 
-      #print(trackDataCollector[[length(trackDataCollector)]])
-      #print(typeof(trackDataCollector))
-      #print(length(trackDataCollector))
-      #print("------------------------")
+load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/trackDataCollector_test.rda")
+trackDataCollectorCensored <- censorData(trackDataCollector,"/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/censoringList.txt")
+uniqueGroups(trackDataCollectorCensored)
 
 #trackDataCollector<-censorData(trackDataCollector,"/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/censoringList.txt")
 
