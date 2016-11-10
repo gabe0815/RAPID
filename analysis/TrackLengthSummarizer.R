@@ -125,7 +125,10 @@ summarizeTracks <- function(RapidInputPath,ResultOutputPath){
 		setTxtProgressBar(progressBar,d)
    
   }
-	cat(" done.\n")
+  # remove entries with wrong trackVersion string
+  trackDataCollector <- trackDataCollector[which(trackDataCollector$trackVersion == correctTrackVersionString), ]
+	
+  cat(" done.\n")
 	save(trackDataCollector, file=paste0(ResultOutputPath,"trackDataCollector_test.rda"))  
 }
 
@@ -155,9 +158,8 @@ createPlots <- function(trackDataCollector,ResultOutputPath){
       singleWorm <- wormsPerStrain[which(wormsPerStrain$sampleID == wormsPerStrain$sampleID[y]), ]
       
       # do the plot at x,y on canvas
-
-    par(mfg=c(y, x)) # define plotting location on muliple plot sheet http://stackoverflow.com/questions/4785657/r-how-to-draw-an-empty-plot
-    try(plot(approx(singleWorm$days, singleWorm$afterArea, xout=seq(0,25,1/24)), main = wormsPerStrain$sampleID[y], xlab="time [days]", ylab="track length [px]", pch='.', type="l", ylim = c(0, 40000))) # plotting limits!
+      par(mfg=c(y, x)) # define plotting location on muliple plot sheet http://stackoverflow.com/questions/4785657/r-how-to-draw-an-empty-plot
+      try(plot(approx(singleWorm$days, singleWorm$afterArea, xout=seq(0,25,1/24)), main = wormsPerStrain$sampleID[y], xlab="time [days]", ylab="track length [px]", pch='.', type="l", ylim = c(0, 40000))) # plotting limits!
 
      } 
    }
@@ -168,13 +170,6 @@ createPlots <- function(trackDataCollector,ResultOutputPath){
 }
 
 plotMeanStDev <- function(trackDataCollector, ResultOutputPath){
-#  summary <- data.frame(strain = character(0),
-#                     timepoint = numeric(0),
-#                 afterAreaMean = numeric(0),
-#               afterAreaStdDev = numeric(0),
-#                beforeAreaMean = numeric(0),
-#              beforeAreaStdDev = numeric(0)
-#                      )
 
   # figure out how many different groups we have
   includedStrains <- uniqueGroups(trackDataCollector)
@@ -184,7 +179,7 @@ plotMeanStDev <- function(trackDataCollector, ResultOutputPath){
   numberOfPlotsPerRow <- 4
   numberOfRows <- ceiling(strainNumber / numberOfPlotsPerRow)  
   
-  png(filename = paste0(ResultOutputPath,"MEANplot001_",correctTrackVersionString,".png"), width = 400*numberOfPlotsPerRow, height = 400*numberOfRows, units = "px", pointsize = 14, bg = "white")
+  png(filename = paste0(ResultOutputPath, "MEANandSTDEVplot001_", correctTrackVersionString,".png"), width = 400*numberOfPlotsPerRow, height = 400*numberOfRows, units = "px", pointsize = 14, bg = "white")
   par(mfrow=c(numberOfRows,numberOfPlotsPerRow))
   # go through the unique groups
   for (s in 1:length(includedStrains)){
@@ -222,7 +217,9 @@ plotMeanStDev <- function(trackDataCollector, ResultOutputPath){
     thisStrainMeanAfter <- apply(perStrainAfterArea, 1, mean)
     thisStrainStdDevAfter <- apply(perStrainAfterArea, 1, sd)
     par(mfg=c(j, i))
-    try(plot(seq(1,25, 1/24), thisStrainMeanAfter, main = includedStrains[s], xlab="time [days]", ylab="track length [px]", pch='.', type="l", ylim = c(0, 40000))) # plotting limits!
+    plot(seq(1,25, 1/24), thisStrainMeanAfter, main = includedStrains[s], xlab="time [days]", ylab="track length [px]", pch='.', type="l", ylim = c(0, 40000)) # plotting limits!
+    lines(seq(1,25, 1/24), thisStrainMeanAfter + thisStrainStdDevAfter,col="gray")
+    lines(seq(1,25, 1/24), thisStrainMeanAfter - thisStrainStdDevAfter,col="gray")
 
     save(perStrainAfterArea, file="/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/thisStrain.rda")
   }
