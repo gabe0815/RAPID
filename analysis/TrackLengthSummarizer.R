@@ -221,7 +221,7 @@ plotMeanStDev <- function(trackDataCollector, ResultOutputPath){
     lines(seq(1,25, 1/24), thisStrainMeanAfter + thisStrainStdDevAfter,col="gray")
     lines(seq(1,25, 1/24), thisStrainMeanAfter - thisStrainStdDevAfter,col="gray")
 
-    save(perStrainAfterArea, file="/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/thisStrain.rda")
+    #save(perStrainAfterArea, file="/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/thisStrain.rda")
   }
   cat("writing plots to file ...")
   dev.off()
@@ -266,49 +266,37 @@ uniqueGroups <- function(trackDataCollector){
 }
 
 
-lappend <- function (lst, addVar){ # adapted from http://stackoverflow.com/questions/9031819/add-named-vector-to-a-list/12978667#12978667
-	lst <- c(lst, list(addVar))
-		return(lst)
-}
-
-mat.sort <- function(mat,n) # from http://www.r-bloggers.com/sorting-a-matrixdata-frame-on-a-column/
-{
-	mat[rank(mat[,n]),] <- mat
-	return(mat)
-}
-
-plotSurvival <- function(sortedFilteredCensoredRapidData) {
-  # At the moment, the column to be checked is hardcoded (X7). This could be avoided if we proberly name columns.
+plotSurvival <- function(trackDataCollector) {
+  # add groupID
+  trackDataCollector$groupID <- str_split_fixed(trackDataCollector$sampleID, "_",2)[,1]
+  
   # All worms are collected in the same data frame. By having a group ID, they can be assigned during plotting.
-  lastTimeAlive.df <- data.frame(ID = character(0), group = character(0), idx = numeric(0), stop = numeric(0), status = numeric(0))  
-  for (i in 1:length(sortedFilteredCensoredRapidData)){
+  lastTimeAlive <- trackDataCollector[0,]
+
+  for (i in 1:length(unique(trackDataCollector$sampleID))){
+    thisWorm <- trackDataCollector[which(trackDataCollector$sampleID == unique(trackDataCollector$sampleID)[i]), ]
+    save(thisWorm, file="/home/gabe/OldAlbert/media/4TBexternal/sync/thisWorm.rda")
     lastTimeAliveIndex <- -1
-    for (j in length(sortedFilteredCensoredRapidData[[i]]$X7):1){
-       # there need to be two tracks within 3 time points for it to count
-       if (sortedFilteredCensoredRapidData[[i]]$X7[j] > 0){
-         if (lastTimeAliveIndex == -1){
-           lastTimeAliveIndex <- j
-          # we found a second track within 3 timepoints, add to df and exit the inner loop
-         } else if ((lastTimeAliveIndex - j) <= 3){
-     
-           lastTimeAlive.df <- rbind(lastTimeAlive.df, data.frame(ID = as.character(sortedFilteredCensoredRapidData[[i]]$X1[lastTimeAliveIndex]), 
-                                                               group = unlist(strsplit(as.character(sortedFilteredCensoredRapidData[[i]]$X1[lastTimeAliveIndex]), "_"))[1], 
-                                                                 idx = as.numeric(unlist(strsplit(as.character(sortedFilteredCensoredRapidData[[i]]$X1[lastTimeAliveIndex]), "_"))[2]),
-                                                                stop = sortedFilteredCensoredRapidData[[i]]$X8[lastTimeAliveIndex], 
-                                                              status = 1))
-           break
-         } else { 
-            lastTimeAliveIndex <- j
-         }
-       } 
+    
+    for (j in length(thisWorm$afterArea):1){
+
+      if ((is.na(thisWorm$afterArea[j]) == FALSE) && (thisWorm$afterArea[j] > 0)) {
+        if (lastTimeAliveIndex == -1){
+          lastTimeAliveIndex <- j
+        } else if ((lastTimeAliveIndex - j) <= 3){
+          lastTimeAlive[nrow(lastTimeAlive)+1, ] <- thisWorm[j, ]
+          break         
+        } else { 
+          lastTimeAliveIndex <- j 
+        }
+      }     
     }
+  
   } 
   
-  #filter for certains groups (optional)
-  load("/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/lastTimeAliveFrame.rda")
-  #lastTimeAlive.df <- lastTimeAlive.df[grep("N2", lastTimeAlive.df$group), ]
-  
-  fit<- survfit(Surv(stop, status) ~ group, data = lastTimeAlive.df)
+  lastTimeAlive$status <- 1
+  save(lastTimeAlive, file="/home/gabe/OldAlbert/media/4TBexternal/sync/lastTimeAliveFrame.rda")
+  fit<- survfit(Surv(days, status) ~ groupID, data = lastTimeAlive)
   ggsurvplot(fit, 
           legend = c("right"), 
     legend.title = "Strains", 
@@ -319,18 +307,20 @@ plotSurvival <- function(sortedFilteredCensoredRapidData) {
             xlab = "Days",
             ylab = "Fraction surving",
             xlim = c(0,30),
-   break.time.by = 5,
-      risk.table = TRUE
-   
- 
+   break.time.by = 5 
             )
   # add more ticks           
 
   # need to find the right parameters to make it look nice
-  ggsave("/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/survival.png") 
-  save(lastTimeAlive.df, file="/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/lastTimeAliveFrame.rda")
+  ggsave("/home/gabe/OldAlbert/media/4TBexternal/sync/survival.png") 
+  #save(lastTimeAlive.df, file="/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/lastTimeAliveFrame.rda")
 
 }
+
+#selectStrains <- function(trackDataCollector, strainList) {
+#  trackDataCollector <- trackDataCollector[trackDataCollector$sampleID %in% censNames, ]
+
+#}
 
 
 
@@ -391,11 +381,14 @@ print("summarize_done")
 #tracks2 <- trackDataCollector
 #trackDataCollector<-c(tracks10,tracks11,tracks12)
 
-load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/trackDataCollector_test.rda")
-trackDataCollectorCensored <- censorData(trackDataCollector,"/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/censoringList.txt")
+#load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/trackDataCollector_test.rda")
+#trackDataCollectorCensored <- censorData(trackDataCollector,"/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/censoringList.txt")
+
+load("/home/gabe/OldAlbert/media/4TBexternal/sync/trackDataCollector_censored.rda")
 uniqueGroups(trackDataCollectorCensored)
 #createPlots(trackDataCollectorCensored, "/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
-plotMeanStDev(trackDataCollectorCensored, "/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
+plotMeanStDev(trackDataCollectorCensored, "/home/gabe/OldAlbert/media/4TBexternal/sync/")
+plotSurvival(trackDataCollectorCensored)
 #save(trackDataCollectorCensored, file = "/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/trackDataCollector_censored.rda")
 
 #trackDataCollector<-censorData(trackDataCollector,"/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/censoringList.txt")
