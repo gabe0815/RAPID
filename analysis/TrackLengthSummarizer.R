@@ -188,8 +188,8 @@ plotMeanStDev <- function(trackDataCollector, ResultOutputPath){
   par(mfrow=c(numberOfRows,numberOfPlotsPerRow))
   # go through the unique groups
   for (s in 1:length(includedStrains)){
-    perStrainBeforeArea <- data.frame(row.names = 1:577)
-    perStrainAfterArea <- data.frame(row.names = 1:577)
+    perStrainBeforeArea <- data.frame(c(rep(NA, 577)))
+    perStrainAfterArea <- data.frame(c(rep(NA, 577)))
      
     wormsPerStrain <- trackDataCollector[grep(includedStrains[s], trackDataCollector$sampleID), ]
     i <- s%%numberOfPlotsPerRow
