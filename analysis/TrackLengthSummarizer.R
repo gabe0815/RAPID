@@ -130,15 +130,7 @@ summarizeTracks <- function(RapidInputPath,ResultOutputPath){
 }
 
 
-createPlots <- function(trackDataCollector,ResultOutputPath){
-  # calculate age of the worms in days
-  trackDataCollector$days <- ((trackDataCollector$currentTimestamp - trackDataCollector$birthTimestamp)/(3600 * 24))  
-
-  # instead of deleting the censored data points, we can write them as NA and use na.omit to omit them during plotting.
-  censorBefore <- c(which(trackDataCollector$beforeEdge == 1), which(trackDataCollector$censorBefore == 1), which(trackDataCollector$beforeArea == -1))
-  trackDataCollector$beforeArea[censorBefore] <- NA
-  censorAfter <- c(which(trackDataCollector$afterEdge == 1), which(trackDataCollector$censorAfter == 1), which(trackDataCollector$afterArea == -1))
-  trackDataCollector$afterArea[censorAfter] <- NA
+createPlots <- function(trackDataCollector,ResultOutputPath){  
 
   # figure out how many different groups we have
   includedStrains <- uniqueGroups(trackDataCollector)
@@ -151,6 +143,7 @@ createPlots <- function(trackDataCollector,ResultOutputPath){
   }
   numberPlotRows <- max(numberOfWorms)
   
+  cat("\nnumber of strains: ", strainNumber, "\n", "max number of worms: ", numberPlotRows, "\n")
   # create an empty canvas with size unique groups x maximum number of individuals
  try(png(filename = paste0(ResultOutputPath,"Rplot001_",correctTrackVersionString,".png"), width = 400*strainNumber, height = 400*numberPlotRows, units = "px", pointsize = 14, bg  = "white"))
  try(par(mfrow=c(numberPlotRows, strainNumber))) # from http://www.statmethods.net/advgraphs/layout.html
@@ -159,321 +152,100 @@ createPlots <- function(trackDataCollector,ResultOutputPath){
   for (x in 1:length(includedStrains)){
     wormsPerStrain <- trackDataCollector[grep(includedStrains[x], trackDataCollector$sampleID), ]
     for (y in 1:length(unique(wormsPerStrain$sampleID))){
-      singleWorm <- wormsPerStrain[grep(wormsPerStrain$sampleID[y], wormsPerStrain$sampleID), ]
+      singleWorm <- wormsPerStrain[which(wormsPerStrain$sampleID == wormsPerStrain$sampleID[y]), ]
+      
       # do the plot at x,y on canvas
 
     par(mfg=c(y, x)) # define plotting location on muliple plot sheet http://stackoverflow.com/questions/4785657/r-how-to-draw-an-empty-plot
-    try(plot(singleWorm$days, singleWorm$afterArea, main = wormsPerStrain$sampleID[y], xlab="time [days]", ylab="track length [px]", pch='.', type="l", ylim = c(0, 40000))) # plotting limits!
+    try(plot(approx(singleWorm$days, singleWorm$afterArea, xout=seq(0,25,1/24)), main = wormsPerStrain$sampleID[y], xlab="time [days]", ylab="track length [px]", pch='.', type="l", ylim = c(0, 40000))) # plotting limits!
 
      } 
    }
-   cat("... done.\n")
    cat("writing plots to file ...")
    dev.off()
    cat(" done.\n")
 
 }
 
+plotMeanStDev <- function(trackDataCollector, ResultOutputPath){
+#  summary <- data.frame(strain = character(0),
+#                     timepoint = numeric(0),
+#                 afterAreaMean = numeric(0),
+#               afterAreaStdDev = numeric(0),
+#                beforeAreaMean = numeric(0),
+#              beforeAreaStdDev = numeric(0)
+#                      )
+
+  # figure out how many different groups we have
+  includedStrains <- uniqueGroups(trackDataCollector)
+  strainNumber <- length(includedStrains)
+
+  # create an empty canvas with size 4 x number of groups / 4
+  numberOfPlotsPerRow <- 4
+  numberOfRows <- ceiling(strainNumber / numberOfPlotsPerRow)  
+  
+  png(filename = paste0(ResultOutputPath,"MEANplot001_",correctTrackVersionString,".png"), width = 400*numberOfPlotsPerRow, height = 400*numberOfRows, units = "px", pointsize = 14, bg = "white")
+  par(mfrow=c(numberOfRows,numberOfPlotsPerRow))
+  # go through the unique groups
+  for (s in 1:length(includedStrains)){
+    perStrainBeforeArea <- data.frame(row.names = 1:577)
+    perStrainAfterArea <- data.frame(row.names = 1:577)
+     
+    wormsPerStrain <- trackDataCollector[grep(includedStrains[s], trackDataCollector$sampleID), ]
+    i <- s%%numberOfPlotsPerRow
+    if (i == 0){
+      i <- numberOfPlotsPerRow
+    }
+    j <- ceiling(s/numberOfPlotsPerRow) 
+    
+    # create interpolated data sets for each worm
+    for (w in length(unique(wormsPerStrain$sampleID))){
+      thisWorm <- wormsPerStrain[which(wormsPerStrain$sampleID == wormsPerStrain$sampleID[w]),]
+      perStrainBeforeArea <- cbind(perStrainBeforeArea, data.frame(approx(thisWorm$days, thisWorm$beforeArea, xout = seq(1,25,1/24))$y)) # y is the second column of the approx function
+      perStrainAfterArea <- cbind(perStrainAfterArea, data.frame(approx(thisWorm$days, thisWorm$afterArea, xout = seq(1,25,1/24))$y))      
+    }
+    
+    # calculate row-wise mean and stdDev and append this to the summary
+    thisStrainMeanBefore <- apply(perStrainBeforeArea, 1, mean)
+    thisStrainStdDevBefore <- apply(perStrainBeforeArea, 1, sd)
+    thisStrainMeanAfter <- apply(perStrainAfterArea, 1, mean)
+    thisStrainStdDevAfter <- apply(perStrainAfterArea, 1, sd)
+    par(mfg=c(j, i))
+    try(plot(seq(1,25, 1/24), thisStrainMeanAfter, main = includedStrains[s], xlab="time [days]", ylab="track length [px]", pch='.', type="l", ylim = c(0, 40000))) # plotting limits!
+
+    save(thisWorm, file="/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/thisStrain.rda")
+  }
+  cat("writing plots to file ...")
+  dev.off()
+  cat(" done.\n")
+}
+
 censorData <- function(trackDataCollector,censoringList){
+  # remove complete sets
 	cat("\ncensoring data...\n")
 	censNames <- readLines(censoringList)
   trackDataCollectorCensored <- trackDataCollector[!trackDataCollector$sampleID %in% censNames, ]
-	cat(" done.\n")
+
+  # convert censored timepoints to NAs
+  censorBefore <- c(which(trackDataCollectorCensored$beforeEdge == "1"), 
+                    which(trackDataCollectorCensored$trackCensoredBefore == "1"), 
+                    which(trackDataCollectorCensored$beforeArea == "-1")
+                   )
+  
+  trackDataCollectorCensored$beforeArea[censorBefore] <- NA
+  
+  censorAfter <- c(which(trackDataCollectorCensored$afterEdge == "1"), 
+                   which(trackDataCollectorCensored$trackCensoredAfter == "1"), 
+                   which(trackDataCollectorCensored$afterArea == "-1")
+                  )
+  
+  trackDataCollectorCensored$afterArea[censorAfter] <- NA
+	
+  # calculate worm age in days
+  trackDataCollectorCensored$days <- ((as.numeric(trackDataCollectorCensored$currentTimestamp) - as.numeric(trackDataCollectorCensored$birthTimestamp))/(3600 * 24))
+  
+  cat(" done.\n")
 	return(trackDataCollectorCensored)	
-}
-
-createMeanPlots <- function(censoredUnzeroedRapidData,ResultOutputPath){
-	#timeUnit <- 3600 # 1 hour (in s - UNIX timestamps)
-	sampleGroups <- uniqueGroups(trackDataCollector)
-	#print("sampleGroups")
-	#print(sampleGroups)
-	statData <- NULL # empty list
-	groupwiseDataCollector <- data.frame(internalIndex=numeric(length(sampleGroups))) #strainGroup=character(length(sampleGroups)),listSamples=numeric(length(sampleGroups)),numberSamples=numeric(length(sampleGroups))) # create an empty list
-
-	print(groupwiseDataCollector)
-	#stdTimeList <- censoredUnzeroedRapidData[[1]]$x # create a timepoint list
-	#timewiseDataCollector <- data.frame(timePoint=numeric(length(stdTimeList))) # create a data frame with one column, containing all timepoints
-	columnNames <- NULL #empty list
-	for (i in 1:length(sampleGroups)){
-	  print(sampleGroups[i])
-		columnNames[[i]]<-sampleGroups[i]
-		columnNames[[i+length(sampleGroups)]] <- paste0(sampleGroups[i],"_mean")
-		columnNames[[i+length(sampleGroups)*2]] <- paste0(sampleGroups[i],"_median")
-		columnNames[[i+length(sampleGroups)*3]] <- paste0(sampleGroups[i],"_average")
-	}
-	
-	print("columnNames")
-	print(columnNames)
-	
-	emptyValueList <- rep(0,length(censoredUnzeroedRapidData[[1]]$x)) # create list of 0s as long as the timepoint list
-	print(sampleGroups)
-	for (i in 1:length(sampleGroups)){
-		groupwiseDataCollector$internalIndex[i] <- i
-		groupwiseDataCollector$strainGroup[i] <- sampleGroups[i] # replace strain name field with sample group name (to be used as search filter later and for plotting
-		groupwiseDataCollector$listSamples[[i]] <- list()
-		groupwiseDataCollector$numberSamples[i] <- 0
-		groupwiseDataCollector$nameSamples[[i]] <- list()
-	}
-	
-	print(groupwiseDataCollector)
-	for (j in 1:length(censoredUnzeroedRapidData)){
-		for (i in 1:length(sampleGroups)){
-  		if(is.na(groupwiseDataCollector$strainGroup[i])==FALSE && is.na(censoredUnzeroedRapidData[[j]][1])==FALSE){
-		  	if(grepl(groupwiseDataCollector$strainGroup[i],censoredUnzeroedRapidData[[j]][1]) == TRUE){
-  				statData[[j]]<-censoredUnzeroedRapidData[[j]]$y # $y values, track length
-  				groupwiseDataCollector$listSamples[[i]] <- c(groupwiseDataCollector$listSamples[[i]],j)
-  				groupwiseDataCollector$nameSamples[[i]] <- c(groupwiseDataCollector$nameSamples[[i]],censoredUnzeroedRapidData[[j]][1])
-  				groupwiseDataCollector$numberSamples[i] <- groupwiseDataCollector$numberSamples[i]+1
-		  	}
-  		}
-		}
-	}
-		
-	print(groupwiseDataCollector)
-	cat("\nThe data set contains these sample groups: ",sampleGroups,"\n")
-    #This loop does nothing?	
-    for (i in 2:length(censoredUnzeroedRapidData)){
-		for (j in 1:length(sampleGroups)){
-			
-		}
-	}
-	return(list(groupwiseDataCollector,statData,censoredUnzeroedRapidData[[1]]$x))
-}
-
-performAnova <- function(groupwiseDataCollector_statData,timePoint){
-  anovaDataFrame <- data.frame(wormID=character(0), motionValue=numeric(0), strainID=character(0))
-  anovaDataFrame[nrow(anovaDataFrame)+1,] <- NA #expand data frame for 1 row
-  anovaDataFrame$wormID <- "" #empty row (somehow necessary)
-  anovaDataFrame$motionValue <- 0 #empty row (somehow necessary)
-  anovaDataFrame$strainID <- "" #empty row (somehow necessary)
-  for(i in 1:length(groupwiseDataCollector_statData[1][[1]]$internalIndex)){ # strains
-   for(j in 1:length(unlist(groupwiseDataCollector_statData[1][[1]]$listSamples[i]))){ # worms
-     r<-nrow(anovaDataFrame)
-     anovaDataFrame$wormID[r] <- groupwiseDataCollector_statData[[1]]$nameSamples[[i]][[j]]
-     anovaDataFrame$motionValue[r] <- groupwiseDataCollector_statData[2][[1]][groupwiseDataCollector_statData[[1]]$listSamples[[i]][[j]]][[1]][timePoint]
-     anovaDataFrame$strainID[r] <- groupwiseDataCollector_statData[[1]]$strainGroup[[i]]
-     anovaDataFrame[nrow(anovaDataFrame)+1,] <- NA #expand data frame for 1 row
-    }
-  }
-  anovaDataFrame <- anovaDataFrame[-c(nrow(anovaDataFrame)), ] #remove last = empty row
-  anovaDataFrame$wormID <- factor(anovaDataFrame$wormID)
-  aov1 <- aov(motionValue ~ strainID, data=anovaDataFrame)
-  anovaResult <- data.frame(TukeyHSD(aov1)[1])
-  return(anovaResult)
-}
-
-calcMeanStd <- function(groupwiseDataCollector_statData,timePoint){
-  meanDataFrame <- data.frame(wormID=character(0), motionValue=numeric(0), strainID=character(0))
-  meanDataFrame[nrow(meanDataFrame)+1,] <- NA #expand data frame for 1 row
-  meanDataFrame$wormID <- "" #empty row (somehow necessary)
-  meanDataFrame$motionValue <- 0 #empty row (somehow necessary)
-  meanDataFrame$strainID <- "" #empty row (somehow necessary)
-  for(i in 1:length(groupwiseDataCollector_statData[1][[1]]$internalIndex)){ # strains
-    for(j in 1:length(unlist(groupwiseDataCollector_statData[1][[1]]$listSamples[i]))){ # worms
-      r<-nrow(meanDataFrame)
-      meanDataFrame$wormID[r] <- groupwiseDataCollector_statData[[1]]$nameSamples[[i]][[j]]
-      meanDataFrame$motionValue[r] <- groupwiseDataCollector_statData[2][[1]][groupwiseDataCollector_statData[[1]]$listSamples[[i]][[j]]][[1]][timePoint]
-      meanDataFrame$strainID[r] <- groupwiseDataCollector_statData[[1]]$strainGroup[[i]]
-      meanDataFrame[nrow(meanDataFrame)+1,] <- NA #expand data frame for 1 row
-    }
-  }
-  meanDataFrame <- meanDataFrame[-c(nrow(meanDataFrame)), ] #remove last = empty row
-  meanStdResult <- data.frame(matrix(NA, nrow = 2, ncol = length(unlist(groupwiseDataCollector_statData[[1]][2]))))# empty data frame with strains as column labels
-  colnames(meanStdResult)<-unlist(groupwiseDataCollector_statData[[1]][2]) # set strain names as column names
-  rownames(meanStdResult)<-c("mean","stDev")
-  for (s in unlist(groupwiseDataCollector_statData[[1]][2])){ # collect data for each strain separately, i.e. loop through strain by strain
-    motionValues <- meanDataFrame[meanDataFrame$strainID==s,]$motionValue
-    meanStdResult["mean",s]<-mean(motionValues)
-    meanStdResult["stDev",s]<-sd(motionValues)
-  }
-  return(meanStdResult)
-}
-
-plotAnova <- function(groupwiseDataCollector_statData){
-  plotSampleNumber <- choose(length(unlist(groupwiseDataCollector_statData[[1]][2])),2) # determine how many comparisons will be available (at most) with the included strain list -> choose(n,k) N over K
-  print(plotSampleNumber)
-  plotWidth <- ceiling(sqrt(plotSampleNumber))
-  plotHeight <- ceiling(plotSampleNumber/plotWidth)
-  ResultOutputPath <-"/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/"
-  png(filename = paste0(ResultOutputPath,"ANOVAplot001_",correctTrackVersionString,".png"), width = 400*plotWidth, height = 400*plotHeight, units = "px", pointsize = 14, bg = "white")
-  par(mfrow=c(plotWidth,plotHeight),pty = "s") #define plotting location on muliple plot sheet http://stackoverflow.com/questions/4785657/r-how-to-draw-an-empty-plot
-  anovaDataCollector <- NULL
-  cat("calculating ANOVA:\n")
-  cat("|0%.......................100%|\n")
-  #print(groupwiseDataCollector_statData)
-  progressBar <- txtProgressBar(min = 1, max = length(groupwiseDataCollector_statData[2][[1]][[1]]), initial = 1, char = "=",width = 30, title, label, style = 1, file = "")
-  for (q in 1:length(groupwiseDataCollector_statData[2][[1]][[1]])){ #loop through all virtual time points
-  #for (q in 190:191){
-    setTxtProgressBar(progressBar,q)
-    anovaResult <- NULL
-    try(anovaResult <- performAnova(groupwiseDataCollector_statData,q),silent = TRUE)
-    if (is.null(anovaResult) == FALSE){
-      if(length(anovaResult$strainID.p.adj) == plotSampleNumber){ #test if all samples are available for this timepoint
-        if(is.null(anovaDataCollector)==TRUE){ #create a new data frame by copying and cleaning up the anovaResult data frame
-          anovaDataCollector <- anovaResult
-          anovaDataCollector$strainID.diff<-NULL
-          anovaDataCollector$strainID.lwr <-NULL
-          anovaDataCollector$strainID.upr <-NULL
-          anovaDataCollector$strainID.p.adj <-NULL
-        }
-        anovaDataCollector[length(anovaDataCollector)+1] <- anovaResult$strainID.p.adj
-        colnames(anovaDataCollector)[length(anovaDataCollector)] <- groupwiseDataCollector_statData[3][[1]][q]
-      }
-    }
-  }
-  cat("... done.\n")
-  save(anovaDataCollector, file="/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/anovaDataCollector.rda")
-  #load(file="/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/anovaDataCollector.rda")
-  
-  anovaRowNames <- rownames(anovaDataCollector)
-  anovaColNames <- as.numeric(colnames(anovaDataCollector))
-  cat("plotting ANOVA:\n")
-  cat("|0%.......................100%|\n")
-  progressBar <- txtProgressBar(min = 1, max = length(anovaRowNames), initial = 1, char = "=",width = 30, title, label, style = 1, file = "")
-  for (i in 1:length(anovaRowNames)){
-    plotX <- anovaColNames
-    plotY <- anovaDataCollector[i,]
-    plot(xy.coords(plotX, plotY, log="y"), log="y",main=anovaRowNames[i],xlab="time [days]", ylab="p-value [ANOVA]",pch='.',type="l",xlim=c(0,25),ylim=c(0.00000001,1))
-    lines(c(0,100),c(0.05,0.05),col="red")
-    setTxtProgressBar(progressBar,i)
-  }
-  cat("... done.\n")
-  cat("writing plots to file ...")
-  dev.off()
-}
-
-plotMeanStDev <- function(groupwiseDataCollector_statData){
-  plotSampleNumber <- length(unlist(groupwiseDataCollector_statData[[1]][2])) # determine how many comparisons will be available (at most) with the included strain list -> choose(n,k) N over K
-  print(plotSampleNumber)
-  plotWidth <- plotSampleNumber
-  plotHeight <- 1
-  ResultOutputPath <-"/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/"
-  
-  meanCollector <- data.frame(matrix(NA, nrow = length(groupwiseDataCollector_statData[[3]]), ncol = length(unlist(groupwiseDataCollector_statData[[1]][2])))) #create an empty data frame filled with NA
-  colnames(meanCollector)<-unlist(groupwiseDataCollector_statData[[1]][2]) # set strain names as column names
-  rownames(meanCollector)<-groupwiseDataCollector_statData[[3]]
-  stdevCollector <- meanCollector #duplicate the NA data frame
-  
-  cat("calculating Mean and StDev:\n")
- # cat("|0%.......................100%|\n")
- # progressBar <- txtProgressBar(min = 1, max = length(groupwiseDataCollector_statData[2][[1]][[1]]), initial = 1, char = "=",width = 30, title, label, style = 1, file = "")
-  
-  for (q in 1:length(groupwiseDataCollector_statData[[3]])){ #loop through all virtual time points
-  #for (q in 190:193){
-    #setTxtProgressBar(progressBar,q)
-    meanStdResult <- NULL
-    try(meanStdResult<- calcMeanStd(groupwiseDataCollector_statData,q),silent = FALSE)
-    if (is.null(meanStdResult) == FALSE){
-      if(length(meanStdResult) == plotSampleNumber){ #test if all samples are available for this timepoint
-          meanCollector[q,] <- meanStdResult["mean",]
-          stdevCollector[q,] <- meanStdResult["stDev",]  
-      }
-    }
-  }
-  cat("... done.\n")
-  
-  save(meanCollector, file="/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/meanCollector.rda")
-  save(stdevCollector, file="/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/stdevCollector.rda")
-  #load(file="/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/meanCollector.rda")
-  #load(file="/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/stdevCollector.rda")
-  
-  png(filename = paste0(ResultOutputPath,"MEANplot001_",correctTrackVersionString,".png"), width = 400*plotWidth, height = 400*plotHeight, units = "px", pointsize = 14, bg = "white")
-  par(mfrow=c(plotHeight,plotWidth),pty = "s") #define plotting location on muliple plot sheet http://stackoverflow.com/questions/4785657/r-how-to-draw-an-empty-plot
-  plotX <- as.numeric(rownames(meanCollector))
-  cat("plotting mean:\n")
-#  cat("|0%.......................100%|\n")
-#  progressBar <- txtProgressBar(min = 1, max = length(meanCollector), initial = 1, char = "=",width = 30, title, label, style = 1, file = "")
-  for (i in 1:length(colnames(meanCollector))){
-    plotY <- meanCollector[,i] # entire colun of current strain over time
-    plot(xy.coords(plotX[is.na(plotY)==FALSE], plotY[is.na(plotY)==FALSE]),main=colnames(meanCollector)[i],xlab="time [days]", ylab="mean [track]",pch='.',type="l",xlim=c(0,25),ylim=c(0,40000)) #plot needs to exlude NA rows
-#    setTxtProgressBar(progressBar,i)
-  }
-  cat("... done.\n")
-  cat("writing plots to file ...")
-  dev.off()
-  
-  cat("plotting stdev:\n")
-#  cat("|0%.......................100%|\n")
-#  progressBar <- txtProgressBar(min = 1, max = length(meanCollector), initial = 1, char = "=",width = 30, title, label, style = 1, file = "")
-  png(filename = paste0(ResultOutputPath,"STDEVplot001_",correctTrackVersionString,".png"), width = 400*plotWidth, height = 400*plotHeight, units = "px", pointsize = 14, bg = "white")
-  par(mfrow=c(plotHeight,plotWidth),pty = "s") #define plotting location on muliple plot sheet http://stackoverflow.com/questions/4785657/r-how-to-draw-an-empty-plot
-  plotX <- as.numeric(rownames(meanCollector))
-  for (i in 1:length(colnames(meanCollector))){
-    plotY <- stdevCollector[,i] # entire colun of current strain over time
-    plot(xy.coords(plotX[is.na(plotY)==FALSE], plotY[is.na(plotY)==FALSE]),main=colnames(meanCollector)[i],xlab="time [days]", ylab="std.dev. [track]",pch='.',type="l",xlim=c(0,25),ylim=c(0,40000))
-#    setTxtProgressBar(progressBar,i)
-  }
-  cat("... done.\n")
-  cat("writing plots to file ...")
-  dev.off()
-  
-  cat("plotting mean and stdev:\n")
-#  cat("|0%.......................100%|\n")
-#  progressBar <- txtProgressBar(min = 1, max = length(meanCollector), initial = 1, char = "=",width = 30, title, label, style = 1, file = "")
-  png(filename = paste0(ResultOutputPath,"MEANandSTDEVplot001_",correctTrackVersionString,".png"), width = 400*plotWidth, height = 400*plotHeight, units = "px", pointsize = 14, bg = "white")
-  par(mfrow=c(plotHeight,plotWidth),pty = "s") #define plotting location on muliple plot sheet http://stackoverflow.com/questions/4785657/r-how-to-draw-an-empty-plot
-  plotX <- as.numeric(rownames(meanCollector))
-  for (i in 1:length(colnames(meanCollector))){
-    plotY1 <- meanCollector[,i]  # entire colun of current strain over time
-    plotY2 <- stdevCollector[,i] # entire colun of current strain over time
-    plot(xy.coords(plotX[is.na(plotY1)==FALSE], plotY1[is.na(plotY1)==FALSE]),main=colnames(meanCollector)[i],xlab="time [days]", ylab="speed[a.U.] (black), std.dev.(gray)",pch='.',type="l",xlim=c(0,25),ylim=c(0,40000),col="black")
-    lines(plotX[is.na(plotY2)==FALSE], plotY1[is.na(plotY1)==FALSE]-plotY2[is.na(plotY2)==FALSE],col="gray")
-    lines(plotX[is.na(plotY2)==FALSE], plotY1[is.na(plotY1)==FALSE]+plotY2[is.na(plotY2)==FALSE],col="gray")
-#    setTxtProgressBar(progressBar,i)
-  }
-  cat("... done.\n")
-  cat("writing plots to file ...")
-  dev.off()
-}
-
-
-removeEmptyTimepoints <- function(singleSample){
-	singleSample <- singleSample[singleSample[,columToAnalyze]<50000,] # upper cut-off X6 <15000
-	if(length(singleSample)>1){
-		if(length(singleSample[,columToAnalyze])>3){
-			rem <- FALSE
-			remList <- NULL
-			for (i in length(singleSample[,columToAnalyze]):2){ # find first zero y after last positive value
-				if((is.na(singleSample[i,columToAnalyze]) == FALSE) && (is.na(singleSample[i-1,columToAnalyze]) == FALSE)){ 
-					if((singleSample[i,columToAnalyze]==-1) && (singleSample[i-1,columToAnalyze]>-1) && (rem == FALSE)){  
-						rem <- TRUE
-					}else if ((rem == TRUE) && (singleSample[i,columToAnalyze]==-1)){
-						remList <- c(remList,i)
-					}
-				}
-			}
-			if(length(remList) > 0){
-				singleSample<-singleSample[-remList,] # http://stackoverflow.com/questions/12328056/how-do-i-delete-rows-in-a-data-frame
-			}
-		}
-	}
-	return(singleSample)
-}
-
-removeCensored <- function(singleSample){
-  #save(singleSample, file="/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/singleSample.rda")
-  #set area of censored timepoints to -1, before and after
-  if (columToAnalyze == 7){
-    censor <- 14
-    edge <- 11
-  } else if (columToAnalyze == 5){
-    censor <- 13
-    edge <- 9
-  }
-  for (i in 1:nrow(singleSample)){
-    if (singleSample[i,edge] == 1){
-      singleSample[i,columToAnalyze] <- -1 #these will be ignored (track crosses edge)
-      #print("edge")
-    }
-    if (is.na(singleSample[i,censor]) == FALSE){
-      if (singleSample[i,censor] == 1){
-        singleSample[i,columToAnalyze] <- -1 #these will be ignored 
-        #print("censoring")
-      }
-    }
-  }
-  return (singleSample)
-
 }
 
 uniqueGroups <- function(trackDataCollector){
@@ -574,7 +346,7 @@ correctTrackVersionString <<- "trackVersion.v13"
 #summarizeTracks("/mnt/4TBraid04/imagesets04/20160217_vibassay_set4","/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
 #summarizeTracks("/mnt/4TBraid04/imagesets04/20160810_vibassay_set10_censored","/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160810_vibassay_set10/")
 #summarizeTracks("/mnt/4TBraid04/imagesets04/20160902_vibassay_set11","/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160902_vibassay_set11/")
-summarizeTracks("/mnt/4TBraid04/imagesets04/20160919_vibassay_set12","/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/")
+#summarizeTracks("/mnt/4TBraid04/imagesets04/20160919_vibassay_set12","/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/")
 #summarizeTracks("/mnt/4TBraid04/imagesets04/SS104_set2_analysisV13","/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_SS104_set2_analysisV13/")
 
 
@@ -614,7 +386,9 @@ print("summarize_done")
 load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/trackDataCollector_test.rda")
 trackDataCollectorCensored <- censorData(trackDataCollector,"/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/censoringList.txt")
 uniqueGroups(trackDataCollectorCensored)
-createPlots(trackDataCollectorCensored, "/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
+#createPlots(trackDataCollectorCensored, "/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
+plotMeanStDev(trackDataCollectorCensored, "/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
+#save(trackDataCollectorCensored, file = "/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/trackDataCollector_censored.rda")
 
 #trackDataCollector<-censorData(trackDataCollector,"/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/censoringList.txt")
 
