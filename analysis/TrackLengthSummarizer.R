@@ -188,6 +188,7 @@ plotMeanStDev <- function(trackDataCollector, ResultOutputPath){
   par(mfrow=c(numberOfRows,numberOfPlotsPerRow))
   # go through the unique groups
   for (s in 1:length(includedStrains)){
+
     perStrainBeforeArea <- data.frame(c(rep(NA, 577)))
     perStrainAfterArea <- data.frame(c(rep(NA, 577)))
      
@@ -198,13 +199,23 @@ plotMeanStDev <- function(trackDataCollector, ResultOutputPath){
     }
     j <- ceiling(s/numberOfPlotsPerRow) 
     
-    # create interpolated data sets for each worm
-    for (w in length(unique(wormsPerStrain$sampleID))){
-      thisWorm <- wormsPerStrain[which(wormsPerStrain$sampleID == wormsPerStrain$sampleID[w]),]
-      perStrainBeforeArea <- cbind(perStrainBeforeArea, data.frame(approx(thisWorm$days, thisWorm$beforeArea, xout = seq(1,25,1/24))$y)) # y is the second column of the approx function
-      perStrainAfterArea <- cbind(perStrainAfterArea, data.frame(approx(thisWorm$days, thisWorm$afterArea, xout = seq(1,25,1/24))$y))      
+    # create interpolated data sets for each worm and append to strain based data frame
+    for (w in 1:length(unique(wormsPerStrain$sampleID))){
+      thisWorm <- wormsPerStrain[which(wormsPerStrain$sampleID == unique(wormsPerStrain$sampleID)[w]), ]
+
+      thisWormApproxBefore <- data.frame(approx(thisWorm$days, thisWorm$beforeArea, xout = seq(1,25,1/24))$y)
+      thisWormApproxAfter <- data.frame(approx(thisWorm$days, thisWorm$afterArea, xout = seq(1,25,1/24))$y)
+      colnames(thisWormApproxBefore) <- unique(wormsPerStrain$sampleID)[w]
+      colnames(thisWormApproxAfter) <- unique(wormsPerStrain$sampleID)[w]
+
+      perStrainBeforeArea <- cbind(perStrainBeforeArea, thisWormApproxBefore) # y is the second column of the approx function
+      perStrainAfterArea <- cbind(perStrainAfterArea, thisWormApproxAfter)      
     }
-    
+   
+    # remove the empty column
+    perStrainBeforeArea <- perStrainBeforeArea[, -1]
+    perStrainAfterArea <- perStrainAfterArea[, -1]
+
     # calculate row-wise mean and stdDev and append this to the summary
     thisStrainMeanBefore <- apply(perStrainBeforeArea, 1, mean)
     thisStrainStdDevBefore <- apply(perStrainBeforeArea, 1, sd)
@@ -213,7 +224,7 @@ plotMeanStDev <- function(trackDataCollector, ResultOutputPath){
     par(mfg=c(j, i))
     try(plot(seq(1,25, 1/24), thisStrainMeanAfter, main = includedStrains[s], xlab="time [days]", ylab="track length [px]", pch='.', type="l", ylim = c(0, 40000))) # plotting limits!
 
-    save(thisWorm, file="/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/thisStrain.rda")
+    save(perStrainAfterArea, file="/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/thisStrain.rda")
   }
   cat("writing plots to file ...")
   dev.off()
