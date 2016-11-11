@@ -10,6 +10,7 @@
 library(survminer)
 library(survival)
 library(stringr)
+library(tibble)
 
 summarizeTracks <- function(RapidInputPath,ResultOutputPath){
 	print(RapidInputPath)
@@ -236,29 +237,37 @@ plotAnova <- function(trackDataCollector, ResultOutputPath){
 
   # construct a data frame with approximate area values with After Area 
   approxAfterArea <- data.frame(matrix(0, ncol = 0, nrow = length(seq(1,25, 1/24))))
-  wormIDs <- NULL 
+  sampleIDs <- NULL 
 
   for (w in unique(trackDataCollector$sampleID)){
       thisWorm <- trackDataCollector[which(trackDataCollector$sampleID == w), ]
       thisWormApproxAfter <- data.frame(approx(thisWorm$days, thisWorm$afterArea, xout = seq(1,25,1/24))$y)
-      # add the approximated values as a column to the data frame, and append the sampleID
+      # add the approximated values as a column to the data frame, and append the groupID
       approxAfterArea <- cbind(approxAfterArea, thisWormApproxAfter)
-      wormIDs <- c(wormIDs, w)
+      sampleIDs <- c(sampleIDs, thisWorm$sampleID[1])
   }
   
-  colnames(approxAfterArea) <- wormIDs
+  colnames(approxAfterArea) <- sampleIDs
+  anovaSummary <- data.frame(matrix(0, ncol = 0, nrow = numberOfPlots))
+  # loop through all time points 
+  for (r in 1:nrow(approxAfterArea)){
+    currentTime <- data.frame(t(approxAfterArea[r,]))
+    colnames(currentTime) <- "afterArea"
+    currentTime <- rownames_to_column(currentTime, var = "sampleID")
+    currentTime$groupID <- str_split_fixed(currentTime$sampleID, "_",2)[,1]
+    if (any(is.na(currentTime$afterArea))){
+      anovaSummary <- cbind(anovaSummary, c(rep(NA, numberOfPlots)))
+    } else {    
+    currentTime.aov <- aov(afterArea ~ groupID, data = currentTime)
+    currentAnova <-  data.frame(TukeyHSD(currentTime.aov)[1])
+    anovaSummary <- cbind(anovaSummary, data.frame(currentAnova$groupID.p.adj))
     
-  for ( r in nrow(approxAfterArea)){
-    aov1 <- aov(approxAfterArea[r] ~ strainID, data = approxAfterArea)
-  }
+    }
+  }  
 
-  save(aov1, file="/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/aov.rda")
+  save(anovaSummary, file="/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/currentTime.rda")
   
-#  # anova test per time point per strain
-#  aov1 <- aov(motionValue ~ strainID, data=anovaDataFrame)
-#  anovaResult <- data.frame(TukeyHSD(aov1)[1])
-
-  
+ 
 }
 
 censorData <- function(trackDataCollector,censoringList){
