@@ -246,8 +246,14 @@ plotAnova <- function(trackDataCollector, ResultOutputPath){
       wormIDs <- c(wormIDs, w)
   }
   
-  colnames(approxAfterArea) <- wormIDs    
-  save(approxAfterArea, file = "/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/approxAfterArea.rda")
+  colnames(approxAfterArea) <- wormIDs
+    
+  for ( r in nrow(approxAfterArea)){
+    aov1 <- aov(approxAfterArea[r] ~ strainID, data = approxAfterArea)
+  }
+
+  save(aov1, file="/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/aov.rda")
+  
 #  # anova test per time point per strain
 #  aov1 <- aov(motionValue ~ strainID, data=anovaDataFrame)
 #  anovaResult <- data.frame(TukeyHSD(aov1)[1])
