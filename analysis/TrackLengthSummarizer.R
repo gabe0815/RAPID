@@ -129,31 +129,31 @@ summarizeTracks <- function(RapidInputPath,ResultOutputPath){
   trackDataCollector <- trackDataCollector[which(trackDataCollector$trackVersion == correctTrackVersionString), ]
 	
   cat(" done.\n")
-	save(trackDataCollector, file=paste0(ResultOutputPath,"trackDataCollector_test.rda"))  
+	save(trackDataCollector, file=paste0(ResultOutputPath, "trackDataCollector_test.rda"))  
 }
 
 
-createPlots <- function(trackDataCollector,ResultOutputPath){  
+createPlots <- function(trackDataCollector, ResultOutputPath){  
 
   # figure out how many different groups we have
-  includedStrains <- uniqueGroups(trackDataCollector)
-  strainNumber <- length(includedStrains)
+  strains <- unique(trackDataCollector$groupID)
+  numberOfStrains <- length(strains)
 
   # figure out which group has the most individuals
   numberOfWorms <- NULL
-  for (i in includedStrains){
+  for (i in strains){
     numberOfWorms <- c(numberOfWorms, length(grep(i, unique(trackDataCollector$sampleID))))
   }
   numberPlotRows <- max(numberOfWorms)
   
-  cat("\nnumber of strains: ", strainNumber, "\n", "max number of worms: ", numberPlotRows, "\n")
+  cat("\nnumber of strains: ", numberOfStrains, "\n", "max number of worms: ", numberPlotRows, "\n")
   # create an empty canvas with size unique groups x maximum number of individuals
- try(png(filename = paste0(ResultOutputPath,"Rplot001_",correctTrackVersionString,".png"), width = 400*strainNumber, height = 400*numberPlotRows, units = "px", pointsize = 14, bg  = "white"))
- try(par(mfrow=c(numberPlotRows, strainNumber))) # from http://www.statmethods.net/advgraphs/layout.html
+ try(png(filename = paste0(ResultOutputPath,"Rplot001_",correctTrackVersionString,".png"), width = 400*numberOfStrains, height = 400*numberPlotRows, units = "px", pointsize = 14, bg  = "white"))
+ try(par(mfrow=c(numberPlotRows, numberOfStrains))) # from http://www.statmethods.net/advgraphs/layout.html
   
   # go through the unique groups
-  for (x in 1:length(includedStrains)){
-    wormsPerStrain <- trackDataCollector[grep(includedStrains[x], trackDataCollector$sampleID), ]
+  for (x in 1:length(strains)){
+    wormsPerStrain <- trackDataCollector[grep(strains[x], trackDataCollector$sampleID), ]
     for (y in 1:length(unique(wormsPerStrain$sampleID))){
       singleWorm <- wormsPerStrain[which(wormsPerStrain$sampleID == wormsPerStrain$sampleID[y]), ]
       
@@ -169,25 +169,25 @@ createPlots <- function(trackDataCollector,ResultOutputPath){
 
 }
 
-plotMeanStDev <- function(trackDataCollector, ResultOutputPath){
+plotMeanSD <- function(trackDataCollector, ResultOutputPath){
 
   # figure out how many different groups we have
-  includedStrains <- uniqueGroups(trackDataCollector)
-  strainNumber <- length(includedStrains)
+  strains <- unique(trackDataCollector$groupID)
+  numberOfStrains <- length(strains)
 
   # create an empty canvas with size 4 x number of groups / 4
   numberOfPlotsPerRow <- 4
-  numberOfRows <- ceiling(strainNumber / numberOfPlotsPerRow)  
+  numberOfRows <- ceiling(numberOfStrains / numberOfPlotsPerRow)  
   
   png(filename = paste0(ResultOutputPath, "MEANandSTDEVplot001_", correctTrackVersionString,".png"), width = 400*numberOfPlotsPerRow, height = 400*numberOfRows, units = "px", pointsize = 14, bg = "white")
   par(mfrow=c(numberOfRows,numberOfPlotsPerRow))
   # go through the unique groups
-  for (s in 1:length(includedStrains)){
+  for (s in 1:length(strains)){
 
-    perStrainBeforeArea <- data.frame(c(rep(NA, 577)))
-    perStrainAfterArea <- data.frame(c(rep(NA, 577)))
+#    perStrainBeforeArea <- data.frame(matrix(0, ncol = 0, nrow = length(seq(1,25, 1/24))))
+    perStrainAfterArea <- data.frame(matrix(0, ncol = 0, nrow = length(seq(1,25, 1/24))))
      
-    wormsPerStrain <- trackDataCollector[grep(includedStrains[s], trackDataCollector$sampleID), ]
+    wormsPerStrain <- trackDataCollector[grep(strains[s], trackDataCollector$sampleID), ]
     i <- s%%numberOfPlotsPerRow
     if (i == 0){
       i <- numberOfPlotsPerRow
@@ -198,26 +198,22 @@ plotMeanStDev <- function(trackDataCollector, ResultOutputPath){
     for (w in 1:length(unique(wormsPerStrain$sampleID))){
       thisWorm <- wormsPerStrain[which(wormsPerStrain$sampleID == unique(wormsPerStrain$sampleID)[w]), ]
 
-      thisWormApproxBefore <- data.frame(approx(thisWorm$days, thisWorm$beforeArea, xout = seq(1,25,1/24))$y)
+#      thisWormApproxBefore <- data.frame(approx(thisWorm$days, thisWorm$beforeArea, xout = seq(1,25,1/24))$y)
       thisWormApproxAfter <- data.frame(approx(thisWorm$days, thisWorm$afterArea, xout = seq(1,25,1/24))$y)
-      colnames(thisWormApproxBefore) <- unique(wormsPerStrain$sampleID)[w]
+#      colnames(thisWormApproxBefore) <- unique(wormsPerStrain$sampleID)[w]
       colnames(thisWormApproxAfter) <- unique(wormsPerStrain$sampleID)[w]
 
-      perStrainBeforeArea <- cbind(perStrainBeforeArea, thisWormApproxBefore) # y is the second column of the approx function
+#      perStrainBeforeArea <- cbind(perStrainBeforeArea, thisWormApproxBefore) # y is the second column of the approx function
       perStrainAfterArea <- cbind(perStrainAfterArea, thisWormApproxAfter)      
     }
    
-    # remove the empty column
-    perStrainBeforeArea <- perStrainBeforeArea[, -1]
-    perStrainAfterArea <- perStrainAfterArea[, -1]
-
     # calculate row-wise mean and stdDev and append this to the summary
-    thisStrainMeanBefore <- apply(perStrainBeforeArea, 1, mean)
-    thisStrainStdDevBefore <- apply(perStrainBeforeArea, 1, sd)
+#    thisStrainMeanBefore <- apply(perStrainBeforeArea, 1, mean)
+#    thisStrainStdDevBefore <- apply(perStrainBeforeArea, 1, sd)
     thisStrainMeanAfter <- apply(perStrainAfterArea, 1, mean)
     thisStrainStdDevAfter <- apply(perStrainAfterArea, 1, sd)
     par(mfg=c(j, i))
-    plot(seq(1,25, 1/24), thisStrainMeanAfter, main = includedStrains[s], xlab="time [days]", ylab="track length [px]", pch='.', type="l", ylim = c(0, 40000)) # plotting limits!
+    plot(seq(1,25, 1/24), thisStrainMeanAfter, main = strains[s], xlab="time [days]", ylab="track length [px]", pch='.', type="l", ylim = c(0, 40000)) # plotting limits!
     lines(seq(1,25, 1/24), thisStrainMeanAfter + thisStrainStdDevAfter,col="gray")
     lines(seq(1,25, 1/24), thisStrainMeanAfter - thisStrainStdDevAfter,col="gray")
 
@@ -226,6 +222,37 @@ plotMeanStDev <- function(trackDataCollector, ResultOutputPath){
   cat("writing plots to file ...")
   dev.off()
   cat(" done.\n")
+}
+
+plotAnova <- function(trackDataCollector, ResultOutputPath){
+  
+  # create an empty canvas with the right size 
+  numberOfPlotsPerRow <- 4  
+  numberOfPlots <- choose(length(unique(trackDataCollector$groupID)),2)
+  numberOfRows <- ceiling(numberOfPlots / numberOfPlotsPerRow)
+
+#  png(filename = paste0(ResultOutputPath, "ANOVAplot001_", correctTrackVersionString,".png"), width = 400*numberOfPlotsPerRow, height = 400*numberOfRows, units = "px", pointsize = 14, bg = "white")
+#  par(mfrow=c(numberOfRows,numberOfPlotsPerRow))
+
+  # construct a data frame with approximate area values with After Area 
+  approxAfterArea <- data.frame(matrix(0, ncol = 0, nrow = length(seq(1,25, 1/24))))
+  wormIDs <- NULL 
+
+  for (w in unique(trackDataCollector$sampleID)){
+      thisWorm <- trackDataCollector[which(trackDataCollector$sampleID == w), ]
+      thisWormApproxAfter <- data.frame(approx(thisWorm$days, thisWorm$afterArea, xout = seq(1,25,1/24))$y)
+      # add the approximated values as a column to the data frame, and append the sampleID
+      approxAfterArea <- cbind(approxAfterArea, thisWormApproxAfter)
+      wormIDs <- c(wormIDs, w)
+  }
+  
+  colnames(approxAfterArea) <- wormIDs    
+  save(approxAfterArea, file = "/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/approxAfterArea.rda")
+#  # anova test per time point per strain
+#  aov1 <- aov(motionValue ~ strainID, data=anovaDataFrame)
+#  anovaResult <- data.frame(TukeyHSD(aov1)[1])
+
+  
 }
 
 censorData <- function(trackDataCollector,censoringList){
@@ -252,30 +279,22 @@ censorData <- function(trackDataCollector,censoringList){
   # calculate worm age in days
   trackDataCollectorCensored$days <- ((as.numeric(trackDataCollectorCensored$currentTimestamp) - as.numeric(trackDataCollectorCensored$birthTimestamp))/(3600 * 24))
   
+  # add groupID
+  trackDataCollectorCensored$groupID <- str_split_fixed(trackDataCollectorCensored$sampleID, "_",2)[,1]
+    
   cat(" done.\n")
 	return(trackDataCollectorCensored)	
 }
 
-uniqueGroups <- function(trackDataCollector){
-	
-	sampleIDs <- unique(unlist(data.frame(str_split_fixed(trackDataCollector$sampleID, "_",2), stringsAsFactors=FALSE)[1]))
-
-  cat("found the following samples: \n")
-  cat(sampleIDs)
-	return(sampleIDs)
-}
-
-
-plotSurvival <- function(trackDataCollector) {
-  # add groupID
-  trackDataCollector$groupID <- str_split_fixed(trackDataCollector$sampleID, "_",2)[,1]
+plotSurvival <- function(trackDataCollector, ResultOutputPath) {
   
   # All worms are collected in the same data frame. By having a group ID, they can be assigned during plotting.
   lastTimeAlive <- trackDataCollector[0,]
-
+  
+  # get last time alive for each worm
   for (i in 1:length(unique(trackDataCollector$sampleID))){
     thisWorm <- trackDataCollector[which(trackDataCollector$sampleID == unique(trackDataCollector$sampleID)[i]), ]
-    save(thisWorm, file="/home/gabe/OldAlbert/media/4TBexternal/sync/thisWorm.rda")
+
     lastTimeAliveIndex <- -1
     
     for (j in length(thisWorm$afterArea):1){
@@ -294,8 +313,9 @@ plotSurvival <- function(trackDataCollector) {
   
   } 
   
+  # plotting
   lastTimeAlive$status <- 1
-  save(lastTimeAlive, file="/home/gabe/OldAlbert/media/4TBexternal/sync/lastTimeAliveFrame.rda")
+
   fit<- survfit(Surv(days, status) ~ groupID, data = lastTimeAlive)
   ggsurvplot(fit, 
           legend = c("right"), 
@@ -312,7 +332,7 @@ plotSurvival <- function(trackDataCollector) {
   # add more ticks           
 
   # need to find the right parameters to make it look nice
-  ggsave("/home/gabe/OldAlbert/media/4TBexternal/sync/survival.png") 
+  ggsave(paste0(ResultOutputPath,"Surv001_",correctTrackVersionString,".png")) 
   #save(lastTimeAlive.df, file="/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/lastTimeAliveFrame.rda")
 
 }
@@ -381,14 +401,14 @@ print("summarize_done")
 #tracks2 <- trackDataCollector
 #trackDataCollector<-c(tracks10,tracks11,tracks12)
 
-#load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/trackDataCollector_test.rda")
-#trackDataCollectorCensored <- censorData(trackDataCollector,"/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/censoringList.txt")
+load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/trackDataCollector_test.rda")
+trackDataCollectorCensored <- censorData(trackDataCollector,"/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/censoringList.txt")
 
-load("/home/gabe/OldAlbert/media/4TBexternal/sync/trackDataCollector_censored.rda")
-uniqueGroups(trackDataCollectorCensored)
+#load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/trackDataCollector_censored.rda")
 #createPlots(trackDataCollectorCensored, "/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
-plotMeanStDev(trackDataCollectorCensored, "/home/gabe/OldAlbert/media/4TBexternal/sync/")
-plotSurvival(trackDataCollectorCensored)
+#plotMeanSD(trackDataCollectorCensored, "/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
+#plotSurvival(trackDataCollectorCensored, "/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
+plotAnova(trackDataCollectorCensored, "/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
 #save(trackDataCollectorCensored, file = "/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/trackDataCollector_censored.rda")
 
 #trackDataCollector<-censorData(trackDataCollector,"/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/censoringList.txt")
