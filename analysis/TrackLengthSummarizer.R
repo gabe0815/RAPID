@@ -249,6 +249,7 @@ plotAnova <- function(trackDataCollector, ResultOutputPath){
   
   colnames(approxAfterArea) <- sampleIDs
   anovaSummary <- data.frame(matrix(0, ncol = 0, nrow = numberOfPlots))
+  firstAnova <- TRUE
   # loop through all time points 
   for (r in 1:nrow(approxAfterArea)){
     currentTime <- data.frame(t(approxAfterArea[r,]))
@@ -258,15 +259,20 @@ plotAnova <- function(trackDataCollector, ResultOutputPath){
     if (any(is.na(currentTime$afterArea))){
       anovaSummary <- cbind(anovaSummary, c(rep(NA, numberOfPlots)))
     } else {    
-    currentTime.aov <- aov(afterArea ~ groupID, data = currentTime)
-    currentAnova <-  data.frame(TukeyHSD(currentTime.aov)[1])
-    anovaSummary <- cbind(anovaSummary, data.frame(currentAnova$groupID.p.adj))
-    
+      currentTime.aov <- aov(afterArea ~ groupID, data = currentTime)
+      currentAnova <-  data.frame(TukeyHSD(currentTime.aov)[1])
+      anovaSummary <- cbind(anovaSummary, data.frame(currentAnova$groupID.p.adj))
+      # extarct row names
+      if (firstAnova == TRUE){
+        rowNames <- rownames(currentAnova)
+        firstAnova <- FALSE
+      } 
     }
-  }  
-
-  save(anovaSummary, file="/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/currentTime.rda")
+  }
   
+  rownames(anovaSummary) <- rowNames
+
+#  save(anovaSummary, file="./applications/RAPID/analysis/anovaSummary.rda")
  
 }
 
@@ -416,14 +422,15 @@ print("summarize_done")
 #tracks2 <- trackDataCollector
 #trackDataCollector<-c(tracks10,tracks11,tracks12)
 
-load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/trackDataCollector_test.rda")
-trackDataCollectorCensored <- censorData(trackDataCollector,"/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/censoringList.txt")
+#load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/trackDataCollector_test.rda")
+#trackDataCollectorCensored <- censorData(trackDataCollector,"/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/censoringList.txt")
 
 #load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/trackDataCollector_censored.rda")
 #createPlots(trackDataCollectorCensored, "/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
 #plotMeanSD(trackDataCollectorCensored, "/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
 #plotSurvival(trackDataCollectorCensored, "/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
-plotAnova(trackDataCollectorCensored, "/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
+load("/home/gabe/OldAlbert/media/4TBexternal/sync/PhD/TrackLengthSummarizer/trackDataCollector_censored.rda")
+plotAnova(trackDataCollectorCensored, "/home/gabe/OldAlbert/media/4TBexternal/sync/PhD/TrackLengthSummarizer/")
 #save(trackDataCollectorCensored, file = "/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/trackDataCollector_censored.rda")
 
 #trackDataCollector<-censorData(trackDataCollector,"/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/censoringList.txt")
