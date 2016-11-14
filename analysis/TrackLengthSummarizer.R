@@ -130,7 +130,7 @@ summarizeTracks <- function(RapidInputPath,ResultOutputPath){
   trackDataCollector <- trackDataCollector[which(trackDataCollector$trackVersion == correctTrackVersionString), ]
 	
   cat(" done.\n")
-	save(trackDataCollector, file=paste0(ResultOutputPath, "trackDataCollector_test.rda"))  
+	save(trackDataCollector, file=paste0(ResultOutputPath, "trackDataCollector.rda"))  
 }
 
 
@@ -412,7 +412,7 @@ print("summarize_done")
 # tracks9 <- trackDataCollector
 #load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160810_vibassay_set10/trackDataCollector.rda")
 #tracks10 <- trackDataCollector
-#load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160902_vibassay_set11/trackDataCollector.rda")
+load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160902_vibassay_set11/trackDataCollector.rda")
 #tracks11 <- trackDataCollector
 #load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/trackDataCollector.rda")
 #tracks12 <- trackDataCollector
@@ -423,14 +423,14 @@ print("summarize_done")
 #trackDataCollector<-c(tracks10,tracks11,tracks12)
 
 #load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/trackDataCollector_test.rda")
-#trackDataCollectorCensored <- censorData(trackDataCollector,"/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/censoringList.txt")
+trackDataCollectorCensored <- censorData(trackDataCollector,"/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/censoringList.txt")
 
 #load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/trackDataCollector_censored.rda")
-#createPlots(trackDataCollectorCensored, "/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
-#plotMeanSD(trackDataCollectorCensored, "/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
-#plotSurvival(trackDataCollectorCensored, "/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
-load("/home/gabe/OldAlbert/media/4TBexternal/sync/PhD/TrackLengthSummarizer/trackDataCollector_censored.rda")
-plotAnova(trackDataCollectorCensored, "/home/gabe/OldAlbert/media/4TBexternal/sync/PhD/TrackLengthSummarizer/")
+createPlots(trackDataCollectorCensored, "/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
+plotMeanSD(trackDataCollectorCensored, "/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
+plotSurvival(trackDataCollectorCensored, "/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
+#load("/home/gabe/OldAlbert/media/4TBexternal/sync/PhD/TrackLengthSummarizer/trackDataCollector_censored.rda")
+plotAnova(trackDataCollectorCensored, "/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
 #save(trackDataCollectorCensored, file = "/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/trackDataCollector_censored.rda")
 
 #trackDataCollector<-censorData(trackDataCollector,"/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/censoringList.txt")
