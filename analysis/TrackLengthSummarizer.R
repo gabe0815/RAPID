@@ -145,12 +145,18 @@ createPlots <- function(trackDataCollector, ResultOutputPath){
   for (i in strains){
     numberOfWorms <- c(numberOfWorms, length(grep(i, unique(trackDataCollector$sampleID))))
   }
-  numberPlotRows <- max(numberOfWorms)
+  numberOfPlotsPerRow <- max(numberOfWorms)
   
-  cat("\nnumber of strains: ", numberOfStrains, "\n", "max number of worms: ", numberPlotRows, "\n")
+  cat("\nnumber of strains: ", numberOfStrains, "\n", "max number of worms: ", numberOfPlotsPerRow, "\n")
   # create an empty canvas with size unique groups x maximum number of individuals
- try(png(filename = paste0(ResultOutputPath,"Rplot001_",correctTrackVersionString,".png"), width = 400*numberOfStrains, height = 400*numberPlotRows, units = "px", pointsize = 14, bg  = "white"))
- try(par(mfrow=c(numberPlotRows, numberOfStrains))) # from http://www.statmethods.net/advgraphs/layout.html
+
+  svg(filename = paste0(ResultOutputPath, "Rplot001_", correctTrackVersionString,".svg"), 
+       width = 7*numberOfStrains, 
+      height = 7*numberOfPlotsPerRow,
+   pointsize = 14,
+          bg = "white")
+  
+  par(mfrow=c(numberOfPlotsPerRow, numberOfStrains)) # from http://www.statmethods.net/advgraphs/layout.html
   
   # go through the unique groups
   for (x in 1:length(strains)){
@@ -180,14 +186,21 @@ plotMeanSD <- function(trackDataCollector, ResultOutputPath){
   numberOfPlotsPerRow <- 4
   numberOfRows <- ceiling(numberOfStrains / numberOfPlotsPerRow)  
   
-  png(filename = paste0(ResultOutputPath, "MEANandSTDEVplot001_", correctTrackVersionString,".png"), width = 400*numberOfPlotsPerRow, height = 400*numberOfRows, units = "px", pointsize = 14, bg = "white")
+  svg(filename = paste0(ResultOutputPath, "MEANandSTDEVplot001_", correctTrackVersionString,".svg"), 
+         width = 7*numberOfPlotsPerRow, 
+        height = 7*numberOfRows,
+     pointsize = 14,
+            bg = "white")
+
   par(mfrow=c(numberOfRows,numberOfPlotsPerRow))
   # go through the unique groups
   for (s in 1:length(strains)){
 
 #    perStrainBeforeArea <- data.frame(matrix(0, ncol = 0, nrow = length(seq(1,25, 1/24))))
     perStrainAfterArea <- data.frame(matrix(0, ncol = 0, nrow = length(seq(1,25, 1/24))))
-     
+    perStrainTemperatureTable <- data.frame(matrix(0, ncol = 0, nrow = length(seq(1,25, 1/24))))
+    perStrainTemperatureAssay <- data.frame(matrix(0, ncol = 0, nrow = length(seq(1,25, 1/24))))
+
     wormsPerStrain <- trackDataCollector[grep(strains[s], trackDataCollector$sampleID), ]
     i <- s%%numberOfPlotsPerRow
     if (i == 0){
@@ -201,11 +214,15 @@ plotMeanSD <- function(trackDataCollector, ResultOutputPath){
 
 #      thisWormApproxBefore <- data.frame(approx(thisWorm$days, thisWorm$beforeArea, xout = seq(1,25,1/24))$y)
       thisWormApproxAfter <- data.frame(approx(thisWorm$days, thisWorm$afterArea, xout = seq(1,25,1/24))$y)
+      thisWormTemperatureTable <- data.frame(approx(thisWorm$days, thisWorm$temperatureTable, xout= seq(1,25,1/24))$y)
+      thisWormTemperatureAssay <- data.frame(approx(thisWorm$days, thisWorm$temperatureAssay, xout= seq(1,25,1/24))$y)
 #      colnames(thisWormApproxBefore) <- unique(wormsPerStrain$sampleID)[w]
       colnames(thisWormApproxAfter) <- unique(wormsPerStrain$sampleID)[w]
 
 #      perStrainBeforeArea <- cbind(perStrainBeforeArea, thisWormApproxBefore) # y is the second column of the approx function
-      perStrainAfterArea <- cbind(perStrainAfterArea, thisWormApproxAfter)      
+      perStrainAfterArea <- cbind(perStrainAfterArea, thisWormApproxAfter)
+      perStrainTemperatureTable <- cbind(perStrainTemperatureTable, thisWormTemperatureTable)
+      perStrainTemperatureAssay <- cbind(perStrainTemperatureAssay, thisWormTemperatureAssay)
     }
    
     # calculate row-wise mean and stdDev and append this to the summary
@@ -213,10 +230,20 @@ plotMeanSD <- function(trackDataCollector, ResultOutputPath){
 #    thisStrainStdDevBefore <- apply(perStrainBeforeArea, 1, sd)
     thisStrainMeanAfter <- apply(perStrainAfterArea, 1, mean)
     thisStrainStdDevAfter <- apply(perStrainAfterArea, 1, sd)
-    par(mfg=c(j, i))
+    thisStrainMeanTemperatureTable <- apply(perStrainTemperatureTable, 1, mean)
+    thisStrainMeanTemperatureAssay <- apply(perStrainTemperatureAssay, 1, mean)
+    
+    par(mfg=c(j, i), mar=c(5,5,2,5), cex.lab=1.5) # margin: c(bottom, left, top, right)
     plot(seq(1,25, 1/24), thisStrainMeanAfter, main = strains[s], xlab="time [days]", ylab="track length [px]", pch='.', type="l", ylim = c(0, 40000)) # plotting limits!
     lines(seq(1,25, 1/24), thisStrainMeanAfter + thisStrainStdDevAfter,col="gray")
     lines(seq(1,25, 1/24), thisStrainMeanAfter - thisStrainStdDevAfter,col="gray")
+
+    # plot temperature
+    par(new = TRUE)
+    plot(seq(1,25, 1/24), thisStrainMeanTemperatureAssay, axes=FALSE, type="l", col = "blue", ylim = c(0, 30), ann=FALSE) 
+    lines(seq(1,25, 1/24), thisStrainMeanTemperatureTable, col = "red", ann=FALSE) 
+    axis(side = 4)
+    mtext(side = 4, line = 3, 'Temperature [°C]')
 
     #save(perStrainAfterArea, file="/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/thisStrain.rda")
   }
@@ -232,7 +259,12 @@ plotAnova <- function(trackDataCollector, ResultOutputPath){
   numberOfPlots <- choose(length(unique(trackDataCollector$groupID)),2)
   numberOfRows <- ceiling(numberOfPlots / numberOfPlotsPerRow)
   # plot the anova p values
-  png(filename = paste0(ResultOutputPath, "ANOVAplot001_", correctTrackVersionString,".png"), width = 400*numberOfPlotsPerRow, height = 400*numberOfRows, units = "px", pointsize = 14, bg = "white")
+
+  svg(filename = paste0(ResultOutputPath, "ANOVAplot001_", correctTrackVersionString,".svg"), 
+         width = 7*numberOfPlotsPerRow, 
+        height = 7*numberOfRows,
+     pointsize = 14,
+            bg = "white")
   par(mfrow=c(numberOfRows,numberOfPlotsPerRow))
 
 
@@ -317,9 +349,15 @@ censorData <- function(trackDataCollector,censoringList){
                    which(trackDataCollectorCensored$trackCensoredAfter == "1"), 
                    which(trackDataCollectorCensored$afterArea == "-1")
                   )
-  
+
   trackDataCollectorCensored$afterArea[censorAfter] <- NA
+
+  censorTemperatureAssay <- c(which(trackDataCollectorCensored$temperatureAssay == "-1"))
+  trackDataCollectorCensored$temperatureAssay[censorTemperatureAssay] <- NA
 	
+  censorTemperatureTable <- c(which(trackDataCollectorCensored$temperatureTable == "-1"))
+  trackDataCollectorCensored$temperatureTable[censorTemperatureTable] <- NA
+
   # calculate worm age in days
   trackDataCollectorCensored$days <- ((as.numeric(trackDataCollectorCensored$currentTimestamp) - as.numeric(trackDataCollectorCensored$birthTimestamp))/(3600 * 24))
   
@@ -376,7 +414,8 @@ plotSurvival <- function(trackDataCollector, ResultOutputPath) {
   # add more ticks           
 
   # need to find the right parameters to make it look nice
-  ggsave(paste0(ResultOutputPath,"Surv001_",correctTrackVersionString,".png")) 
+  ggsave(paste0(ResultOutputPath,"Surv001_",correctTrackVersionString,".svg"))
+#  ggsave(paste0(ResultOutputPath,"Surv001_",correctTrackVersionString,".png")) 
   #save(lastTimeAlive.df, file="/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/lastTimeAliveFrame.rda")
 
 }
@@ -406,7 +445,7 @@ correctTrackVersionString <<- "trackVersion.v13"
 #summarizeTracks("/mnt/4TBraid04/imagesets04/20160217_vibassay_set4","/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
 #summarizeTracks("/mnt/4TBraid04/imagesets04/20160810_vibassay_set10_censored","/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160810_vibassay_set10/")
 #summarizeTracks("/mnt/4TBraid04/imagesets04/20160902_vibassay_set11","/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160902_vibassay_set11/")
-#summarizeTracks("/mnt/4TBraid04/imagesets04/20160919_vibassay_set12","/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/")
+summarizeTracks("/mnt/4TBraid04/imagesets04/20160919_vibassay_set12","/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/")
 #summarizeTracks("/mnt/4TBraid04/imagesets04/SS104_set2_analysisV13","/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_SS104_set2_analysisV13/")
 
 
@@ -433,9 +472,9 @@ print("summarize_done")
 # tracks9 <- trackDataCollector
 #load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160810_vibassay_set10/trackDataCollector.rda")
 #tracks10 <- trackDataCollector
-load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160902_vibassay_set11/trackDataCollector.rda")
+#load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160902_vibassay_set11/trackDataCollector.rda")
 #tracks11 <- trackDataCollector
-#load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/trackDataCollector.rda")
+load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/trackDataCollector.rda")
 #tracks12 <- trackDataCollector
 #trackDataCollector<-c(tracks2,tracks3,tracks4,tracks5,tracks6,tracks7,tracks8,tracks9)
 #trackDataCollector<-tracks10
