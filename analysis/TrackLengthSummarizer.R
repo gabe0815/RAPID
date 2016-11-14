@@ -231,9 +231,10 @@ plotAnova <- function(trackDataCollector, ResultOutputPath){
   numberOfPlotsPerRow <- 4  
   numberOfPlots <- choose(length(unique(trackDataCollector$groupID)),2)
   numberOfRows <- ceiling(numberOfPlots / numberOfPlotsPerRow)
+  # plot the anova p values
+  png(filename = paste0(ResultOutputPath, "ANOVAplot001_", correctTrackVersionString,".png"), width = 400*numberOfPlotsPerRow, height = 400*numberOfRows, units = "px", pointsize = 14, bg = "white")
+  par(mfrow=c(numberOfRows,numberOfPlotsPerRow))
 
-#  png(filename = paste0(ResultOutputPath, "ANOVAplot001_", correctTrackVersionString,".png"), width = 400*numberOfPlotsPerRow, height = 400*numberOfRows, units = "px", pointsize = 14, bg = "white")
-#  par(mfrow=c(numberOfRows,numberOfPlotsPerRow))
 
   # construct a data frame with approximate area values with After Area 
   approxAfterArea <- data.frame(matrix(0, ncol = 0, nrow = length(seq(1,25, 1/24))))
@@ -247,6 +248,10 @@ plotAnova <- function(trackDataCollector, ResultOutputPath){
       sampleIDs <- c(sampleIDs, thisWorm$sampleID[1])
   }
   
+  cat("\nCalculate ANOVA p-values for all combinations\n")
+  cat("|0%.......................100%|\n")
+  progressBar <- txtProgressBar(min = 1, max = nrow(approxAfterArea), initial = 1, char = "=",width = 30, title, label, style = 1, file = "")
+
   colnames(approxAfterArea) <- sampleIDs
   anovaSummary <- data.frame(matrix(0, ncol = 0, nrow = numberOfPlots))
   firstAnova <- TRUE
@@ -266,13 +271,31 @@ plotAnova <- function(trackDataCollector, ResultOutputPath){
       if (firstAnova == TRUE){
         rowNames <- rownames(currentAnova)
         firstAnova <- FALSE
-      } 
+      }
     }
+  setTxtProgressBar(progressBar,r)
   }
   
+  cat("\nplotting ANOVA p-values")
+#  load("/home/gabe/OldAlbert/media/4TBexternal/sync/PhD/TrackLengthSummarizer/anovaSummary.rda")
   rownames(anovaSummary) <- rowNames
+ 
+  for (r in 1:nrow(anovaSummary)){
+    i <- r%%numberOfPlotsPerRow
+    if (i == 0){
+      i <- numberOfPlotsPerRow
+    }
+    j <- ceiling(r/numberOfPlotsPerRow) 
+  
+    par(mfg=c(j, i))
+    plot(seq(1,25, 1/24), anovaSummary[r,],log="y", main = rowNames[r], xlab="time [days]", ylab="p-value [ANOVA]", pch='.', type="l", ylim=c(0.00000001,1))
+    lines(c(0,100),c(0.05,0.05),col="red")
+  }
+  
+  cat("\nwriting plots to file ...")
+  dev.off()
+  cat("\ndone.\n")
 
-#  save(anovaSummary, file="./applications/RAPID/analysis/anovaSummary.rda")
  
 }
 
@@ -366,8 +389,6 @@ plotSurvival <- function(trackDataCollector, ResultOutputPath) {
 
 
 # global parameters (use <<- instead of <-)
-columToAnalyze <<- 7 # after track area
-#columToAnalyze <<- 5 # before track area
 correctTrackVersionString <<- "trackVersion.v13"
 
 # enter RAPID source and output directories here
