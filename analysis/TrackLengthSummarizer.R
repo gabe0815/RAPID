@@ -389,8 +389,6 @@ plotSurvival <- function(trackDataCollector, ResultOutputPath) {
 
 
 # global parameters (use <<- instead of <-)
-columToAnalyze <<- 7 # after track area
-#columToAnalyze <<- 5 # before track area
 correctTrackVersionString <<- "trackVersion.v13"
 
 # enter RAPID source and output directories here
