@@ -231,7 +231,7 @@ plotMeanSD <- function(trackDataCollector, ResultOutputPath){
     thisStrainMeanAfter <- apply(perStrainAfterArea, 1, mean)
     thisStrainStdDevAfter <- apply(perStrainAfterArea, 1, sd)
     thisStrainMeanTemperatureTable <- apply(perStrainTemperatureTable, 1, mean)
-    thisStrainMeanTemperatureAssay <- apply(perStrainTemperatureAssay, 1, mean)
+    thisStrainMeanTemperatureAssay <- apply(perStrainTemperatureAssay, 1, mean)    
     
     par(mfg=c(j, i), mar=c(5,5,2,5), cex.lab=1.5) # margin: c(bottom, left, top, right)
     plot(seq(1,25, 1/24), thisStrainMeanAfter, main = strains[s], xlab="time [days]", ylab="track length [px]", pch='.', type="l", ylim = c(0, 40000)) # plotting limits!
@@ -240,8 +240,10 @@ plotMeanSD <- function(trackDataCollector, ResultOutputPath){
 
     # plot temperature
     par(new = TRUE)
-    plot(seq(1,25, 1/24), thisStrainMeanTemperatureAssay, axes=FALSE, type="l", col = "blue", ylim = c(0, 30), ann=FALSE) 
-    lines(seq(1,25, 1/24), thisStrainMeanTemperatureTable, col = "red", ann=FALSE) 
+    plot(seq(1,25, 1/24), thisStrainMeanTemperatureAssay, axes=FALSE, type="l", col = "blue", ylim = c(0, 30), ann=FALSE)
+    abline(h = mean(thisStrainMeanTemperatureAssay, na.rm = TRUE), col = "blue") 
+    lines(seq(1,25, 1/24), thisStrainMeanTemperatureTable, col = "red", ann=FALSE)
+    abline(h = mean(thisStrainMeanTemperatureTable, na.rm = TRUE), col = "red")
     axis(side = 4)
     mtext(side = 4, line = 3, 'Temperature [°C]')
 
@@ -415,15 +417,16 @@ plotSurvival <- function(trackDataCollector, ResultOutputPath) {
 
   # need to find the right parameters to make it look nice
   ggsave(paste0(ResultOutputPath,"Surv001_",correctTrackVersionString,".svg"))
-#  ggsave(paste0(ResultOutputPath,"Surv001_",correctTrackVersionString,".png")) 
-  #save(lastTimeAlive.df, file="/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/lastTimeAliveFrame.rda")
 
 }
 
-#selectStrains <- function(trackDataCollector, strainList) {
-#  trackDataCollector <- trackDataCollector[trackDataCollector$sampleID %in% censNames, ]
+selectStrains <- function(trackDataCollector, strainList) {
+  # grep a whole list of patterns: http://stackoverflow.com/questions/7597559/grep-in-r-with-a-list-of-patterns
+  selectedStrains <- grep(paste(stranList,collapse="|"), trackDataCollector$sampleID)
+  trackDataCollector <- trackDataCollector[selectedStrains, ]
+  return (trackDataCollector)
 
-#}
+}
 
 
 
@@ -445,7 +448,7 @@ correctTrackVersionString <<- "trackVersion.v13"
 #summarizeTracks("/mnt/4TBraid04/imagesets04/20160217_vibassay_set4","/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
 #summarizeTracks("/mnt/4TBraid04/imagesets04/20160810_vibassay_set10_censored","/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160810_vibassay_set10/")
 #summarizeTracks("/mnt/4TBraid04/imagesets04/20160902_vibassay_set11","/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160902_vibassay_set11/")
-summarizeTracks("/mnt/4TBraid04/imagesets04/20160919_vibassay_set12","/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/")
+#summarizeTracks("/mnt/4TBraid04/imagesets04/20160919_vibassay_set12","/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/")
 #summarizeTracks("/mnt/4TBraid04/imagesets04/SS104_set2_analysisV13","/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_SS104_set2_analysisV13/")
 
 
@@ -486,11 +489,11 @@ load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_A
 trackDataCollectorCensored <- censorData(trackDataCollector,"/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/censoringList.txt")
 
 #load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/trackDataCollector_censored.rda")
-createPlots(trackDataCollectorCensored, "/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
+#createPlots(trackDataCollectorCensored, "/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
 plotMeanSD(trackDataCollectorCensored, "/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
-plotSurvival(trackDataCollectorCensored, "/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
+#plotSurvival(trackDataCollectorCensored, "/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
 #load("/home/gabe/OldAlbert/media/4TBexternal/sync/PhD/TrackLengthSummarizer/trackDataCollector_censored.rda")
-plotAnova(trackDataCollectorCensored, "/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
+#plotAnova(trackDataCollectorCensored, "/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
 #save(trackDataCollectorCensored, file = "/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/trackDataCollector_censored.rda")
 
 #trackDataCollector<-censorData(trackDataCollector,"/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/censoringList.txt")
