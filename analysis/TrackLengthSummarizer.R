@@ -129,10 +129,27 @@ summarizeTracks <- function(RapidInputPath,ResultOutputPath){
   # remove entries with wrong trackVersion string
   trackDataCollector <- trackDataCollector[which(trackDataCollector$trackVersion == correctTrackVersionString), ]
 	
+  # add a column for the set
+  trackDataCollector$setID <- unlist(str_split(RapidInputPath, "_set"))[2]
+  
   cat(" done.\n")
-	save(trackDataCollector, file=paste0(ResultOutputPath, "trackDataCollector.rda"))  
+	save(trackDataCollector, file=paste0(ResultOutputPath, "trackDataCollector_V", TrackLengthSummarizerVersion, ".rda"))  
 }
 
+loadTracks <- function(RapidInputPath){
+  trackDataCollectorAllSets <- NULL
+  files <- list.files(RapidInputPath, pattern = paste0("_V", TrackLengthSummarizerVersion, ".rda"), recursive = TRUE)
+  
+  for (f in files){
+    trackDataCollector <- NULL # clear the previous trackDataCollector to avoid loading it twice
+    load(paste0(RapidInputPath, f))
+    trackDataCollectorAllSets <- c(trackDataCollectorAllSets, trackDataCollector)
+  }
+ 
+  return (trackDataCollectorAllSets)
+
+  
+}
 
 createPlots <- function(trackDataCollector, ResultOutputPath){  
 
@@ -323,7 +340,7 @@ plotAnova <- function(trackDataCollector, ResultOutputPath){
   
     par(mfg=c(j, i))
     plot(seq(1,25, 1/24), anovaSummary[r,],log="y", main = rowNames[r], xlab="time [days]", ylab="p-value [ANOVA]", pch='.', type="l", ylim=c(0.00000001,1))
-    lines(c(0,100),c(0.05,0.05),col="red")
+    abline(h = 0.05, col = "red")     
   }
   
   cat("\nwriting plots to file ...")
@@ -432,6 +449,7 @@ selectStrains <- function(trackDataCollector, strainList) {
 
 # global parameters (use <<- instead of <-)
 correctTrackVersionString <<- "trackVersion.v13"
+TrackLengthSummarizerVersion <<- 2
 
 # enter RAPID source and output directories here
 # usage
@@ -454,69 +472,13 @@ correctTrackVersionString <<- "trackVersion.v13"
 
 print("summarize_done")
 
-#stop()
-
-#load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20151203_vibassay_set2/trackDataCollector.rda")
-# tracks2 <- trackDataCollector
- #load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160122_vibassay_set3/trackDataCollector.rda")
-# tracks3 <- trackDataCollector
-#load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160217_vibassay_set4/trackDataCollector.rda")
-# tracks4 <- trackDataCollector
-# load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160311_vibassay_set5/trackDataCollector.rda")
-# tracks5 <- trackDataCollector
-# #stop()
-#load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160406_vibassay_set6/trackDataCollector.rda")
-# tracks6 <- trackDataCollector
-#load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160504_vibassay_set7/trackDataCollector.rda")
-# tracks7 <- trackDataCollector
-#load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160615_vibassay_set8/trackDataCollector.rda")
-# tracks8 <- trackDataCollector
-# load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160720_vibassay_set9/trackDataCollector.rda")
-# tracks9 <- trackDataCollector
-#load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160810_vibassay_set10/trackDataCollector.rda")
-#tracks10 <- trackDataCollector
-#load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160902_vibassay_set11/trackDataCollector.rda")
-#tracks11 <- trackDataCollector
-load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/trackDataCollector.rda")
-#tracks12 <- trackDataCollector
-#trackDataCollector<-c(tracks2,tracks3,tracks4,tracks5,tracks6,tracks7,tracks8,tracks9)
-#trackDataCollector<-tracks10
-#load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_SS104_set2_analysisV13/trackDataCollector.rda")
-#tracks2 <- trackDataCollector
-#trackDataCollector<-c(tracks10,tracks11,tracks12)
-
-#load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/trackDataCollector_test.rda")
-trackDataCollectorCensored <- censorData(trackDataCollector,"/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/censoringList.txt")
-
-#load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/trackDataCollector_censored.rda")
-#createPlots(trackDataCollectorCensored, "/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
-plotMeanSD(trackDataCollectorCensored, "/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
-#plotSurvival(trackDataCollectorCensored, "/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
-#load("/home/gabe/OldAlbert/media/4TBexternal/sync/PhD/TrackLengthSummarizer/trackDataCollector_censored.rda")
-#plotAnova(trackDataCollectorCensored, "/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
-#save(trackDataCollectorCensored, file = "/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/trackDataCollector_censored.rda")
+# allways load all sets
+trackDataCollector <- loadTracks("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/")
+save(trackDataCollector, file = "/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/trackDataCollector_All.rda")  
 
 #trackDataCollector<-censorData(trackDataCollector,"/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/censoringList.txt")
 
-
-      #print(trackDataCollector[[length(trackDataCollector)]])
-      #print(typeof(trackDataCollector))
-      #print(length(trackDataCollector))
-      #print("------------------------")
-      #load("trackDataCollector.rda")
-      #createMeanPlots(trackDataCollector,"/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/")
 #createPlots(trackDataCollector,"/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
-
-# next 3 lines WORK!
-#load("/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/censoredUnzeroedRapidData.rda")
-#load("/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/sortedFilteredCensoredRapidData.rda")
 #plotSurvival(sortedFilteredCensoredRapidData)
-
-
-#groupwiseDataCollector_statData<-createMeanPlots(censoredUnzeroedRapidData,"/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
-
-#save(groupwiseDataCollector_statData, file="/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/groupwiseDataCollector_statData.rda")
-#load("/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/groupwiseDataCollector_statData.rda")
-
 #plotAnova(groupwiseDataCollector_statData)
 #plotMeanStDev(groupwiseDataCollector_statData)
