@@ -142,8 +142,10 @@ loadTracks <- function(RapidInputPath){
   
   for (f in files){
     trackDataCollector <- NULL # clear the previous trackDataCollector to avoid loading it twice
+    cat("\nloading trackDataCollector: ", paste0(RapidInputPath, f))
     load(paste0(RapidInputPath, f))
-    trackDataCollectorAllSets <- c(trackDataCollectorAllSets, trackDataCollector)
+#    print(head(trackDataCollector))
+    trackDataCollectorAllSets <- rbind(trackDataCollectorAllSets, trackDataCollector)
   }
  
   return (trackDataCollectorAllSets)
