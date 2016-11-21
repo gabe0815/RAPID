@@ -16,6 +16,7 @@ var P_TO_A=1;
 var P_FROM_A=2;
 var RESET = 5;
 var PUMP_ON = 6;
+var P_TO_T = 7;
 
 //robot numeric registers
 var X_PLATE=2;
@@ -38,14 +39,14 @@ var PTPCAM="/home/user/applications/RAPID/ptpcam/ptpcam";
 var CMD; //used to execute non blocking shell scripts
 var CAM;
 
-var DOWNDIR = "/mnt/4TBraid02/20160919_vibassay_set12/dl";
+var DOWNDIR = "/mnt/4TBraid02/20161121_set13/dl";
 
 var TARGETDIR;
 var SAMPLEID;
 var TIMESTAMP=0;
 
 //assay variables
-var TABLEFILENAME="/home/user/applications/RAPID/sampleTable_20160919.csv";
+var TABLEFILENAME="/home/user/applications/RAPID/sampleTable_20161121.csv";
 var CURRENTSAMPLEID;
 var CURRENTSAMPLEZEROTIME;
 var MAXY=7; //for test purposes, set x,y limits to 2,2 default: Y=7, X=10
@@ -152,6 +153,29 @@ macro "execute CMD" {
 	//print(r);
 }
 
+macro "remove all plates from table" {
+	for (y=5;y<=MAXY;y++){
+
+			for (x=1;x<=MAXX;x++){
+				while (File.exists("/home/user/pause.txt")==true){
+					getDateAndTime(year, month, dayOfWeek, dayOfMonth, hour, minute, second, msec);
+					print("\\Update: pause active: "+dayOfMonth+"."+month+1+"."+year+"-"+hour+":"+minute+":"+second);
+					wait(1000);
+				}
+				
+		        	robotSetRegister(X_PLATE,x);
+				robotSetRegister(Y_PLATE,y);
+				//process the stack
+				for (z=MAXZ-1; z>=0; z--){ //plates are picked from the top
+					robotSetRegister(Z_PLATE,z+1); //robot z stack starts with 1
+					robotSetRegister(TODO,P_TO_T);
+					waitForRobotWhileRunning();
+				}
+			}
+            		    //reset startX to 1 in case the recording was resumed
+		}
+	
+}
 //*************************************Camera functions******************************************************************
 
 function initCameras() {
