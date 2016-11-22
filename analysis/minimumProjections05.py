@@ -16,22 +16,25 @@ def createOverlay(description):
         image = first_before
         projection = cv2.cvtColor(cv2.absdiff(before_projection, first_before), cv2.COLOR_BGR2GRAY)
         #invert        
-        projection = cv2.bitwise_not(before_projection)
+        projection = cv2.bitwise_not(projection)
         path = vidPath + "_2fps.AVI_"+str(before_start)+"_"+str(before_end) + "_before.jpg"
 
-    else if description == "after":
+    elif description == "after":
         image = first_after
         projection = cv2.cvtColor(cv2.absdiff(after_projection, first_after), cv2.COLOR_BGR2GRAY)
         #invert        
-        projection = cv2.bitwise_not(after_projection)
+        projection = cv2.bitwise_not(projection)
         path = vidPath + "_2fps.AVI_"+str(after_start)+"_"+str(after_end) + "_after.jpg"
     
 
     colorTrackImg = np.zeros(image.shape, np.uint8)
     colorTrackImg.fill(255)
     
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    # we have to convert to gray and back to get a 3 channel gray image 
+    image = cv2.cvtColor(cv2.cvtColor(image, cv2.COLOR_BGR2GRAY), cv2.COLOR_GRAY2BGR)
+
     weight=0.5
+#    print("shape colorTrackImg %s, shape image %s") % (colorTrackImg.shape, image.shape)
     colorTrackImg[:,:,1] = projection[:]
     combinedTrackAndPhoto = cv2.addWeighted( colorTrackImg, weight, image, 1-weight, 0 )
 
@@ -39,8 +42,7 @@ def createOverlay(description):
     cv2.imwrite(path, projection)
     cv2.imwrite(vidPath + "_2fps.AVI_"+description+"_overlay.jpg", combinedTrackAndPhoto)
 
-
-startTime = time.time()
+# main program starts here
 
 vidPath = sys.argv[1]
 vidFile = cv2.VideoCapture ( vidPath )
@@ -57,16 +59,12 @@ for i in xrange(len( seconds )):
         before_end = i-1
         break
 
-
 before_start = 0
 #as we use a frame before the vibration started, we have to increase by 2 to take the one after the vibration started
 after_start = before_end + 2
 after_end = nFrames
 
-
 print("File: %s, Number of Frames: %d, before start: %d, before_end %d, after start: %d, after end %d") % (vidPath, nFrames, before_start, before_end, after_start, after_end)
-
-
 
 #write parameters to text file
 paramPath = vidPath + "_parameters.txt"
@@ -76,16 +74,11 @@ with open(paramPath, 'w') as parameters:
     parameters.write(str(after_start) + '\n')
     parameters.write(str(after_end) + '\n')
 
-
 #create paths for saving jpegs
 imgBefore = vidPath + "_2fps.AVI_"+str(before_start)+"_"+str(before_end) + "_before.jpg"
 imgAfter = vidPath + "_2fps.AVI_"+str(after_start)+"_"+str(after_end) + "_after.jpg"
 
-
 #print ("before_start %d, before_end %d, after_start %d, after_end %d") % (before_start, before_end, after_start, after_end)
-
-
-
 
 for f in xrange( nFrames ):
     ret, frame = vidFile.read()
@@ -129,8 +122,3 @@ descriptions = ("before", "after")
 for descr in descriptions:
     createOverlay(descr)
 
-
-
-
-
-#print "finished in %d seconds" % (time.time() - startTime)
