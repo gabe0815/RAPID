@@ -196,9 +196,12 @@ createPlots <- function(trackDataCollector, ResultOutputPath){
 }
 
 plotMeanSD <- function(trackDataCollector, ResultOutputPath){
+  # treat each set differently 
+  trackDataCollector$groupSet <- paste0(trackDataCollector$groupID,"_", trackDataCollector$setID)
+  trackDataCollector$groupSetID <- paste0(trackDataCollector$groupSet, "_", str_split_fixed(trackDataCollector$sampleID, "_",2)[,2])
 
   # figure out how many different groups we have
-  strains <- unique(trackDataCollector$groupID)
+  strains <- unique(trackDataCollector$groupSet)
   numberOfStrains <- length(strains)
 
   # create an empty canvas with size 4 x number of groups / 4
@@ -220,7 +223,7 @@ plotMeanSD <- function(trackDataCollector, ResultOutputPath){
     perStrainTemperatureTable <- data.frame(matrix(0, ncol = 0, nrow = length(seq(1,25, 1/24))))
     perStrainTemperatureAssay <- data.frame(matrix(0, ncol = 0, nrow = length(seq(1,25, 1/24))))
 
-    wormsPerStrain <- trackDataCollector[grep(strains[s], trackDataCollector$sampleID), ]
+    wormsPerStrain <- trackDataCollector[grep(strains[s], trackDataCollector$groupSetID), ]
     i <- s%%numberOfPlotsPerRow
     if (i == 0){
       i <- numberOfPlotsPerRow
@@ -228,15 +231,15 @@ plotMeanSD <- function(trackDataCollector, ResultOutputPath){
     j <- ceiling(s/numberOfPlotsPerRow) 
     
     # create interpolated data sets for each worm and append to strain based data frame
-    for (w in 1:length(unique(wormsPerStrain$sampleID))){
-      thisWorm <- wormsPerStrain[which(wormsPerStrain$sampleID == unique(wormsPerStrain$sampleID)[w]), ]
+    for (w in 1:length(unique(wormsPerStrain$groupSetID))){
+      thisWorm <- wormsPerStrain[which(wormsPerStrain$groupSetID == unique(wormsPerStrain$groupSetID)[w]), ]
 
 #      thisWormApproxBefore <- data.frame(approx(thisWorm$days, thisWorm$beforeArea, xout = seq(1,25,1/24))$y)
       thisWormApproxAfter <- data.frame(approx(thisWorm$days, thisWorm$afterArea, xout = seq(1,25,1/24))$y)
       thisWormTemperatureTable <- data.frame(approx(thisWorm$days, thisWorm$temperatureTable, xout= seq(1,25,1/24))$y)
       thisWormTemperatureAssay <- data.frame(approx(thisWorm$days, thisWorm$temperatureAssay, xout= seq(1,25,1/24))$y)
 #      colnames(thisWormApproxBefore) <- unique(wormsPerStrain$sampleID)[w]
-      colnames(thisWormApproxAfter) <- unique(wormsPerStrain$sampleID)[w]
+      colnames(thisWormApproxAfter) <- unique(wormsPerStrain$groupSetID)[w]
 
 #      perStrainBeforeArea <- cbind(perStrainBeforeArea, thisWormApproxBefore) # y is the second column of the approx function
       perStrainAfterArea <- cbind(perStrainAfterArea, thisWormApproxAfter)
@@ -475,12 +478,13 @@ TrackLengthSummarizerVersion <<- 2
 print("summarize_done")
 
 # allways load all sets
-trackDataCollector <- loadTracks("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/")
-save(trackDataCollector, file = "/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/trackDataCollector_All.rda")  
+#trackDataCollector <- loadTracks("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/")
+#save(trackDataCollector, file = "/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/trackDataCollector_All.rda")  
 
-#trackDataCollector<-censorData(trackDataCollector,"/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/censoringList.txt")
+#load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/trackDataCollector_All.rda")
+#trackDataCollector <- censorData(trackDataCollector,"/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/censoringList.txt")
+#save(trackDataCollector, file = "/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/trackDataCollector_All_censored.rda")
 
-#createPlots(trackDataCollector,"/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/")
-#plotSurvival(sortedFilteredCensoredRapidData)
-#plotAnova(groupwiseDataCollector_statData)
-#plotMeanStDev(groupwiseDataCollector_statData)
+load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/trackDataCollector_All_censored.rda")
+plotMeanSD(trackDataCollector, "/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/")
+
