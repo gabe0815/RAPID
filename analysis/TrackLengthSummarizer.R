@@ -195,13 +195,16 @@ createPlots <- function(trackDataCollector, ResultOutputPath){
 
 }
 
-plotMeanSD <- function(trackDataCollector, ResultOutputPath){
-  # treat each set differently 
-  trackDataCollector$groupSet <- paste0(trackDataCollector$groupID,"_", trackDataCollector$setID)
-  trackDataCollector$groupSetID <- paste0(trackDataCollector$groupSet, "_", str_split_fixed(trackDataCollector$sampleID, "_",2)[,2])
+plotMeanSD <- function(trackDataCollector, ResultOutputPath, bySet){
+  if (bySet == TRUE){
+    # treat each set differently 
+    trackDataCollector$groupID <- paste0(trackDataCollector$groupID,"_", trackDataCollector$setID)
+    trackDataCollector$sampleID <- paste0(trackDataCollector$groupID, "_", str_split_fixed(trackDataCollector$sampleID, "_",2)[,2])
+  }
+
 
   # figure out how many different groups we have
-  strains <- unique(trackDataCollector$groupSet)
+  strains <- unique(trackDataCollector$groupID)
   numberOfStrains <- length(strains)
 
   # create an empty canvas with size 4 x number of groups / 4
@@ -223,7 +226,7 @@ plotMeanSD <- function(trackDataCollector, ResultOutputPath){
     perStrainTemperatureTable <- data.frame(matrix(0, ncol = 0, nrow = length(seq(1,25, 1/24))))
     perStrainTemperatureAssay <- data.frame(matrix(0, ncol = 0, nrow = length(seq(1,25, 1/24))))
 
-    wormsPerStrain <- trackDataCollector[grep(strains[s], trackDataCollector$groupSetID), ]
+    wormsPerStrain <- trackDataCollector[grep(strains[s], trackDataCollector$sampleID), ]
     i <- s%%numberOfPlotsPerRow
     if (i == 0){
       i <- numberOfPlotsPerRow
@@ -231,15 +234,15 @@ plotMeanSD <- function(trackDataCollector, ResultOutputPath){
     j <- ceiling(s/numberOfPlotsPerRow) 
     
     # create interpolated data sets for each worm and append to strain based data frame
-    for (w in 1:length(unique(wormsPerStrain$groupSetID))){
-      thisWorm <- wormsPerStrain[which(wormsPerStrain$groupSetID == unique(wormsPerStrain$groupSetID)[w]), ]
+    for (w in 1:length(unique(wormsPerStrain$sampleID))){
+      thisWorm <- wormsPerStrain[which(wormsPerStrain$sampleID == unique(wormsPerStrain$sampleID)[w]), ]
 
 #      thisWormApproxBefore <- data.frame(approx(thisWorm$days, thisWorm$beforeArea, xout = seq(1,25,1/24))$y)
       thisWormApproxAfter <- data.frame(approx(thisWorm$days, thisWorm$afterArea, xout = seq(1,25,1/24))$y)
       thisWormTemperatureTable <- data.frame(approx(thisWorm$days, thisWorm$temperatureTable, xout= seq(1,25,1/24))$y)
       thisWormTemperatureAssay <- data.frame(approx(thisWorm$days, thisWorm$temperatureAssay, xout= seq(1,25,1/24))$y)
 #      colnames(thisWormApproxBefore) <- unique(wormsPerStrain$sampleID)[w]
-      colnames(thisWormApproxAfter) <- unique(wormsPerStrain$groupSetID)[w]
+      colnames(thisWormApproxAfter) <- unique(wormsPerStrain$sampleID)[w]
 
 #      perStrainBeforeArea <- cbind(perStrainBeforeArea, thisWormApproxBefore) # y is the second column of the approx function
       perStrainAfterArea <- cbind(perStrainAfterArea, thisWormApproxAfter)
@@ -276,13 +279,14 @@ plotMeanSD <- function(trackDataCollector, ResultOutputPath){
   cat(" done.\n")
 }
 
-plotAnova <- function(trackDataCollector, ResultOutputPath){
-  # treat each set differently 
-  trackDataCollector$groupSet <- paste0(trackDataCollector$groupID,"_", trackDataCollector$setID)
-  trackDataCollector$groupSetID <- paste0(trackDataCollector$groupSet, "_", str_split_fixed(trackDataCollector$sampleID, "_",2)[,2])
-  
+plotAnova <- function(trackDataCollector, ResultOutputPath, bySet){
+  if (bySet == TRUE){
+    # treat each set differently     
+    trackDataCollector$sampleID <- paste0(trackDataCollector$groupID,"_", trackDataCollector$setID, "_", str_split_fixed(trackDataCollector$sampleID, "_",2)[,2])
+  }
+   
   # create an empty canvas with the right size 
-  numberOfPlotsPerRow <- 6  
+  numberOfPlotsPerRow <- 6
   numberOfPlots <- choose(length(unique(trackDataCollector$groupSet)),2)
   numberOfRows <- ceiling(numberOfPlots / numberOfPlotsPerRow)
   # plot the anova p values
@@ -304,7 +308,7 @@ plotAnova <- function(trackDataCollector, ResultOutputPath){
       thisWormApproxAfter <- data.frame(approx(thisWorm$days, thisWorm$afterArea, xout = seq(1,25,1/24))$y)
       # add the approximated values as a column to the data frame, and append the groupID
       approxAfterArea <- cbind(approxAfterArea, thisWormApproxAfter)
-      sampleIDs <- c(sampleIDs, thisWorm$groupSetID[1])
+      sampleIDs <- c(sampleIDs, thisWorm$sampleID[1])
   }
   
   cat("\nCalculate ANOVA p-values for all combinations\n")
@@ -396,9 +400,13 @@ censorData <- function(trackDataCollector,censoringList){
 	return(trackDataCollectorCensored)	
 }
 
-plotSurvival <- function(trackDataCollector, ResultOutputPath) {
-  # treat each set differently 
-  trackDataCollector$groupSet <- paste0(trackDataCollector$groupID,"_", trackDataCollector$setID)
+plotSurvival <- function(trackDataCollector, ResultOutputPath, bySet) {
+  if (bySet == TRUE){
+    # treat each set differently 
+    trackDataCollector$groupID <- paste0(trackDataCollector$groupID,"_", trackDataCollector$setID)
+  }
+
+
   
   # All worms are collected in the same data frame. By having a group ID, they can be assigned during plotting.
   lastTimeAlive <- trackDataCollector[0,]
@@ -428,7 +436,7 @@ plotSurvival <- function(trackDataCollector, ResultOutputPath) {
   # plotting
   lastTimeAlive$status <- 1
   save(lastTimeAlive, file="/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/lastTimeAlive.rda")
-  fit<- survfit(Surv(days, status) ~ groupSet, data = lastTimeAlive)
+  fit<- survfit(Surv(days, status) ~ groupID, data = lastTimeAlive)
   ggsurvplot(fit, 
           legend = c("right"), 
     legend.title = "Strains", 
@@ -492,6 +500,6 @@ print("summarize_done")
 #save(trackDataCollector, file = "/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/trackDataCollector_All_censored.rda")
 
 load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/trackDataCollector_All_censored.rda")
-#plotMeanSD(trackDataCollector, "/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/")
-#plotAnova(trackDataCollector, "/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/")
-plotSurvival(trackDataCollector, "/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/")
+plotMeanSD(trackDataCollector, "/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/", TRUE)
+#plotAnova(trackDataCollector, "/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/", TRUE)
+#plotSurvival(trackDataCollector, "/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/", TRUE)
