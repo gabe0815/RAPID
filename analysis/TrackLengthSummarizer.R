@@ -277,10 +277,13 @@ plotMeanSD <- function(trackDataCollector, ResultOutputPath){
 }
 
 plotAnova <- function(trackDataCollector, ResultOutputPath){
+  # treat each set differently 
+  trackDataCollector$groupSet <- paste0(trackDataCollector$groupID,"_", trackDataCollector$setID)
+  trackDataCollector$groupSetID <- paste0(trackDataCollector$groupSet, "_", str_split_fixed(trackDataCollector$sampleID, "_",2)[,2])
   
   # create an empty canvas with the right size 
-  numberOfPlotsPerRow <- 4  
-  numberOfPlots <- choose(length(unique(trackDataCollector$groupID)),2)
+  numberOfPlotsPerRow <- 6  
+  numberOfPlots <- choose(length(unique(trackDataCollector$groupSet)),2)
   numberOfRows <- ceiling(numberOfPlots / numberOfPlotsPerRow)
   # plot the anova p values
 
@@ -301,7 +304,7 @@ plotAnova <- function(trackDataCollector, ResultOutputPath){
       thisWormApproxAfter <- data.frame(approx(thisWorm$days, thisWorm$afterArea, xout = seq(1,25,1/24))$y)
       # add the approximated values as a column to the data frame, and append the groupID
       approxAfterArea <- cbind(approxAfterArea, thisWormApproxAfter)
-      sampleIDs <- c(sampleIDs, thisWorm$sampleID[1])
+      sampleIDs <- c(sampleIDs, thisWorm$groupSetID[1])
   }
   
   cat("\nCalculate ANOVA p-values for all combinations\n")
@@ -316,10 +319,11 @@ plotAnova <- function(trackDataCollector, ResultOutputPath){
     currentTime <- data.frame(t(approxAfterArea[r,]))
     colnames(currentTime) <- "afterArea"
     currentTime <- rownames_to_column(currentTime, var = "sampleID")
-    currentTime$groupID <- str_split_fixed(currentTime$sampleID, "_",2)[,1]
+    currentTime$groupID <- paste0(str_split_fixed(currentTime$sampleID, "_",3)[,1],"_", str_split_fixed(currentTime$sampleID, "_",3)[,2])
     if (any(is.na(currentTime$afterArea))){
       anovaSummary <- cbind(anovaSummary, c(rep(NA, numberOfPlots)))
-    } else {    
+    } else {
+      save(currentTime, file="/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/currentTime.rda")    
       currentTime.aov <- aov(afterArea ~ groupID, data = currentTime)
       currentAnova <-  data.frame(TukeyHSD(currentTime.aov)[1])
       anovaSummary <- cbind(anovaSummary, data.frame(currentAnova$groupID.p.adj))
@@ -393,6 +397,8 @@ censorData <- function(trackDataCollector,censoringList){
 }
 
 plotSurvival <- function(trackDataCollector, ResultOutputPath) {
+  # treat each set differently 
+  trackDataCollector$groupSet <- paste0(trackDataCollector$groupID,"_", trackDataCollector$setID)
   
   # All worms are collected in the same data frame. By having a group ID, they can be assigned during plotting.
   lastTimeAlive <- trackDataCollector[0,]
@@ -421,8 +427,8 @@ plotSurvival <- function(trackDataCollector, ResultOutputPath) {
   
   # plotting
   lastTimeAlive$status <- 1
-
-  fit<- survfit(Surv(days, status) ~ groupID, data = lastTimeAlive)
+  save(lastTimeAlive, file="/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/lastTimeAlive.rda")
+  fit<- survfit(Surv(days, status) ~ groupSet, data = lastTimeAlive)
   ggsurvplot(fit, 
           legend = c("right"), 
     legend.title = "Strains", 
@@ -438,7 +444,7 @@ plotSurvival <- function(trackDataCollector, ResultOutputPath) {
   # add more ticks           
 
   # need to find the right parameters to make it look nice
-  ggsave(paste0(ResultOutputPath,"Surv001_",correctTrackVersionString,".svg"))
+  ggsave(paste0(ResultOutputPath,"Surv001_",correctTrackVersionString,".svg"), width=7, height=7)
 
 }
 
@@ -486,5 +492,6 @@ print("summarize_done")
 #save(trackDataCollector, file = "/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/trackDataCollector_All_censored.rda")
 
 load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/trackDataCollector_All_censored.rda")
-plotMeanSD(trackDataCollector, "/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/")
-
+#plotMeanSD(trackDataCollector, "/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/")
+#plotAnova(trackDataCollector, "/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/")
+plotSurvival(trackDataCollector, "/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/")
