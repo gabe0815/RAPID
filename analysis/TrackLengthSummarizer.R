@@ -153,7 +153,13 @@ loadTracks <- function(RapidInputPath){
   
 }
 
-createPlots <- function(trackDataCollector, ResultOutputPath){  
+createPlots <- function(trackDataCollector, ResultOutputPath, bySet){  
+  if (bySet == TRUE){
+    # treat each set differently 
+    trackDataCollector$groupID <- paste0(trackDataCollector$groupID,"_", trackDataCollector$setID)    
+    trackDataCollector$sampleID <- paste0(trackDataCollector$groupID,"_", trackDataCollector$setID, "_", str_split_fixed(trackDataCollector$sampleID, "_",2)[,2])
+  }
+  
 
   # figure out how many different groups we have
   strains <- unique(trackDataCollector$groupID)
@@ -372,14 +378,16 @@ censorData <- function(trackDataCollector,censoringList){
   # convert censored timepoints to NAs
   censorBefore <- c(which(trackDataCollectorCensored$beforeEdge == "1"), 
                     which(trackDataCollectorCensored$trackCensoredBefore == "1"), 
-                    which(trackDataCollectorCensored$beforeArea == "-1")
+                    which(trackDataCollectorCensored$beforeArea == "-1"),
+                    which(trackDataCollectorCensored$beforeArea == "0")
                    )
   
   trackDataCollectorCensored$beforeArea[censorBefore] <- NA
   
   censorAfter <- c(which(trackDataCollectorCensored$afterEdge == "1"), 
                    which(trackDataCollectorCensored$trackCensoredAfter == "1"), 
-                   which(trackDataCollectorCensored$afterArea == "-1")
+                   which(trackDataCollectorCensored$afterArea == "-1"),
+                   which(trackDataCollectorCensored$afterArea == "0")
                   )
 
   trackDataCollectorCensored$afterArea[censorAfter] <- NA
@@ -406,7 +414,6 @@ plotSurvival <- function(trackDataCollector, ResultOutputPath, bySet) {
     trackDataCollector$groupID <- paste0(trackDataCollector$groupID,"_", trackDataCollector$setID)
   }
 
-
   
   # All worms are collected in the same data frame. By having a group ID, they can be assigned during plotting.
   lastTimeAlive <- trackDataCollector[0,]
@@ -414,7 +421,6 @@ plotSurvival <- function(trackDataCollector, ResultOutputPath, bySet) {
   # get last time alive for each worm
   for (i in 1:length(unique(trackDataCollector$sampleID))){
     thisWorm <- trackDataCollector[which(trackDataCollector$sampleID == unique(trackDataCollector$sampleID)[i]), ]
-
     lastTimeAliveIndex <- -1
     
     for (j in length(thisWorm$afterArea):1){
@@ -432,33 +438,52 @@ plotSurvival <- function(trackDataCollector, ResultOutputPath, bySet) {
     }
   
   } 
-  
+
+  # calculate mean temperature
+  trackDataCollector$temperatureAssay <- as.numeric(trackDataCollector$temperatureAssay)
+  trackDataCollector$temperatureTable <- as.numeric(trackDataCollector$temperatureTable)  
+  meanTemperatures <- aggregate(temperatureTable ~ groupID, trackDataCollector, mean)
+  print(meanTemperatures)
   # plotting
   lastTimeAlive$status <- 1
-  save(lastTimeAlive, file="/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/lastTimeAlive.rda")
+#  save(lastTimeAlive, file="/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/lastTimeAlive.rda")
   fit<- survfit(Surv(days, status) ~ groupID, data = lastTimeAlive)
-  ggsurvplot(fit, 
-          legend = c("right"), 
-    legend.title = "Strains", 
-     #legend.labs = c("N2", "CB120", "CB246", "CB306", "CL2355", "LS292", "TJ1052", "ZZ17", "MT2426", "CB1072"),
-     #legend.labs = c("N2, 10 µM FUdR", "N2, 20 µM FUdR", "N2, 40 µM FUdR"),
-     #legend.labs = c("SS104, 10 µM FUdR", "SS104, 0 µM FUdR", "N2, 10 µM FUdR (old)", "N2, 10 µM FUdR"), 
-            main = "Lifespan",
-            xlab = "Days",
-            ylab = "Fraction surving",
-            xlim = c(0,30),
-   break.time.by = 5 
-            )
-  # add more ticks           
+  logRank <- survdiff(Surv(days, status) ~ groupID, data = lastTimeAlive)
+  ggsurv <- ggsurvplot(fit, 
+                  legend = c("right"), 
+            legend.title = "Strains", 
+             #legend.labs = c("N2", "CB120", "CB246", "CB306", "CL2355", "LS292", "TJ1052", "ZZ17", "MT2426", "CB1072"),
+             #legend.labs = c("N2, 10 µM FUdR", "N2, 20 µM FUdR", "N2, 40 µM FUdR"),
+             #legend.labs = c("SS104, 10 µM FUdR", "SS104, 0 µM FUdR", "N2, 10 µM FUdR (old)", "N2, 10 µM FUdR"), 
+                    main = "Lifespan",
+                    xlab = "Days",
+                    ylab = "Fraction surving",
+                    xlim = c(0,30),
+           break.time.by = 5,
+                    #pval = TRUE,
+              pval.coord = c(5, 0.25)
+             )
 
-  # need to find the right parameters to make it look nice
-  ggsave(paste0(ResultOutputPath,"Surv001_",correctTrackVersionString,".svg"), width=7, height=7)
+#  ggsurv$plot <-ggsurv$plot + geom_hline(aes(yintercept=0.5))    
+  print(ggsurv)
+  print(logRank)
+  ggsave(paste0(ResultOutputPath,"Surv001_",correctTrackVersionString,".svg"), width=7, height=5)
 
 }
 
-selectStrains <- function(trackDataCollector, strainList) {
-  # grep a whole list of patterns: http://stackoverflow.com/questions/7597559/grep-in-r-with-a-list-of-patterns
-  selectedStrains <- grep(paste(stranList,collapse="|"), trackDataCollector$sampleID)
+selectStrains <- function(trackDataCollector, strainList, bySet) {
+  if (bySet == TRUE){
+    # treat each set differently 
+    trackDataCollector$groupSet <- paste0(trackDataCollector$groupID,"_", trackDataCollector$setID)
+
+    # grep a whole list of patterns: http://stackoverflow.com/questions/7597559/grep-in-r-with-a-list-of-patterns
+    selectedStrains <- grep(paste(strainList,collapse="|"), trackDataCollector$groupSet)
+  } else {
+
+    # grep a whole list of patterns: http://stackoverflow.com/questions/7597559/grep-in-r-with-a-list-of-patterns
+    selectedStrains <- grep(paste(strainList,collapse="|"), trackDataCollector$groupID)
+  }
+  
   trackDataCollector <- trackDataCollector[selectedStrains, ]
   return (trackDataCollector)
 
@@ -487,19 +512,19 @@ TrackLengthSummarizerVersion <<- 2
 #summarizeTracks("/mnt/4TBraid04/imagesets04/20160902_vibassay_set11","/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160902_vibassay_set11/")
 #summarizeTracks("/mnt/4TBraid04/imagesets04/20160919_vibassay_set12","/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_20160919_vibassay_set12/")
 #summarizeTracks("/mnt/4TBraid04/imagesets04/SS104_set2_analysisV13","/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_SS104_set2_analysisV13/")
-
+#summarizeTracks("/mnt/4TBraid04/imagesets04/20161121_vibasay_set13", "/mnt/1TBraid01/homefolders/gschweighauser/Rdata_set13/")
 
 print("summarize_done")
 
 # allways load all sets
-#trackDataCollector <- loadTracks("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/")
+#trackDataCollector <- loadTracks("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis")
 #save(trackDataCollector, file = "/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/trackDataCollector_All.rda")  
-
 #load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/trackDataCollector_All.rda")
 #trackDataCollector <- censorData(trackDataCollector,"/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/censoringList.txt")
-#save(trackDataCollector, file = "/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/trackDataCollector_All_censored.rda")
-
-load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/trackDataCollector_All_censored.rda")
-plotMeanSD(trackDataCollector, "/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/", TRUE)
-#plotAnova(trackDataCollector, "/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/", TRUE)
+#load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_SS104_set2_analysisV13/trackDataCollector_V2.rda")
+#load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/trackDataCollector_All_censored.rda")
+#trackDataCollector <- selectStrains(trackDataCollector, c("LS292", "CB120", "N2.FUdR.10_10"), TRUE)
 #plotSurvival(trackDataCollector, "/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/", TRUE)
+#plotMeanSD(trackDataCollector, "/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/", TRUE)
+#plotAnova(trackDataCollector, "/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/", TRUE)
+#createPlots(trackDataCollector, "/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/", bySet=TRUE)
