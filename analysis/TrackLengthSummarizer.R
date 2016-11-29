@@ -225,10 +225,10 @@ plotMeanSD <- function(trackDataCollector, ResultOutputPath, bySet){
 
   par(mfrow=c(numberOfRows,numberOfPlotsPerRow))
   # go through the unique groups
-  strainsAfterAreaMean <- data.frame(ID = character(0), 
-                                    day = numeric(0), 
-                              areaAfter = numeric(0),
-                                 SDafter = numeric(0))
+  strainsAfterAreaMean <- data.frame(groupID = character(0), 
+                                    days = numeric(0), 
+                               afterArea = numeric(0),
+                                 sdAfter = numeric(0))
   for (s in 1:length(strains)){
 
 #    perStrainBeforeArea <- data.frame(matrix(0, ncol = 0, nrow = length(seq(1,25, 1/24))))
