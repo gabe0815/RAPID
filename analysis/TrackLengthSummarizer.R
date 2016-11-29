@@ -225,6 +225,10 @@ plotMeanSD <- function(trackDataCollector, ResultOutputPath, bySet){
 
   par(mfrow=c(numberOfRows,numberOfPlotsPerRow))
   # go through the unique groups
+  strainsAfterAreaMean <- data.frame(ID = character(0), 
+                                    day = numeric(0), 
+                              areaAfter = numeric(0),
+                                 SDafter = numeric(0))
   for (s in 1:length(strains)){
 
 #    perStrainBeforeArea <- data.frame(matrix(0, ncol = 0, nrow = length(seq(1,25, 1/24))))
@@ -242,6 +246,11 @@ plotMeanSD <- function(trackDataCollector, ResultOutputPath, bySet){
     # create interpolated data sets for each worm and append to strain based data frame
     for (w in 1:length(unique(wormsPerStrain$sampleID))){
       thisWorm <- wormsPerStrain[which(wormsPerStrain$sampleID == unique(wormsPerStrain$sampleID)[w]), ]
+      # approximation needs at lest 2 values
+      if (sum(!is.na(thisWorm$afterArea)) < 2){ 
+        cat("\nskipping: ", unique(thisWorm$sampleID))
+        next
+      }
 
 #      thisWormApproxBefore <- data.frame(approx(thisWorm$days, thisWorm$beforeArea, xout = seq(1,25,1/24))$y)
       thisWormApproxAfter <- data.frame(approx(thisWorm$days, thisWorm$afterArea, xout = seq(1,25,1/24))$y)
@@ -261,6 +270,11 @@ plotMeanSD <- function(trackDataCollector, ResultOutputPath, bySet){
 #    thisStrainStdDevBefore <- apply(perStrainBeforeArea, 1, sd)
     thisStrainMeanAfter <- apply(perStrainAfterArea, 1, mean)
     thisStrainStdDevAfter <- apply(perStrainAfterArea, 1, sd)
+    # append the mean to a data frame
+    thisStrainSummary <- data.frame(cbind(rep(strains[s], 577), as.numeric(seq(1,25,1/24)), as.numeric(thisStrainMeanAfter), as.numeric(thisStrainStdDevAfter)), stringsAsFactors=FALSE)
+    colnames(thisStrainSummary) <- colnames(strainsAfterAreaMean)
+    strainsAfterAreaMean <- rbind(strainsAfterAreaMean, thisStrainSummary)
+
     thisStrainMeanTemperatureTable <- apply(perStrainTemperatureTable, 1, mean)
     thisStrainMeanTemperatureAssay <- apply(perStrainTemperatureAssay, 1, mean)    
     
@@ -280,6 +294,9 @@ plotMeanSD <- function(trackDataCollector, ResultOutputPath, bySet){
 
     #save(perStrainAfterArea, file="/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/thisStrain.rda")
   }
+
+  save(strainsAfterAreaMean, file="/mnt/4TBraid04/imagesets04/20160321_FIJI_analysis_testing/strainsAfterAreaMean.rda")
+ 
   cat("writing plots to file ...")
   dev.off()
   cat(" done.\n")
@@ -374,20 +391,24 @@ censorData <- function(trackDataCollector,censoringList){
 	cat("\ncensoring data...\n")
 	censNames <- readLines(censoringList)
   trackDataCollectorCensored <- trackDataCollector[!trackDataCollector$sampleID %in% censNames, ]
+  
+  # convert chars to numeric
+  cols.num <- c("beforeEdge", "trackCensoredBefore", "beforeArea", "afterEdge", "trackCensoredAfter", "afterArea")
+  trackDataCollectorCensored[cols.num] <- sapply(trackDataCollectorCensored[cols.num],as.numeric)
 
   # convert censored timepoints to NAs
-  censorBefore <- c(which(trackDataCollectorCensored$beforeEdge == "1"), 
-                    which(trackDataCollectorCensored$trackCensoredBefore == "1"), 
-                    which(trackDataCollectorCensored$beforeArea == "-1"),
-                    which(trackDataCollectorCensored$beforeArea == "0")
+  censorBefore <- c(which(trackDataCollectorCensored$beforeEdge == 1), 
+                    which(trackDataCollectorCensored$trackCensoredBefore == 1), 
+                    which(trackDataCollectorCensored$beforeArea == -1),
+                    which(trackDataCollectorCensored$beforeArea == 0)
                    )
   
   trackDataCollectorCensored$beforeArea[censorBefore] <- NA
   
-  censorAfter <- c(which(trackDataCollectorCensored$afterEdge == "1"), 
-                   which(trackDataCollectorCensored$trackCensoredAfter == "1"), 
-                   which(trackDataCollectorCensored$afterArea == "-1"),
-                   which(trackDataCollectorCensored$afterArea == "0")
+  censorAfter <- c(which(trackDataCollectorCensored$afterEdge == 1), 
+                   which(trackDataCollectorCensored$trackCensoredAfter == 1), 
+                   which(trackDataCollectorCensored$afterArea == -1),
+                   which(trackDataCollectorCensored$afterArea == 0)
                   )
 
   trackDataCollectorCensored$afterArea[censorAfter] <- NA
@@ -403,9 +424,43 @@ censorData <- function(trackDataCollector,censoringList){
   
   # add groupID
   trackDataCollectorCensored$groupID <- str_split_fixed(trackDataCollectorCensored$sampleID, "_",2)[,1]
-    
+
+  # find last time a worm was alive and replace all following values with 0
+ 
+  # create a new data frame to append the zeroed samples
+  trackDataCollectorZeroed <- trackDataCollectorCensored[0, ]
+
+  for (i in 1:length(unique(trackDataCollectorCensored$sampleID))){
+  thisWorm <- trackDataCollectorCensored[which(trackDataCollectorCensored$sampleID == unique(trackDataCollectorCensored$sampleID)[i]), ]
+  #cat("\nSample: ", unique(thisWorm$sampleID))
+  lastTimeAliveIndex <- -1
+  
+    for (j in length(thisWorm$afterArea):1){
+      if (sum(is.na(thisWorm$afterArea)) < 2){
+        # remove sets which have to few tracks
+        #trackDataCollector <- trackDataCollector[!which(trackDataCollector$sampleID == unique(thisWorm$sampleID)), ]
+        break
+      }
+      if ((is.na(thisWorm$afterArea[j]) == FALSE) && (thisWorm$afterArea[j] > 0)) {
+        if (lastTimeAliveIndex == -1){
+          lastTimeAliveIndex <- j
+        } else if ((lastTimeAliveIndex - j) <= 3){
+          thisWorm$afterArea[-(1:lastTimeAliveIndex)] <- 0
+          thisWorm$beforeArea[-(1:lastTimeAliveIndex)] <- 0
+          break         
+        } else { 
+          lastTimeAliveIndex <- j 
+        }
+      }     
+    }
+    if (lastTimeAliveIndex != -1){
+      trackDataCollectorZeroed <- rbind(trackDataCollectorZeroed, thisWorm)
+    }
+  }
+
+
   cat(" done.\n")
-	return(trackDataCollectorCensored)	
+	return(trackDataCollectorZeroed)	
 }
 
 plotSurvival <- function(trackDataCollector, ResultOutputPath, bySet) {
