@@ -11,6 +11,7 @@ library(survminer)
 library(survival)
 library(stringr)
 library(tibble)
+library(multcomp)
 
 summarizeTracks <- function(RapidInputPath,ResultOutputPath){
 	print(RapidInputPath)
@@ -201,6 +202,25 @@ createPlots <- function(trackDataCollector, ResultOutputPath, bySet){
 
 }
 
+plotMean <- function(trackDataCollector, ResultOutputPath, bySet){
+  
+  if (bySet == TRUE){
+    # treat each set differently 
+    trackDataCollector$groupID <- paste0(trackDataCollector$groupID,"_", trackDataCollector$setID)
+    trackDataCollector$sampleID <- paste0(trackDataCollector$groupID, "_", str_split_fixed(trackDataCollector$sampleID, "_",2)[,2])
+  }
+
+  # convert levels to numeric
+  cols.num <- c("temperatureTable", "temperatureAssay")
+  trackDataCollector[cols.num] <- sapply(trackDataCollector[cols.num],as.character)
+  trackDataCollector[cols.num] <- sapply(trackDataCollector[cols.num],as.numeric)
+
+  # plot mean and CI in facettes
+  p <- ggplot(trackDataCollector, aes(x=days, y=afterArea)) + geom_point(size = 0.6, alpha = 0.3, aes(colour = temperatureTable)) + scale_colour_gradientn(colours = rainbow(7))
+  p <- p + stat_smooth(fill = "grey50", size = 0.5, alpha = 1) + xlim(1, 25) +ylim(0, 40000) + facet_wrap(~groupID, ncol=4)
+  ggsave(paste0(ResultOutputPath, "MEANandSMOOTHplot001_", correctTrackVersionString,".svg"), p)
+}
+
 plotMeanSD <- function(trackDataCollector, ResultOutputPath, bySet){
   if (bySet == TRUE){
     # treat each set differently 
@@ -348,6 +368,7 @@ plotAnova <- function(trackDataCollector, ResultOutputPath, bySet){
   colnames(approxAfterArea) <- sampleIDs
   anovaSummary <- data.frame(matrix(0, ncol = 0, nrow = numberOfPlots))
   firstAnova <- TRUE
+  saved = FALSE
   # loop through all time points 
   for (r in 1:nrow(approxAfterArea)){
     currentTime <- data.frame(t(approxAfterArea[r,]))
@@ -357,7 +378,8 @@ plotAnova <- function(trackDataCollector, ResultOutputPath, bySet){
     if (any(is.na(currentTime$afterArea))){
       anovaSummary <- cbind(anovaSummary, c(rep(NA, numberOfPlots)))
     } else {
-      if (r == 26){
+      if (saved == FALSE){
+        saved = TRUE
         save(currentTime, file="/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/currentTime.rda")
       }
       currentTime.aov <- aov(afterArea ~ groupID, data = currentTime)
@@ -394,6 +416,105 @@ plotAnova <- function(trackDataCollector, ResultOutputPath, bySet){
 
  
 }
+
+plotAnovaDunnett <- function(trackDataCollector, ResultOutputPath, bySet){
+  if (bySet == TRUE){
+    # treat each set differently
+    trackDataCollector$sampleID <- paste0(trackDataCollector$groupID,"_", trackDataCollector$setID, "_", str_split_fixed(trackDataCollector$sampleID, "_",2)[,2])
+    trackDataCollector$groupID <- paste0(trackDataCollector$groupID,"_", trackDataCollector$setID) 
+  }
+   
+  # create an empty canvas with the right size 
+  numberOfPlotsPerRow <- 4
+  numberOfPlots <- length(unique(trackDataCollector$groupID)) -1 
+  numberOfRows <- ceiling(numberOfPlots / numberOfPlotsPerRow)
+  # plot the anova p values
+  
+  cat("\n ", numberOfPlots, ", ", numberOfRows)
+  svg(filename = paste0(ResultOutputPath, "ANOVAplot001_", correctTrackVersionString,".svg"), 
+         width = 7*numberOfPlotsPerRow, 
+        height = 7*numberOfRows,
+     pointsize = 14,
+            bg = "white")
+  par(mfrow=c(numberOfRows,numberOfPlotsPerRow))
+
+
+  # construct a data frame with approximate area values with After Area 
+  approxAfterArea <- data.frame(matrix(0, ncol = 0, nrow = length(seq(1,25, 1/24))))
+  sampleIDs <- NULL 
+ 
+  # create interpolated data sets for each worm and append to strain based data frame
+  for (w in unique(trackDataCollector$sampleID)){
+      thisWorm <- trackDataCollector[which(trackDataCollector$sampleID == w), ]
+      if (sum(!is.na(thisWorm$afterArea)) < 2){ 
+        cat("\nskipping: ", unique(thisWorm$sampleID))
+        next
+      }
+      thisWormApproxAfter <- data.frame(approx(thisWorm$days, thisWorm$afterArea, xout = seq(1,25,1/24))$y)
+      # add the approximated values as a column to the data frame, and append the groupID
+      approxAfterArea <- cbind(approxAfterArea, thisWormApproxAfter)
+      sampleIDs <- c(sampleIDs, thisWorm$sampleID[1])
+  }
+  
+  cat("\nCalculate ANOVA p-values for all combinations\n")
+  cat("|0%.......................100%|\n")
+  progressBar <- txtProgressBar(min = 1, max = nrow(approxAfterArea), initial = 1, char = "=",width = 30, title, label, style = 1, file = "")
+
+  colnames(approxAfterArea) <- sampleIDs
+  dunnettSummary <- data.frame(matrix(0, ncol = 0, nrow = numberOfPlots))
+  firstAnova <- TRUE
+  # loop through all time points 
+  for (r in 1:nrow(approxAfterArea)){
+    currentTime <- data.frame(t(approxAfterArea[r,]))
+    colnames(currentTime) <- "afterArea"
+    currentTime <- rownames_to_column(currentTime, var = "sampleID")
+    currentTime$groupID <- paste0(str_split_fixed(currentTime$sampleID, "_",3)[,1],"_", str_split_fixed(currentTime$sampleID, "_",3)[,2])
+    currentTime$groupID <- as.factor(currentTime$groupID)
+    if (any(is.na(currentTime$afterArea))){
+      dunnettSummary <- cbind(dunnettSummary, c(rep(NA, numberOfPlots)))
+    } else {
+      # compute coefficient matrix and extract column names
+      if (firstAnova == TRUE){
+        # set the base comparison: http://r.789695.n4.nabble.com/Getting-the-correct-factor-level-as-Dunnett-control-in-glht-td4659754.html
+        ngrp <- table(currentTime$groupID)
+        cm <- contrMat(ngrp, base=8) # the base line has to be adapted to select N2.   
+        names <- levels(currentTime$groupID)
+        names <- names[-8]
+        firstAnova <- FALSE
+      }  
+      currentDunnett <-  glht(currentTime.aov, linfct=mcp(groupID=cm))
+      currentTime.aov <- aov(afterArea ~ groupID, data = currentTime)
+#      save(currentDunnett, file="/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/currentDunnett.rda")
+      currentPvalues <- data.frame(summary(currentDunnett)$test$pvalues)
+      dunnettSummary <- cbind(dunnettSummary, currentPvalues)
+
+    }
+  setTxtProgressBar(progressBar,r)
+  }
+  
+  cat("\nplotting ANOVA p-values")
+#  load("/home/gabe/OldAlbert/media/4TBexternal/sync/PhD/TrackLengthSummarizer/anovaSummary.rda")
+  rownames(dunnettSummary) <- names
+  save(dunnettSummary, file="/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/dunnetSummary.rda")
+  for (r in 1:nrow(dunnettSummary)){
+    i <- r%%numberOfPlotsPerRow
+    if (i == 0){
+      i <- numberOfPlotsPerRow
+    }
+    j <- ceiling(r/numberOfPlotsPerRow) 
+  
+    par(mfg=c(j, i))
+    plot(seq(1,25, 1/24), dunnettSummary[r,],log="y", main = paste0(names[r], " - ", "N2.F10_12"), xlab="time [days]", ylab="p-value [ANOVA]", pch='.', type="l", ylim=c(0.00000001,1))
+    abline(h = 0.05, col = "red")     
+  }
+  
+  cat("\nwriting plots to file ...")
+  dev.off()
+  cat("\ndone.\n")
+
+ 
+}
+
 
 censorData <- function(trackDataCollector,censoringList){
   # remove complete sets
