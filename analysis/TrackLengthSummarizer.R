@@ -216,7 +216,7 @@ plotMean <- function(trackDataCollector, ResultOutputPath, bySet){
   trackDataCollector[cols.num] <- sapply(trackDataCollector[cols.num],as.numeric)
 
   # plot mean and CI in facettes
-  p <- ggplot(trackDataCollector, aes(x=days, y=afterArea)) + geom_point(size = 0.6, alpha = 0.3, aes(colour = temperatureTable)) + scale_colour_gradientn(colours = rainbow(7))
+  p <- ggplot(trackDataCollector, aes(x=days, y=afterArea)) + geom_point(size = 0.7, alpha = 0.3, aes(colour = temperatureTable)) + scale_colour_gradientn(colours = rainbow(7))
   p <- p + stat_smooth(fill = "grey50", size = 0.5, alpha = 1) + xlim(1, 25) +ylim(0, 40000) + facet_wrap(~groupID, ncol=4)
   ggsave(paste0(ResultOutputPath, "MEANandSMOOTHplot001_", correctTrackVersionString,".svg"), p)
 }
@@ -330,8 +330,8 @@ plotAnova <- function(trackDataCollector, ResultOutputPath, bySet){
   }
    
   # create an empty canvas with the right size 
-  numberOfPlotsPerRow <- 6
-  numberOfPlots <- choose(length(unique(trackDataCollector$groupID)),2)
+  numberOfPlotsPerRow <- 4
+  numberOfPlots <- length(unique(trackDataCollector$groupID)) - 1
   numberOfRows <- ceiling(numberOfPlots / numberOfPlotsPerRow)
   # plot the anova p values
   
@@ -397,7 +397,8 @@ plotAnova <- function(trackDataCollector, ResultOutputPath, bySet){
   cat("\nplotting ANOVA p-values")
 #  load("/home/gabe/OldAlbert/media/4TBexternal/sync/PhD/TrackLengthSummarizer/anovaSummary.rda")
   rownames(anovaSummary) <- rowNames
- 
+#  save(anovaSummary, file="/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/anovaSummary.rda")
+  anovaSummary <- anovaSummary[grep("N2", rownames(anovaSummary)), ]
   for (r in 1:nrow(anovaSummary)){
     i <- r%%numberOfPlotsPerRow
     if (i == 0){
@@ -406,7 +407,7 @@ plotAnova <- function(trackDataCollector, ResultOutputPath, bySet){
     j <- ceiling(r/numberOfPlotsPerRow) 
   
     par(mfg=c(j, i))
-    plot(seq(1,25, 1/24), anovaSummary[r,],log="y", main = rowNames[r], xlab="time [days]", ylab="p-value [ANOVA]", pch='.', type="l", ylim=c(0.00000001,1))
+    plot(seq(1,25, 1/24), anovaSummary[r,],log="y", main = rownames(anovaSummary)[r], xlab="time [days]", ylab="p-value [ANOVA]", pch='.', type="l", ylim=c(0.00000001,1))
     abline(h = 0.05, col = "red")     
   }
   
