@@ -304,16 +304,18 @@ plotMeanSD <- function(trackDataCollector, ResultOutputPath, bySet){
 
 plotAnova <- function(trackDataCollector, ResultOutputPath, bySet){
   if (bySet == TRUE){
-    # treat each set differently     
+    # treat each set differently
     trackDataCollector$sampleID <- paste0(trackDataCollector$groupID,"_", trackDataCollector$setID, "_", str_split_fixed(trackDataCollector$sampleID, "_",2)[,2])
+    trackDataCollector$groupID <- paste0(trackDataCollector$groupID,"_", trackDataCollector$setID) 
   }
    
   # create an empty canvas with the right size 
   numberOfPlotsPerRow <- 6
-  numberOfPlots <- choose(length(unique(trackDataCollector$groupSet)),2)
+  numberOfPlots <- choose(length(unique(trackDataCollector$groupID)),2)
   numberOfRows <- ceiling(numberOfPlots / numberOfPlotsPerRow)
   # plot the anova p values
-
+  
+  cat("\n ", numberOfPlots, ", ", numberOfRows)
   svg(filename = paste0(ResultOutputPath, "ANOVAplot001_", correctTrackVersionString,".svg"), 
          width = 7*numberOfPlotsPerRow, 
         height = 7*numberOfRows,
@@ -325,9 +327,14 @@ plotAnova <- function(trackDataCollector, ResultOutputPath, bySet){
   # construct a data frame with approximate area values with After Area 
   approxAfterArea <- data.frame(matrix(0, ncol = 0, nrow = length(seq(1,25, 1/24))))
   sampleIDs <- NULL 
-
+ 
+  # create interpolated data sets for each worm and append to strain based data frame
   for (w in unique(trackDataCollector$sampleID)){
       thisWorm <- trackDataCollector[which(trackDataCollector$sampleID == w), ]
+      if (sum(!is.na(thisWorm$afterArea)) < 2){ 
+        cat("\nskipping: ", unique(thisWorm$sampleID))
+        next
+      }
       thisWormApproxAfter <- data.frame(approx(thisWorm$days, thisWorm$afterArea, xout = seq(1,25,1/24))$y)
       # add the approximated values as a column to the data frame, and append the groupID
       approxAfterArea <- cbind(approxAfterArea, thisWormApproxAfter)
@@ -350,7 +357,9 @@ plotAnova <- function(trackDataCollector, ResultOutputPath, bySet){
     if (any(is.na(currentTime$afterArea))){
       anovaSummary <- cbind(anovaSummary, c(rep(NA, numberOfPlots)))
     } else {
-      save(currentTime, file="/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/currentTime.rda")    
+      if (r == 26){
+        save(currentTime, file="/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/currentTime.rda")
+      }
       currentTime.aov <- aov(afterArea ~ groupID, data = currentTime)
       currentAnova <-  data.frame(TukeyHSD(currentTime.aov)[1])
       anovaSummary <- cbind(anovaSummary, data.frame(currentAnova$groupID.p.adj))
@@ -575,10 +584,8 @@ print("summarize_done")
 #trackDataCollector <- loadTracks("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis")
 #save(trackDataCollector, file = "/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/trackDataCollector_All.rda")  
 #load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/trackDataCollector_All.rda")
+#load("/mnt/1TBraid01/homefolders/gschweighauser/Rdata_set13/trackDataCollector_V2.rda")
 #trackDataCollector <- censorData(trackDataCollector,"/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/censoringList.txt")
-#load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_SS104_set2_analysisV13/trackDataCollector_V2.rda")
-#load("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/trackDataCollector_All_censored.rda")
-#trackDataCollector <- selectStrains(trackDataCollector, c("LS292", "CB120", "N2.FUdR.10_10"), TRUE)
 #plotSurvival(trackDataCollector, "/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/", TRUE)
 #plotMeanSD(trackDataCollector, "/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/", TRUE)
 #plotAnova(trackDataCollector, "/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/", TRUE)
