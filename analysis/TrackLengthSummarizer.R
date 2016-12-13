@@ -217,8 +217,13 @@ plotMean <- function(trackDataCollector, ResultOutputPath, bySet){
 
   # plot mean and CI in facettes
   p <- ggplot(trackDataCollector, aes(x=days, y=afterArea)) + geom_point(size = 0.7, alpha = 0.3, aes(colour = temperatureTable)) + scale_colour_gradientn(colours = rainbow(7))
-  p <- p + stat_smooth(fill = "grey50", size = 0.5, alpha = 1) + xlim(1, 25) +ylim(0, 40000) + facet_wrap(~groupID, ncol=4)
-  ggsave(paste0(ResultOutputPath, "MEANandSMOOTHplot001_", correctTrackVersionString,".svg"), p)
+  p <- p + stat_smooth(fill = "grey50", size = 0.5, alpha = 1) + xlim(1, 25) +ylim(0, 40000) + facet_wrap(~groupID, ncol=4) + theme_grey(base_size = 30, base_family = "")
+  ggsave(paste0(ResultOutputPath, "MEANasFacettes_", correctTrackVersionString,".svg"), p)
+
+  # plot mean and CI in one
+  p <- ggplot(trackDataCollector, aes(x=days, y=afterArea, group=groupID, colour=groupID))
+  p <- p + stat_smooth(fill = "grey50", size = 1, alpha = 1) + xlim(1, 25) +ylim(0, 40000) + theme_grey(base_size = 30, base_family = "")
+  ggsave(paste0(ResultOutputPath, "MEANinOne_", correctTrackVersionString,".svg"), p)
 }
 
 plotMeanSD <- function(trackDataCollector, ResultOutputPath, bySet){
@@ -558,40 +563,42 @@ censorData <- function(trackDataCollector,censoringList){
 
   # find last time a worm was alive and replace all following values with 0
  
-  # create a new data frame to append the zeroed samples
-  trackDataCollectorZeroed <- trackDataCollectorCensored[0, ]
+#  # create a new data frame to append the zeroed samples
+#  trackDataCollectorZeroed <- trackDataCollectorCensored[0, ]
 
-  for (i in 1:length(unique(trackDataCollectorCensored$sampleID))){
-  thisWorm <- trackDataCollectorCensored[which(trackDataCollectorCensored$sampleID == unique(trackDataCollectorCensored$sampleID)[i]), ]
-  #cat("\nSample: ", unique(thisWorm$sampleID))
-  lastTimeAliveIndex <- -1
-  
-    for (j in length(thisWorm$afterArea):1){
-      if (sum(is.na(thisWorm$afterArea)) < 2){
-        # remove sets which have to few tracks
-        #trackDataCollector <- trackDataCollector[!which(trackDataCollector$sampleID == unique(thisWorm$sampleID)), ]
-        break
-      }
-      if ((is.na(thisWorm$afterArea[j]) == FALSE) && (thisWorm$afterArea[j] > 0)) {
-        if (lastTimeAliveIndex == -1){
-          lastTimeAliveIndex <- j
-        } else if ((lastTimeAliveIndex - j) <= 3){
-          thisWorm$afterArea[-(1:lastTimeAliveIndex)] <- 0
-          thisWorm$beforeArea[-(1:lastTimeAliveIndex)] <- 0
-          break         
-        } else { 
-          lastTimeAliveIndex <- j 
-        }
-      }     
-    }
-    if (lastTimeAliveIndex != -1){
-      trackDataCollectorZeroed <- rbind(trackDataCollectorZeroed, thisWorm)
-    }
-  }
+#  for (i in 1:length(unique(trackDataCollectorCensored$sampleID))){
+#  thisWorm <- trackDataCollectorCensored[which(trackDataCollectorCensored$sampleID == unique(trackDataCollectorCensored$sampleID)[i]), ]
+#  #cat("\nSample: ", unique(thisWorm$sampleID))
+#  lastTimeAliveIndex <- -1
+#  
+#    for (j in length(thisWorm$afterArea):1){
+#      if (sum(is.na(thisWorm$afterArea)) < 2){
+#        # remove sets which have to few tracks
+#        #trackDataCollector <- trackDataCollector[!which(trackDataCollector$sampleID == unique(thisWorm$sampleID)), ]
+#        break
+#      }
+#      if ((is.na(thisWorm$afterArea[j]) == FALSE) && (thisWorm$afterArea[j] > 0)) {
+#        if (lastTimeAliveIndex == -1){
+#          lastTimeAliveIndex <- j
+#        } else if ((lastTimeAliveIndex - j) <= 3){
+#          thisWorm$afterArea[-(1:lastTimeAliveIndex+1)] <- NA
+#          thisWorm$afterArea[lastTimeAliveIndex+1] <- 0
+#          thisWorm$beforeArea[-(1:lastTimeAliveIndex+1)] <- NA
+#          thisWorm$beforeArea[lastTimeAliveIndex+1] <- 0
+#          break         
+#        } else { 
+#          lastTimeAliveIndex <- j 
+#        }
+#      }     
+#    }
+#    if (lastTimeAliveIndex != -1){
+#      trackDataCollectorZeroed <- rbind(trackDataCollectorZeroed, thisWorm)
+#    }
+#  }
 
 
   cat(" done.\n")
-	return(trackDataCollectorZeroed)	
+	return(trackDataCollectorCensored)	
 }
 
 plotSurvival <- function(trackDataCollector, ResultOutputPath, bySet) {
