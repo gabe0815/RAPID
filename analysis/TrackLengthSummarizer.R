@@ -576,8 +576,9 @@ censorData <- function(trackDataCollector,censoringList){
         if (lastTimeAliveIndex == -1){
           lastTimeAliveIndex <- j
         } else if ((lastTimeAliveIndex - j) <= 3){
-          thisWorm$afterArea[-(1:lastTimeAliveIndex)] <- 0
-          thisWorm$beforeArea[-(1:lastTimeAliveIndex)] <- 0
+          thisWorm$afterArea[-(1:lastTimeAliveIndex)] <- NA
+          thisWorm$beforeArea[-(1:lastTimeAliveIndex)] <- NA
+
           break         
         } else { 
           lastTimeAliveIndex <- j 
@@ -624,7 +625,7 @@ plotSurvival <- function(trackDataCollector, ResultOutputPath, bySet) {
     }
   
   } 
-
+  save(lastTimeAlive, file = "/home/jhench/mac/Documents/sync/lab_journal/2017/data201701/Figure_FUdR_on_N2/lastTimeAlive.rda")
   # calculate mean temperature
   trackDataCollector$temperatureAssay <- as.numeric(trackDataCollector$temperatureAssay)
   trackDataCollector$temperatureTable <- as.numeric(trackDataCollector$temperatureTable)  
@@ -700,7 +701,7 @@ TrackLengthSummarizerVersion <<- 2
 #summarizeTracks("/mnt/4TBraid04/imagesets04/SS104_set2_analysisV13","/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_SS104_set2_analysisV13/")
 #summarizeTracks("/mnt/4TBraid04/imagesets04/20161121_vibasay_set13", "/mnt/1TBraid01/homefolders/gschweighauser/Rdata_set13/")
 
-print("summarize_done")
+#print("summarize_done")
 
 # allways load all sets
 #trackDataCollector <- loadTracks("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis")
