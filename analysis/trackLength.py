@@ -6,9 +6,41 @@ import cv2
 import numpy as np
 import sys
 import os
-
+import re
 
 version = "v13"
+
+def combineTrackAndPhoto(parentDir, description):
+    if description == "before":
+        photoImgPath = findPhoto(parentDir, "_0.jpg$")
+    elif description == "after":
+        photoImgPath = findPhoto(parentDir, "\d\d\.jpg$")
+
+    trackImgPath = findImage(parentDir, description + ".jpg")
+    trackImg = cv2.imread(trackImgPath,0)
+    photoImg = cv2.imread(photoImgPath)
+
+    height, width = trackImg.shape
+    combinedImg = np.zeros((height,width,3), np.uint8)
+    combinedImg.fill(255)
+    combinedImg[:,:,1] = trackImg
+    weight=0.5
+    combinedImg = cv2.addWeighted(combinedImg, weight, photoImg, 1-weight, 0)
+    imgPath = photoImgPath + "_" + description + "_overlay.jpg"
+    cv2.imwrite(imgPath, combinedImg)
+
+    return combinedImg, imgPath 
+
+def createOverlay(img, imgPath, description, area, mask, onEdge):
+    ret, dst = cv2.threshold(mask, 127, 255, cv2.THRESH_BINARY)
+    contours, hierarchy = cv2.findContours(dst,cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)
+    cv2.drawContours(img, contours, -1, (0,0,255), 3)
+    cv2.putText(img, str(description), (100,150), cv2.FONT_HERSHEY_SIMPLEX, 5, (0,0,255), 10)
+    cv2.putText(img, str(area), (100,2200), cv2.FONT_HERSHEY_SIMPLEX, 5, (0,0,255), 10)
+    cv2.putText(img, str(onEdge), (1500,2200), cv2.FONT_HERSHEY_SIMPLEX, 5, (0,0,255), 10)
+    cv2.putText(img, str(version), (2700,2200), cv2.FONT_HERSHEY_SIMPLEX, 5, (0,0,255), 10)
+
+    cv2.imwrite(imgPath+"_tracklength.jpg", img)   
 
 def getCenter(cont):
     M = cv2.moments(cont)
@@ -114,6 +146,13 @@ def findImage(parentDir, description):
 
     return -1
 
+def findPhoto(parentDir, expression):
+    for f in os.listdir(parentDir):
+        if re.search(expression, f) is not None:
+            return parentDir + f
+
+    return -1
+            
 def measureArea(origImg, threshImg, minArea, minDistance):
     kernel = np.ones((5,5),np.uint8)
   
@@ -167,18 +206,16 @@ def analyseTrack(parentDir, description):
 
         imgPath = findImage(parentDir, description+"_overlay.jpg")        
 
-        #print "imagepath: %s %s" % (imgPath, description)
-        if imgPath != -1:
-            ret, dst = cv2.threshold(mask, 127, 255, cv2.THRESH_BINARY)
-            contours, hierarchy = cv2.findContours(dst,cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)
-            img = cv2.imread(imgPath)
-            cv2.drawContours(img, contours, -1, (0,0,255), 3)
-            cv2.putText(img, str(description), (100,150), cv2.FONT_HERSHEY_SIMPLEX, 5, (0,0,255), 10)
-            cv2.putText(img, str(area), (100,2200), cv2.FONT_HERSHEY_SIMPLEX, 5, (0,0,255), 10)
-            cv2.putText(img, str(onEdge), (1500,2200), cv2.FONT_HERSHEY_SIMPLEX, 5, (0,0,255), 10)
-            cv2.putText(img, str(version), (2700,2200), cv2.FONT_HERSHEY_SIMPLEX, 5, (0,0,255), 10)
+        
+        if imgPath == -1:
+            #create overlay
+            combinedImg, imgPath = combineTrackAndPhoto(parentDir, description)
+        
+        elif imgPath != -1:
+            combinedImg = cv2.imread(imgPath) 
 
-            cv2.imwrite(imgPath+"_tracklength.jpg", img)            
+        createOverlay(combinedImg, imgPath, description, area, mask, onEdge)
+         
     
         return area, onEdge, numberOfContours 
     
