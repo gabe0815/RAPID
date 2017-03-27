@@ -1,8 +1,8 @@
 #!/bin/bash
 
 #IMAGEPATH is stored in config.sh to make it accessible to all scripts
-. ~/applications/RAPID/analysis/config.sh
-#IMAGEPATH=/mnt/4TBraid04/imagesets04/20161012_testset_V12
+#. ~/applications/RAPID/analysis/config.sh
+IMAGEPATH=/mnt/4TBraid04/imagesets04/20151203_vibassay_set2
 
 
 #functions
@@ -32,7 +32,7 @@ function assembleMosaic {
         while read i;
 		    do
                 #echo ${searchStrings[$k]}
-                imgPath=$(find $(dirname $i) -maxdepth 2 -name "imgseries_h264.AVI_2fps.AVI_${searchStrings[$k]}_overlay.jpg_tracklength.jpg") #imgseries_h264.AVI_2fps.AVI_before_overlay.jpg_tracklength.jpg
+                imgPath=$(find $(dirname $i) -maxdepth 2 -name "imgseries_h264.AVI_2fps.AVI_*${searchStrings[$k]}_overlay.jpg_tracklength.jpg") #imgseries_h264.AVI_2fps.AVI_before_overlay.jpg_tracklength.jpg
                 if [ ! -f "$imgPath" ]
                 then
                     echo "couldn't find image" 
