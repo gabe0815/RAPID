@@ -563,38 +563,38 @@ censorData <- function(trackDataCollector,censoringList){
 
   # find last time a worm was alive and replace all following values with 0
  
-#  # create a new data frame to append the zeroed samples
-#  trackDataCollectorZeroed <- trackDataCollectorCensored[0, ]
 
-#  for (i in 1:length(unique(trackDataCollectorCensored$sampleID))){
-#  thisWorm <- trackDataCollectorCensored[which(trackDataCollectorCensored$sampleID == unique(trackDataCollectorCensored$sampleID)[i]), ]
-#  #cat("\nSample: ", unique(thisWorm$sampleID))
-#  lastTimeAliveIndex <- -1
-#  
-#    for (j in length(thisWorm$afterArea):1){
-#      if (sum(is.na(thisWorm$afterArea)) < 2){
-#        # remove sets which have to few tracks
-#        #trackDataCollector <- trackDataCollector[!which(trackDataCollector$sampleID == unique(thisWorm$sampleID)), ]
-#        break
-#      }
-#      if ((is.na(thisWorm$afterArea[j]) == FALSE) && (thisWorm$afterArea[j] > 0)) {
-#        if (lastTimeAliveIndex == -1){
-#          lastTimeAliveIndex <- j
-#        } else if ((lastTimeAliveIndex - j) <= 3){
-#          thisWorm$afterArea[-(1:lastTimeAliveIndex+1)] <- NA
-#          thisWorm$afterArea[lastTimeAliveIndex+1] <- 0
-#          thisWorm$beforeArea[-(1:lastTimeAliveIndex+1)] <- NA
-#          thisWorm$beforeArea[lastTimeAliveIndex+1] <- 0
-#          break         
-#        } else { 
-#          lastTimeAliveIndex <- j 
-#        }
-#      }     
-#    }
-#    if (lastTimeAliveIndex != -1){
-#      trackDataCollectorZeroed <- rbind(trackDataCollectorZeroed, thisWorm)
-#    }
-#  }
+  # create a new data frame to append the zeroed samples
+  trackDataCollectorZeroed <- trackDataCollectorCensored[0, ]
+
+  for (i in 1:length(unique(trackDataCollectorCensored$sampleID))){
+  thisWorm <- trackDataCollectorCensored[which(trackDataCollectorCensored$sampleID == unique(trackDataCollectorCensored$sampleID)[i]), ]
+  #cat("\nSample: ", unique(thisWorm$sampleID))
+  lastTimeAliveIndex <- -1
+  
+    for (j in length(thisWorm$afterArea):1){
+      if (sum(is.na(thisWorm$afterArea)) < 2){
+        # remove sets which have to few tracks
+        #trackDataCollector <- trackDataCollector[!which(trackDataCollector$sampleID == unique(thisWorm$sampleID)), ]
+        break
+      }
+      if ((is.na(thisWorm$afterArea[j]) == FALSE) && (thisWorm$afterArea[j] > 0)) {
+        if (lastTimeAliveIndex == -1){
+          lastTimeAliveIndex <- j
+        } else if ((lastTimeAliveIndex - j) <= 3){
+          thisWorm$afterArea[-(1:lastTimeAliveIndex)] <- NA
+          thisWorm$beforeArea[-(1:lastTimeAliveIndex)] <- NA
+
+          break         
+        } else { 
+          lastTimeAliveIndex <- j 
+        }
+      }     
+    }
+    if (lastTimeAliveIndex != -1){
+      trackDataCollectorZeroed <- rbind(trackDataCollectorZeroed, thisWorm)
+    }
+  }
 
 
   cat(" done.\n")
@@ -631,7 +631,7 @@ plotSurvival <- function(trackDataCollector, ResultOutputPath, bySet) {
     }
   
   } 
-
+  save(lastTimeAlive, file = "/home/jhench/mac/Documents/sync/lab_journal/2017/data201701/Figure_FUdR_on_N2/lastTimeAlive.rda")
   # calculate mean temperature
   trackDataCollector$temperatureAssay <- as.numeric(trackDataCollector$temperatureAssay)
   trackDataCollector$temperatureTable <- as.numeric(trackDataCollector$temperatureTable)  
@@ -707,7 +707,7 @@ TrackLengthSummarizerVersion <<- 2
 #summarizeTracks("/mnt/4TBraid04/imagesets04/SS104_set2_analysisV13","/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis/Rdata_SS104_set2_analysisV13/")
 #summarizeTracks("/mnt/4TBraid04/imagesets04/20161121_vibasay_set13", "/mnt/1TBraid01/homefolders/gschweighauser/Rdata_set13/")
 
-print("summarize_done")
+#print("summarize_done")
 
 # allways load all sets
 #trackDataCollector <- loadTracks("/home/jhench/mac/Documents/sync/lab_journal/2016/data201603/Track_Length_Analysis")

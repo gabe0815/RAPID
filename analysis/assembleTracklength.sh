@@ -37,8 +37,8 @@ function assembleMosaic {
                 then
                     echo "couldn't find image" 
                     continue
-                else 
-                    echo "found $imgPath"
+               # else 
+                   # echo "found $imgPath"
                 fi
 
 			    time=$(echo "$i"|cut -f2); 
