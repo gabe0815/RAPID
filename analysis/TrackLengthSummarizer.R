@@ -60,7 +60,7 @@ summarizeTracks <- function(RapidInputPath,ResultOutputPath){
     before <- c(NA, NA, NA, NA) # length, area, edge, contours
     after <- c(NA, NA, NA, NA) # length, area, edge, contours
     trackCensoredBefore <- NA
-		trackCensoredAfter <- NA 
+	trackCensoredAfter <- NA 
     cameraSerial <- NA
     cameraVersion <- NA
     device <- NA
@@ -68,59 +68,63 @@ summarizeTracks <- function(RapidInputPath,ResultOutputPath){
     temperatureTable <- NA
 
     # read all files and parse their content
-		if (length(inputFiles)<2){
+	if (length(inputFiles)<2){
       next # skip to the next item in the for loop
     } 
 
-		for (f in 1:length(inputFiles)){
+	for (f in 1:length(inputFiles)){
 			filePath <- paste0(rapidDirectories[d],"/",inputFiles[f], collapse = NULL)
       #cat("reading from: ", filePath, "\n")
 
-      if (inputFiles[f] == "trackLength.tsv"){ #required files for analysis
-        rawTrackLength <- read.delim(filePath,header = TRUE, sep = "\t")
-        trackVersion <- names(rawTrackLength)[1]
-        beforeIdx <- which(rawTrackLength[,1] == "before")
-        afterIdx <- which(rawTrackLength[,1] == "after")
-        before <- as.numeric(unlist(unname(rawTrackLength[beforeIdx,2:5]))) # length, area, edge, contours
-        after <- as.numeric(unlist(unname(rawTrackLength[afterIdx,2:5])))          
+        if (inputFiles[f] == "trackLength.tsv"){ #required files for analysis
+            rawTrackLength <- read.delim(filePath,header = TRUE, sep = "\t")
+            trackVersion <- names(rawTrackLength)[1]
+            beforeIdx <- which(rawTrackLength[,1] == "before")
+            afterIdx <- which(rawTrackLength[,1] == "after")
+            before <- as.numeric(unlist(unname(rawTrackLength[beforeIdx,2:5]))) # length, area, edge, contours
+            after <- as.numeric(unlist(unname(rawTrackLength[afterIdx,2:5])))          
 				
-			} else if (inputFiles[f] == "sampleID.txt"){ #required files for analysis
-        rawSampleID <- readLines(filePath)
-        sampleID <- rawSampleID[1]
-        birthTimestamp <- as.numeric(rawSampleID[2])
+        } else if (inputFiles[f] == "sampleID.txt"){ #required files for analysis
+            rawSampleID <- readLines(filePath)
+            sampleID <- rawSampleID[1]
+            birthTimestamp <- as.numeric(rawSampleID[2])
 				
-			} else if (inputFiles[f] == "timestamp.txt"){ #required files for analysis
-				currentTimestamp <- as.numeric(readLines(filePath))
+        } else if (inputFiles[f] == "timestamp.txt"){ #required files for analysis
+            currentTimestamp <- as.numeric(readLines(filePath))
 				
-			} else if (inputFiles[f] == "censored.txt"){ 
-			  censoringParameters<-read.delim(filePath, header=FALSE, row.names=1) 
-			  trackCensoredBefore <- censoringParameters["before",]
-			  trackCensoredAfter <- censoringParameters["after",]
+        } else if (inputFiles[f] == "censored.txt"){ 
+            censoringParameters<-read.delim(filePath, header=FALSE, row.names=1) 
+            trackCensoredBefore <- censoringParameters["before",]
+            trackCensoredAfter <- censoringParameters["after",]
 
-		  } else if (inputFiles[f] == "camera.txt"){
-        rawCamera <- readLines(filePath)
-        cameraSerial <- rawCamera[1]
-        device <- rawCamera[2]
+        } else if (inputFiles[f] == "camera.txt"){
+            rawCamera <- readLines(filePath)
+            cameraSerial <- rawCamera[1]
+            device <- rawCamera[2]
 
-		  } else if (inputFiles[f] == "version.txt"){
-        cameraVersion <- readLines(filePath)
+        } else if (inputFiles[f] == "version.txt"){
+            cameraVersion <- readLines(filePath)
 
-		  } else if (inputFiles[f] == "temperature.txt"){
-        rawTemperature <- try(read.csv(filePath, header = FALSE, sep = ",", stringsAsFactors = FALSE))
-          if(inherits(rawTemperature, "try-error")) {
-            cat("got empty file, skipping...","\n")
-          } else {
-            temperatureAssay <- as.numeric(rawTemperature[1,1])
-            temperatureTable <- as.numeric(rawTemperature[1,2])
-          }      
-      }
-		}
+        } else if (inputFiles[f] == "temperature.txt"){
+            rawTemperature <- try(read.csv(filePath, header = FALSE, sep = ",", stringsAsFactors = FALSE))
+            if(inherits(rawTemperature, "try-error")) {
+                cat("got empty file, skipping...","\n")
+            } else {
+                temperatureAssay <- as.numeric(rawTemperature[1,1])
+                temperatureTable <- as.numeric(rawTemperature[1,2])
+            }      
+        }
+    }
 		
     if (any(is.na(sampleID), is.na(birthTimestamp), is.na(currentTimestamp), is.na(before), is.na(after)) == FALSE) {
       # append all parameter from each measurement in one huge data frame
-      trackDataStrings <- c(sampleID, birthTimestamp, currentTimestamp, trackVersion, before, after, trackCensoredBefore, trackCensoredAfter, cameraSerial, cameraVersion, device, temperatureAssay, temperatureTable)
-
-      trackDataCollector[nrow(trackDataCollector)+1,] <- trackDataStrings
+        trackDataStrings <- c(sampleID, birthTimestamp, currentTimestamp, trackVersion, before, after, trackCensoredBefore, trackCensoredAfter, cameraSerial, cameraVersion, device, temperatureAssay, temperatureTable)
+        
+        # check if we got all parameters before appending:
+        if (length(trackDataStrings) != ncol(trackDataCollector)){
+            cat("missing parameters, got:", "\n")
+            cat(trackDataStrings, "\n")
+            trackDataCollector[nrow(trackDataCollector)+1,] <- trackDataStrings
 
     }
 
