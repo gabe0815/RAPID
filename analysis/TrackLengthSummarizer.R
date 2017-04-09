@@ -143,14 +143,14 @@ summarizeTracks <- function(RapidInputPath,ResultOutputPath){
 	save(trackDataCollector, file=paste0(ResultOutputPath, "trackDataCollector_V", TrackLengthSummarizerVersion, ".rda"))  
 }
 
-censorData <- function(trackDataCollector,censoringList){
+censorData <- function(trackDataCollector, censoringList){
   # remove complete sets
 	cat("\ncensoring data...\n")
 	censNames <- readLines(censoringList)
   trackDataCollectorCensored <- trackDataCollector[!trackDataCollector$sampleID %in% censNames, ]
   
   # convert chars to numeric
-  cols.num <- c("beforeEdge", "trackCensoredBefore", "beforeArea", "afterEdge", "trackCensoredAfter", "afterArea")
+  cols.num <- c("birthTimestamp", "currentTimestamp", "beforeLength", "beforeArea", "beforeEdge", "beforeContours", "afterLength", "afterArea", "afterEdge", "afterContours", "trackCensoredBefore", "trackCensoredAfter", "temperatureAssay", "temperatureTable", "setID")
   trackDataCollectorCensored[cols.num] <- sapply(trackDataCollectorCensored[cols.num],as.numeric)
 
   # convert censored timepoints to NAs
@@ -181,43 +181,6 @@ censorData <- function(trackDataCollector,censoringList){
   
   # add groupID
   trackDataCollectorCensored$groupID <- str_split_fixed(trackDataCollectorCensored$sampleID, "_",2)[,1]
-
-  # find last time a worm was alive and replace all following values with 0
- 
-
-  # create a new data frame to append the zeroed samples
-  trackDataCollectorZeroed <- trackDataCollectorCensored[0, ]
-
-  for (i in 1:length(unique(trackDataCollectorCensored$sampleID))){
-  thisWorm <- trackDataCollectorCensored[which(trackDataCollectorCensored$sampleID == unique(trackDataCollectorCensored$sampleID)[i]), ]
-  #cat("\nSample: ", unique(thisWorm$sampleID))
-  lastTimeAliveIndex <- -1
-  
-    for (j in length(thisWorm$afterArea):1){
-      if (sum(is.na(thisWorm$afterArea)) < 2){
-        # remove sets which have to few tracks
-        #trackDataCollector <- trackDataCollector[!which(trackDataCollector$sampleID == unique(thisWorm$sampleID)), ]
-        break
-      }
-      if ((is.na(thisWorm$afterArea[j]) == FALSE) && (thisWorm$afterArea[j] > 0)) {
-        if (lastTimeAliveIndex == -1){
-          lastTimeAliveIndex <- j
-        } else if ((lastTimeAliveIndex - j) <= 3){
-          thisWorm$afterArea[-(1:lastTimeAliveIndex)] <- NA
-          thisWorm$beforeArea[-(1:lastTimeAliveIndex)] <- NA
-
-          break         
-        } else { 
-          lastTimeAliveIndex <- j 
-        }
-      }     
-    }
-    if (lastTimeAliveIndex != -1){
-      trackDataCollectorZeroed <- rbind(trackDataCollectorZeroed, thisWorm)
-    }
-  }
-
-
   cat(" done.\n")
 	return(trackDataCollectorCensored)	
 }
