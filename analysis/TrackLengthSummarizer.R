@@ -185,6 +185,39 @@ censorData <- function(trackDataCollector, censoringList){
 	return(trackDataCollectorCensored)	
 }
 
+extractLifepsan <- function(trackDataCollector, ResultOutputPath, bySet) {
+  if (bySet == TRUE){
+    # treat each set differently 
+    trackDataCollector$groupID <- paste0(trackDataCollector$groupID,"_", trackDataCollector$setID)
+  }
+
+  
+  # All worms are collected in the same data frame. By having a group ID, they can be assigned during plotting.
+  lastTimeAlive <- trackDataCollector[0,]
+  
+  # get last time alive for each worm
+  for (i in 1:length(unique(trackDataCollector$sampleID))){
+    thisWorm <- trackDataCollector[which(trackDataCollector$sampleID == unique(trackDataCollector$sampleID)[i]), ]
+    lastTimeAliveIndex <- -1
+    
+    for (j in length(thisWorm$afterArea):1){
+
+      if ((is.na(thisWorm$afterArea[j]) == FALSE) && (thisWorm$afterArea[j] > 0)) {
+        if (lastTimeAliveIndex == -1){
+          lastTimeAliveIndex <- j
+        } else if ((lastTimeAliveIndex - j) <= 3){
+          lastTimeAlive[nrow(lastTimeAlive)+1, ] <- thisWorm[j, ]
+          break         
+        } else { 
+          lastTimeAliveIndex <- j 
+        }
+      }     
+    }
+  
+  } 
+  return lastTimeAlive
+}
+
 plotSurvival <- function(trackDataCollector, ResultOutputPath, bySet) {
   if (bySet == TRUE){
     # treat each set differently 
