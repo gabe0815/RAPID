@@ -182,7 +182,7 @@ censorData <- function(trackDataCollector, censoringList){
   # add groupID
   trackDataCollectorCensored$groupID <- str_split_fixed(trackDataCollectorCensored$sampleID, "_",2)[,1]
   cat(" done.\n")
-	return(trackDataCollectorCensored)	
+  return(trackDataCollectorCensored)	
 }
 
 extractLifepsan <- function(trackDataCollector, ResultOutputPath, bySet) {
@@ -215,7 +215,7 @@ extractLifepsan <- function(trackDataCollector, ResultOutputPath, bySet) {
     }
   
   } 
-  return lastTimeAlive
+  return (lastTimeAlive)
 }
 
 plotSurvival <- function(trackDataCollector, ResultOutputPath, bySet) {
