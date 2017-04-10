@@ -170,10 +170,10 @@ censorData <- function(trackDataCollector, censoringList){
 
   trackDataCollectorCensored$afterArea[censorAfter] <- NA
 
-  censorTemperatureAssay <- c(which(trackDataCollectorCensored$temperatureAssay == "-1"))
+  censorTemperatureAssay <- c(which(trackDataCollectorCensored$temperatureAssay == -1))
   trackDataCollectorCensored$temperatureAssay[censorTemperatureAssay] <- NA
 	
-  censorTemperatureTable <- c(which(trackDataCollectorCensored$temperatureTable == "-1"))
+  censorTemperatureTable <- c(which(trackDataCollectorCensored$temperatureTable == -1))
   trackDataCollectorCensored$temperatureTable[censorTemperatureTable] <- NA
 
   # calculate worm age in days
