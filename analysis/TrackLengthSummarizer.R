@@ -185,7 +185,7 @@ censorData <- function(trackDataCollector, censoringList){
   return(trackDataCollectorCensored)	
 }
 
-extractLifepsan <- function(trackDataCollector, ResultOutputPath, bySet) {
+extractLifepsan <- function(trackDataCollector, bySet) {
   if (bySet == TRUE){
     # treat each set differently 
     trackDataCollector$groupID <- paste0(trackDataCollector$groupID,"_", trackDataCollector$setID)
