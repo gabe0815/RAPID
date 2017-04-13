@@ -10,7 +10,7 @@ This is the imagej macro which orchestrates the whole assay
 ### ptpcam
 contains all camera related scripts, i.e for image aquisition and download
 
-### analyis
+### analysis
 contains image to video conversion, track area extraction and an R script to read RAPID data into R for analysis
 
 ### hardware
