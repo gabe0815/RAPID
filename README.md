@@ -4,22 +4,22 @@ Created by Jürgen Hench and Gabriel Schweighauser, June 2015
 
 All necessary files are contained within this repository.
 
-###assay_control.ijm
+### assay_control.ijm
 This is the imagej macro which orchestrates the whole assay
 
-###ptpcam
+### ptpcam
 contains all camera related scripts, i.e for image aquisition and download
 
-###analyis
+### analyis
 contains image to video conversion, track area extraction and an R script to read RAPID data into R for analysis
 
-###hardware
+### hardware
 contains 3d printed parts and templates for the imaging stages
 
-###temperature
+### temperature
 contains scripts to get temperature readings from an arduino
 
-###robot
+### robot
 contains scripts related to communication with the FANUC M430i robotic arm
 
 ###labels
