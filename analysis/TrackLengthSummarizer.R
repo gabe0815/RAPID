@@ -91,8 +91,10 @@ summarizeTracks <- function(RapidInputPath,ResultOutputPath){
                      before <- as.numeric(unlist(unname(rawTrackLength[beforeIdx,2:5])))
                       after <- as.numeric(unlist(unname(rawTrackLength[afterIdx,2:5])))
 
-        } else if (inputFiles[f] == "imgseries_h264.AVI_centroids.csv_MeanSpeed.csv"){          
-				    # do something
+        } else if (inputFiles[f] == "meanSpeed.csv"){          
+				    rawMeanSpeeds <- read.csv(filePath, header = T)
+            beforeSpeed <- as.numeric(rawMeanSpeeds[which(rawMeanSpeeds$stimulus == "before"), 2-3])
+            afterSpeed <- as.numeric(rawMeanSpeeds[which(rawMeanSpeeds$stimulus == "after"), 2-3])
           
 
         } else if (inputFiles[f] == "sampleID.txt"){ #required files for analysis
@@ -119,7 +121,7 @@ summarizeTracks <- function(RapidInputPath,ResultOutputPath){
         } else if (inputFiles[f] == "temperature.txt"){
             rawTemperature <- try(read.csv(filePath, header = FALSE, sep = ",", stringsAsFactors = FALSE))
             if(inherits(rawTemperature, "try-error")) {
-                cat("got empty file, skipping...","\n")
+                #cat("got empty file, skipping...","\n")
             } else {
                 temperatureAssay <- as.numeric(rawTemperature[1,1])
                 temperatureTable <- as.numeric(rawTemperature[1,2])
@@ -129,7 +131,23 @@ summarizeTracks <- function(RapidInputPath,ResultOutputPath){
 		
     if (any(is.na(sampleID), is.na(birthTimestamp), is.na(currentTimestamp), is.na(before), is.na(after)) == FALSE) {
       # append all parameter from each measurement in one huge data frame
-        trackDataStrings <- c(sampleID, birthTimestamp, currentTimestamp, trackVersion, before, beforeSpeed, after, afterSpeed, trackCensoredBefore, trackCensoredAfter, cameraSerial, cameraVersion, device, temperatureAssay, temperatureTable)
+        trackDataStrings <- c(
+                              sampleID, 
+                        birthTimestamp, 
+                      currentTimestamp, 
+                          trackVersion, 
+                                before, 
+                           beforeSpeed, 
+                                 after, 
+                            afterSpeed, 
+                   trackCensoredBefore, 
+                    trackCensoredAfter, 
+                          cameraSerial, 
+                         cameraVersion, 
+                                device, 
+                      temperatureAssay, 
+                      temperatureTable
+                            )
         
         # check if we got all parameters before appending:
         if (length(trackDataStrings) != ncol(trackDataCollector)){
@@ -333,7 +351,7 @@ selectStrains <- function(trackDataCollector, strainList, bySet) {
 
 # global parameters (use <<- instead of <-)
 correctTrackVersionString <<- "trackVersion.v13"
-TrackLengthSummarizerVersion <<- 2
+TrackLengthSummarizerVersion <<- 3
 
 # enter RAPID source and output directories here
 # usage
