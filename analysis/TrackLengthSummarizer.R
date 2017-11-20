@@ -25,10 +25,14 @@ summarizeTracks <- function(RapidInputPath,ResultOutputPath){
                                  beforeArea = numeric(0),
                                  beforeEdge = numeric(0),
                              beforeContours = numeric(0),
+                            beforeMeanSpeed = numeric(0),
+                         beforeMeasurements = numeric(0),
                                 afterLength = numeric(0),
                                   afterArea = numeric(0),
                                   afterEdge = numeric(0),
-                              afterContours = numeric(0), 
+                              afterContours = numeric(0),
+                             afterMeanSpeed = numeric(0),
+                          afterMeasurements = numeric(0), 
                         trackCensoredBefore = numeric(0),
                          trackCensoredAfter = numeric(0),
                                cameraSerial = character(0),
@@ -58,9 +62,11 @@ summarizeTracks <- function(RapidInputPath,ResultOutputPath){
     currentTimestamp <- NA
     trackVersion <- NA
     before <- c(NA, NA, NA, NA) # length, area, edge, contours
-    after <- c(NA, NA, NA, NA) # length, area, edge, contours
+    after <- c(NA, NA, NA, NA)
+    beforeSpeed <- c(NA, NA) # mean speed, measurements
+    afterSpeed <- c(NA, NA)
     trackCensoredBefore <- NA
-	trackCensoredAfter <- NA 
+	  trackCensoredAfter <- NA 
     cameraSerial <- NA
     cameraVersion <- NA
     device <- NA
@@ -77,30 +83,37 @@ summarizeTracks <- function(RapidInputPath,ResultOutputPath){
       #cat("reading from: ", filePath, "\n")
 
         if (inputFiles[f] == "trackLength.tsv"){ #required files for analysis
-            rawTrackLength <- read.delim(filePath,header = TRUE, sep = "\t")
-            trackVersion <- names(rawTrackLength)[1]
-            beforeIdx <- which(rawTrackLength[,1] == "before")
-            afterIdx <- which(rawTrackLength[,1] == "after")
-            before <- as.numeric(unlist(unname(rawTrackLength[beforeIdx,2:5]))) # length, area, edge, contours
-            after <- as.numeric(unlist(unname(rawTrackLength[afterIdx,2:5])))          
-				
+             rawTrackLength <- read.delim(filePath,header = TRUE, sep = "\t")
+               trackVersion <- names(rawTrackLength)[1]
+                  beforeIdx <- which(rawTrackLength[,1] == "before")
+                   afterIdx <- which(rawTrackLength[,1] == "after")
+                      # length, area, edge, contours
+                     before <- as.numeric(unlist(unname(rawTrackLength[beforeIdx,2:5])))
+                      after <- as.numeric(unlist(unname(rawTrackLength[afterIdx,2:5])))
+
+        } else if (inputFiles[f] == "meanSpeed.csv"){          
+				    rawMeanSpeeds <- read.csv(filePath, header = T)
+            beforeSpeed <- as.numeric(rawMeanSpeeds[which(rawMeanSpeeds$stimulus == "before"), 2-3])
+            afterSpeed <- as.numeric(rawMeanSpeeds[which(rawMeanSpeeds$stimulus == "after"), 2-3])
+          
+
         } else if (inputFiles[f] == "sampleID.txt"){ #required files for analysis
-            rawSampleID <- readLines(filePath)
-            sampleID <- rawSampleID[1]
-            birthTimestamp <- as.numeric(rawSampleID[2])
+                rawSampleID <- readLines(filePath)
+                   sampleID <- rawSampleID[1]
+             birthTimestamp <- as.numeric(rawSampleID[2])
 				
         } else if (inputFiles[f] == "timestamp.txt"){ #required files for analysis
             currentTimestamp <- as.numeric(readLines(filePath))
 				
         } else if (inputFiles[f] == "censored.txt"){ 
-            censoringParameters<-read.delim(filePath, header=FALSE, row.names=1) 
+            censoringParameters <- read.delim(filePath, header=FALSE, row.names=1) 
             trackCensoredBefore <- censoringParameters["before",]
-            trackCensoredAfter <- censoringParameters["after",]
+             trackCensoredAfter <- censoringParameters["after",]
 
         } else if (inputFiles[f] == "camera.txt"){
-            rawCamera <- readLines(filePath)
+               rawCamera <- readLines(filePath)
             cameraSerial <- rawCamera[1]
-            device <- rawCamera[2]
+                  device <- rawCamera[2]
 
         } else if (inputFiles[f] == "version.txt"){
             cameraVersion <- readLines(filePath)
@@ -108,7 +121,7 @@ summarizeTracks <- function(RapidInputPath,ResultOutputPath){
         } else if (inputFiles[f] == "temperature.txt"){
             rawTemperature <- try(read.csv(filePath, header = FALSE, sep = ",", stringsAsFactors = FALSE))
             if(inherits(rawTemperature, "try-error")) {
-                cat("got empty file, skipping...","\n")
+                #cat("got empty file, skipping...","\n")
             } else {
                 temperatureAssay <- as.numeric(rawTemperature[1,1])
                 temperatureTable <- as.numeric(rawTemperature[1,2])
@@ -118,7 +131,23 @@ summarizeTracks <- function(RapidInputPath,ResultOutputPath){
 		
     if (any(is.na(sampleID), is.na(birthTimestamp), is.na(currentTimestamp), is.na(before), is.na(after)) == FALSE) {
       # append all parameter from each measurement in one huge data frame
-        trackDataStrings <- c(sampleID, birthTimestamp, currentTimestamp, trackVersion, before, after, trackCensoredBefore, trackCensoredAfter, cameraSerial, cameraVersion, device, temperatureAssay, temperatureTable)
+        trackDataStrings <- c(
+                              sampleID, 
+                        birthTimestamp, 
+                      currentTimestamp, 
+                          trackVersion, 
+                                before, 
+                           beforeSpeed, 
+                                 after, 
+                            afterSpeed, 
+                   trackCensoredBefore, 
+                    trackCensoredAfter, 
+                          cameraSerial, 
+                         cameraVersion, 
+                                device, 
+                      temperatureAssay, 
+                      temperatureTable
+                            )
         
         # check if we got all parameters before appending:
         if (length(trackDataStrings) != ncol(trackDataCollector)){
@@ -150,7 +179,26 @@ censorData <- function(trackDataCollector, censoringList){
   trackDataCollectorCensored <- trackDataCollector[!trackDataCollector$sampleID %in% censNames, ]
   
   # convert chars to numeric
-  cols.num <- c("birthTimestamp", "currentTimestamp", "beforeLength", "beforeArea", "beforeEdge", "beforeContours", "afterLength", "afterArea", "afterEdge", "afterContours", "trackCensoredBefore", "trackCensoredAfter", "temperatureAssay", "temperatureTable", "setID")
+cols.num <- c("birthTimestamp", 
+              "currentTimestamp", 
+              "beforeLength", 
+              "beforeArea", 
+              "beforeEdge", 
+              "beforeContours", 
+              "beforeMeanSpeed", 
+              "beforeMeasurements", 
+              "afterLength", 
+              "afterArea", 
+              "afterEdge", 
+              "afterContours", 
+              "afterMeanSpeed", 
+              "afterMeasurements", 
+              "trackCensoredBefore", 
+              "trackCensoredAfter", 
+              "temperatureAssay", 
+              "temperatureTable", 
+              "setID")
+
   trackDataCollectorCensored[cols.num] <- sapply(trackDataCollectorCensored[cols.num],as.numeric)
 
   # convert censored timepoints to NAs
@@ -303,7 +351,7 @@ selectStrains <- function(trackDataCollector, strainList, bySet) {
 
 # global parameters (use <<- instead of <-)
 correctTrackVersionString <<- "trackVersion.v13"
-TrackLengthSummarizerVersion <<- 2
+TrackLengthSummarizerVersion <<- 3
 
 # enter RAPID source and output directories here
 # usage
