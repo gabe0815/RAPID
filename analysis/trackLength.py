@@ -8,7 +8,7 @@ import sys
 import os
 import re
 
-version = "v13"
+version = "v14"
 
 def combineTrackAndPhoto(parentDir, description):
     if description == "before":
@@ -33,7 +33,7 @@ def combineTrackAndPhoto(parentDir, description):
 
 def createOverlay(img, imgPath, description, area, mask, onEdge):
     ret, dst = cv2.threshold(mask, 127, 255, cv2.THRESH_BINARY)
-    contours, hierarchy = cv2.findContours(dst,cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)
+    _, contours, _ = cv2.findContours(dst,cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)
     cv2.drawContours(img, contours, -1, (0,0,255), 3)
     cv2.putText(img, str(description), (100,150), cv2.FONT_HERSHEY_SIMPLEX, 5, (0,0,255), 10)
     cv2.putText(img, str(area), (100,2200), cv2.FONT_HERSHEY_SIMPLEX, 5, (0,0,255), 10)
@@ -65,7 +65,7 @@ def createMask(contours, threshImg, minDistance):
         if cv2.contourArea(cnt) > 100 and cv2.contourArea(cnt) < 100000:
             cv2.drawContours(mask,[cnt],0,255,-1)
 
-    contours,hier = cv2.findContours(mask,cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)  
+    _, contours, _ = cv2.findContours(mask,cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)  
     length = len(contours)
     if length < 3:
         mask = np.zeros(threshImg.shape,np.uint8)
@@ -107,7 +107,7 @@ def createMask(contours, threshImg, minDistance):
     cv2.drawContours(mask,unified,-1,255,-1)
 
     maskArea = np.zeros(threshImg.shape,np.uint8)
-    contours,hier = cv2.findContours(mask.copy(),cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE) 
+    _, contours, _ = cv2.findContours(mask.copy(),cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE) 
     for cnt in contours:
         if cv2.pointPolygonTest(cnt, maxAreaCenter, measureDist=False) == 1:
             cv2.drawContours(maskArea, [cnt], 0, 255,-1)
@@ -162,7 +162,7 @@ def measureArea(origImg, threshImg, minArea, minDistance):
         return (-1, np.zeros(threshImg.shape,np.uint8), 0, 0)                    
 
     else: 
-        contours, hierarchy = cv2.findContours(threshImg.copy(),cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)
+        _, contours, _ = cv2.findContours(threshImg.copy(),cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)
 
     numberOfContours = len(contours)
     if numberOfContours == 0:
@@ -171,7 +171,7 @@ def measureArea(origImg, threshImg, minArea, minDistance):
     #apply mask   
     mask = createMask(contours, threshImg, minDistance)  
     maskedImg = cv2.bitwise_and(threshImg,threshImg,mask=mask)
-    contours, hierarchy = cv2.findContours(maskedImg.copy(),cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)
+    _, contours, _ = cv2.findContours(maskedImg.copy(),cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)
     
     #check if on edge
     onEdge = 0
